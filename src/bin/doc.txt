@@ -1,0 +1,9 @@
+Simple console audio player.
+
+Usage: scp [OPTION]... [FILE]...
+
+Options:
+    -h, --help          display this help and exit
+        --version       output version information and exit
+
+    -just_play          Do not run TUI
