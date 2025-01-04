@@ -17,15 +17,15 @@ stat Interface::draw_topPannel(dem w, dem h) {
         return stat::success;
     }
 
-    if (true
-        && top_main_dir_name != nullptr
-        && top_files != nullptr
-        && top_dirs != nullptr
-        && top_search_pat != nullptr
-    ) {
-        std::cerr << "Error: cannot draw top: bad data" << std::endl;
-        return stat::error;
-    }
+    // if (true
+    //     && top_main_dir_name != nullptr
+    //     && top_files != nullptr
+    //     && top_dirs != nullptr
+    //     && top_search_pat != nullptr
+    // ) {
+    //     std::cerr << "Error: cannot draw top: bad data" << std::endl;
+    //     return stat::error;
+    // }
 
     if (w < top_min_width) {
         std::cerr << "Error: cannot draw top: width is too small"

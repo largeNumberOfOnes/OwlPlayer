@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "abstract.h"
 
@@ -14,8 +15,7 @@ class Interface {
         volume vol = 0;
         seconds tim = 0;
 
-        static const int min_h_to_draw_topPannel = 4;
-
+        static dem const min_h_to_draw_topPannel = 4;
         static dem const vol_min_width = 12;
         static dem const tim_min_width = 26;
         static dem const vol_tim_pad = 3;
@@ -28,12 +28,12 @@ class Interface {
         static dem const top_min_width = 10;
 
         bool top_data_is_set = false;
-        char const* top_main_dir_name = nullptr;
-        char const** top_files = nullptr;
-        int top_files_count = 0;
-        char const** top_dirs = nullptr;
-        int top_dirs_count = 0;
-        char const* top_search_pat = nullptr;
+        // std::string const& top_main_dir_name;
+        // std::vector<std::string> const& top_files;
+        // int top_files_count = 0;
+        // std::vector<std::string> const& top_dirs;
+        // int top_dirs_count = 0;
+        // std::string const& top_search_pat = nullptr;
 
         struct Int_metrics {
             dem vol_w = 0;

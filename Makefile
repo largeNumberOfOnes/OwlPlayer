@@ -1,5 +1,5 @@
 CC = clang++-14
-DEB_FLAGS = -g
+DEB_FLAGS = -g -std=c++17
 # FLAGS = -g
 OBJECTS =   src/player/main.cpp\
 			src/player/intreface.cpp\

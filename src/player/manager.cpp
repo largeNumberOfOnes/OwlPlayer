@@ -28,8 +28,11 @@ manager_ret Manager::work() {
     
     key k = abs.get_key();
 
-    if (key_table.count(k)) {
-        (this->*key_table[k])();
+    // if (key_table.count(k)) {
+    //     (this->*key_table[k])();
+    // }
+    if (auto it = key_table.find(k); it != key_table.end()) {
+        (this->*(it->second))();
     }
 
     if (interface.draw()) {

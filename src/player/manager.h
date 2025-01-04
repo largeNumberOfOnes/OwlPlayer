@@ -23,6 +23,7 @@ class Manager {
         class TopPannel {
             bool is_active = false;
             std::string main_dir_name;
+            // std::string main_dir_name;
         };
         TopPannel top;
 
