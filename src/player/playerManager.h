@@ -3,7 +3,7 @@
 #include "abstract.h"
 #include "interface.h"
 #include "player.h"
-#include "config.h"
+// #include "config.h"
 #include <unordered_map>
 
 
@@ -14,7 +14,7 @@ enum class manager_ret {
     out,
 };
 
-class Manager {
+class PlayerManager {
     private:
         Abstract& abs;
         Player& player;
@@ -33,6 +33,6 @@ class Manager {
         std::unordered_map<key, void (Manager::*)()> key_table;
 
     public:
-        Manager(Abstract& abs, Player &player, Interface &interface);
+        PlayerManager(Abstract& abs, Player &player, Interface &interface);
         manager_ret work();
 };

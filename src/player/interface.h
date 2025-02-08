@@ -28,12 +28,19 @@ class Interface {
         static dem const top_min_width = 10;
 
         bool top_data_is_set = false;
-        // std::string const& top_main_dir_name;
-        // std::vector<std::string> const& top_files;
-        // int top_files_count = 0;
-        // std::vector<std::string> const& top_dirs;
-        // int top_dirs_count = 0;
-        // std::string const& top_search_pat = nullptr;
+        // class TopData {
+        //     std::string const& top_main_dir_name;
+        //     std::vector<std::string> const& top_files;
+        //     int top_files_count = 0;
+        //     std::vector<std::string> const& top_dirs;
+        //     int top_dirs_count = 0;
+        //     std::string const& top_search_pat = nullptr;
+
+        //     public:
+        //         TopData();
+        // };
+        // TopData top_data;
+
 
         struct Int_metrics {
             dem vol_w = 0;

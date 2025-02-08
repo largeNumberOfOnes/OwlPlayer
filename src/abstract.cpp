@@ -22,16 +22,11 @@ Abstract::~Abstract() {
 key Abstract::get_key() {
     int a = getch();
     switch (a) {
-        case KEY_LEFT:
-            return key::arrow_left;
-        case KEY_RIGHT:
-            return key::arrow_rigth;
-        case KEY_UP:
-            return key::arrow_up;
-        case KEY_DOWN:
-            return key::arrow_down;
-        default:
-            return key::nothing;
+        case KEY_LEFT:  return key::arrow_left;
+        case KEY_RIGHT: return key::arrow_rigth;
+        case KEY_UP:    return key::arrow_up;
+        case KEY_DOWN:  return key::arrow_down;
+        default:        return key::nothing;
     }
 
 }
@@ -51,8 +46,8 @@ stat Abstract::draw_slider(dem x, dem y, dem len, dem val) {
     return stat::success;
 }
 
-stat Abstract::draw_text(dem x, dem y, std::string const& str){
-    if (mvprintw(y, x, "%s", str.c_str()) == OK)
+stat Abstract::draw_text(dem x, dem y, char const* str){
+    if (mvprintw(y, x, "%s", str) == OK)
         return stat::success;
     else
         return stat::error;

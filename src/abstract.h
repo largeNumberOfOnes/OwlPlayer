@@ -3,19 +3,13 @@
 #include <string>
 #include <iostream>
 
+#include "glob_types.h"
 
 
-// enum Key {
-
-// };
 
 using dem = unsigned int;
 using seconds = unsigned int;
 using volume = unsigned int;
-enum stat {
-    success = 0,
-    error   = 1,
-};
 
 enum class key {
     arrow_rigth,
@@ -29,10 +23,12 @@ class Abstract {
     private:
         Abstract(Abstract const&) = delete;
         void operator=(Abstract const&) = delete;
+        static Abstract* ptr;
 
     public:
         Abstract();
         ~Abstract();
+        // static Abstract& get();
         // static Abstract& get_instance();
 
         // Cathing symbols
@@ -57,4 +53,5 @@ class Abstract {
 
         std::string get_config_path();
 
+        // void fill_files()
 };

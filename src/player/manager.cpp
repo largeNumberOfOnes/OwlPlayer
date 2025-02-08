@@ -12,8 +12,8 @@ Manager::Manager(Abstract& abs, Player& player, Interface& interface)
     , player(player)
     , interface(interface)
 {
-    key_table[key::arrow_left] = &Manager::volume_down;
-    key_table[key::arrow_rigth] = &Manager::volume_up;
+    // key_table[key::arrow_left] = &Manager::volume_down;
+    // key_table[key::arrow_rigth] = &Manager::volume_up;
 }
 
 void Manager::volume_up() {
@@ -35,10 +35,10 @@ manager_ret Manager::work() {
         (this->*(it->second))();
     }
 
-    if (interface.draw()) {
-        std::cerr << "Error: cannot draw interface:" << std::endl;
-        return manager_ret::error;
-    }
+    // if (interface.draw()) {
+    //     std::cerr << "Error: cannot draw interface:" << std::endl;
+    //     return manager_ret::error;
+    // }
 
     return manager_ret::success;
 }
