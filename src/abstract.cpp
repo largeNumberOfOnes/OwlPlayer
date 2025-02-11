@@ -3,9 +3,7 @@
 #include <curses.h>
 #include <iterator>
 
-
-
-Abstract::Abstract() {
+stat had::start_window() {
     initscr();
     noecho();
     // halfdelay(1);
@@ -13,13 +11,15 @@ Abstract::Abstract() {
     cbreak();
     curs_set(0);
     keypad(stdscr, true);
+    return stat::success;
 }
 
-Abstract::~Abstract() {
+stat had::end_window() {
     endwin();
+    return stat::success;
 }
 
-key Abstract::get_key() {
+had::key had::get_key() {
     int a = getch();
     switch (a) {
         case KEY_LEFT:  return key::arrow_left;
@@ -31,74 +31,74 @@ key Abstract::get_key() {
 
 }
 
-void Abstract::set_color() {
+void had::set_color() {
     // pass
 }
 
-void Abstract::move() {
+void had::move() {
     // pass
 }
 
-stat Abstract::draw_slider(dem x, dem y, dem len, dem val) {
+stat had::draw_slider(dem x, dem y, dem len, dem val) {
     std::string slider(len, '-');
     slider[val] = '0';
     mvprintw(y, x, "%s", slider.c_str());
     return stat::success;
 }
 
-stat Abstract::draw_text(dem x, dem y, char const* str){
+stat had::draw_text(dem x, dem y, char const* str){
     if (mvprintw(y, x, "%s", str) == OK)
         return stat::success;
     else
         return stat::error;
 }
 
-stat Abstract::update() {
+stat had::update() {
     if (refresh() == OK)
         return stat::success;
     else
         return stat::error;
 }
 
-stat Abstract::cls() {
+stat had::cls() {
     if (clear() == OK)
         return stat::success;
     else
         return stat::error;
 }
 
-dem Abstract::get_width() {
+had::dem had::get_width() {
     int w = 0, h = 0;
     getmaxyx(stdscr, h, w);
     return w;
 }
 
-dem Abstract::get_height() {
+had::dem had::get_height() {
     int w = 0, h = 0;
     getmaxyx(stdscr, h, w);
     return h;
 }
 
-stat Abstract::load(std::string const& path) {
+stat had::load(char const* path) {
     // pass
     return stat::success;
 }
 
-stat Abstract::remove() {
+stat had::remove() {
     // pass
     return stat::success;
 }
 
-seconds Abstract::get_duration() {
+had::seconds had::get_duration() {
     // pass
     return 7;
 }
 
-seconds Abstract::get_cur_time() {
+had::seconds had::get_cur_time() {
     // pass
     return 7;
 }
 
-void Abstract::jump(int pos) {
+void had::jump(had::seconds pos) {
     // pass
 }

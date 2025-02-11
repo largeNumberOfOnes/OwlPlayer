@@ -7,51 +7,42 @@
 
 
 
-using dem = unsigned int;
-using seconds = unsigned int;
-using volume = unsigned int;
+namespace had {
 
-enum class key {
-    arrow_rigth,
-    arrow_left,
-    arrow_up,
-    arrow_down,
-    nothing,
-};
+    using dem = unsigned int;
+    using seconds = unsigned int;
+    using volume = unsigned int;
 
-class Abstract {
-    private:
-        Abstract(Abstract const&) = delete;
-        void operator=(Abstract const&) = delete;
-        static Abstract* ptr;
+    enum class key {
+        arrow_rigth,
+        arrow_left,
+        arrow_up,
+        arrow_down,
+        nothing,
+    };
 
-    public:
-        Abstract();
-        ~Abstract();
-        // static Abstract& get();
-        // static Abstract& get_instance();
+    stat start_window();
+    stat end_window();
 
-        // Cathing symbols
-        key get_key();
+    // Cathing symbols
+    key get_key();
 
-        // Interface
-        void set_color();
-        void move();
-        stat draw_slider(dem x, dem y, dem len, dem val);
-        stat draw_text(dem x, dem y, std::string const& str);
-        stat update();
-        stat cls();
-        dem get_width();
-        dem get_height();
+    // Interface
+    void set_color();
+    void move();
+    stat draw_slider(dem x, dem y, dem len, dem val);
+    stat draw_text(dem x, dem y, char const* str);
+    stat update();
+    stat cls();
+    dem get_width();
+    dem get_height();
 
-        // AudioPlayer
-        stat load(std::string const& path);
-        stat remove();
-        seconds get_duration();
-        seconds get_cur_time();
-        void jump(int pos); // pos in seconds
+    // AudioPlayer
+    stat load(char const* path);
+    stat remove();
+    seconds get_duration();
+    seconds get_cur_time();
+    void jump(had::seconds pos);
 
-        std::string get_config_path();
-
-        // void fill_files()
+    std::string get_config_path();
 };

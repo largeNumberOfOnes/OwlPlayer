@@ -7,16 +7,28 @@
 
 int main() {
 
-    Abstract abs;
-    FileManager manager{abs, "/home/dt/Documents"};
-
+    FileManager manager{"/home/dt/Documents"};
+    had::start_window();
     while (true) {
-        manager.reload();
-        manager.draw(0, 0, abs.get_width(), abs.get_height());
 
-        abs.update();
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        switch (had::get_key()) {
+            case had::key::arrow_up:
+                manager.up();
+                break;
+            case had::key::arrow_down:
+                manager.down();
+                break;
+            default:
+                break;
+        }
+        manager.reload();
+        // manager.resize(had::get_height()-2);
+        manager.draw(0, 0, had::get_width(), had::get_height());
+
+        had::update();
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
+    had::end_window();
 
     return 0;
 }
