@@ -1,4 +1,5 @@
 #include "fileManager.h"
+#include "../intf.h"
 #include <algorithm>
 #include <cstddef>
 #include <cstdio>
@@ -129,9 +130,21 @@ stat FileManager::draw(had::dem x, had::dem y, had::dem w, had::dem h) {
         if (str_len + free_space > w)
             std::strcpy(draw_line_buf + w - free_space, "...  ");
 
-        draw_line_buf[1] = (top + q == pointer) ? '>' : ' ';
+        // draw_line_buf[1] = (top + q == pointer) ? '>' : ' ';
 
+        if (top + q == pointer) {
+            if (list[top+q].is_directory()) intf::setcol_dir_selected();
+            else                            intf::setcol_file_selected();
+            // draw_line_buf[1] = '>';
+        } else {
+            if (list[top+q].is_directory()) intf::setcol_dir();
+            else                            intf::setcol_file();
+            // draw_line_buf[1] = ' ';
+        }
         had::draw_text(x, y + q + 1, draw_line_buf);
+        if (top + q + 1 == list_size) intf::draw_list_end_symbol(x + 1, y + q + 1);
+        else                          intf::draw_list_symbol(x + 1, y + q + 1);
+        intf::setcol_default();
     }
 
     had::draw_text(x, y+h-1, ":");
