@@ -195,6 +195,7 @@ had::seconds had::get_cur_time() {
     return 7;
 }
 
-void had::jump(had::seconds pos) {
+stat had::jump(had::seconds pos) {
     // pass
+    return stat::success;
 }

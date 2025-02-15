@@ -56,11 +56,9 @@ namespace had {
         extern Color const white;
     }
 
-    // static unsigned int color_count = 10;
     stat set_new_color(Color& col, int r, int g, int b);
     stat change_color(Color col, int r, int g, int b);
 
-    // static unsigned int pair_count = 1;
     stat set_new_color_pair(ColorPair& pair, Color t, ColorPair b);
     stat change_color_pair(ColorPair pair, Color t, ColorPair b);
     stat use_color_pair(ColorPair pair);
@@ -71,7 +69,7 @@ namespace had {
     stat remove();
     seconds get_duration();
     seconds get_cur_time();
-    void jump(had::seconds pos);
+    stat jump(had::seconds pos);
 
-    std::string get_config_path();
+    std::string get_system_config_path();
 };

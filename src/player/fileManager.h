@@ -11,7 +11,6 @@
 
 class FileManager {
     static had::dem const min_w = 14;
-    static had::dem const min_h = 3;
     static had::dem const line_offset = 3;
     static had::dem const free_space = 5;
 
@@ -30,6 +29,8 @@ class FileManager {
     FileManager(FileManager const&) = delete;
 
     public:
+        static had::dem const min_h = 3;
+        
         FileManager(std::string dir);
         ~FileManager();
 
