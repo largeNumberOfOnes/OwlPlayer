@@ -9,6 +9,14 @@ enum res {
     error   = 1,
 };
 
-inline void log_err(const char* mes) {
-    std::cout << mes << std::endl;
-}
+#ifdef BUILD_DEB
+
+#define log_err() {                                                       \
+    std::cerr << mes << std::endl;                                        \
+}                                                                         \
+
+#else
+
+#define log_err()
+
+#endif // BUILD_DEB
