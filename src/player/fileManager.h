@@ -34,12 +34,12 @@ class FileManager {
         FileManager(std::string dir);
         ~FileManager();
 
-        stat go();
-        stat up();
-        stat down();
-        stat reload();
-        stat resize(had::dem newh);
+        res go();
+        res up();
+        res down();
+        res reload();
+        res resize(had::dem newh);
 
-        stat draw(had::dem x, had::dem y, had::dem w, had::dem h);
+        res draw(had::dem x, had::dem y, had::dem w, had::dem h);
 
 };

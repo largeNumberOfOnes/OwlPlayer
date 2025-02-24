@@ -2,6 +2,6 @@
 
 
 
-stat read_args(int argc, const char** argv) {
-    return stat::success;
+res read_args(int argc, const char** argv) {
+    return res::success;
 }

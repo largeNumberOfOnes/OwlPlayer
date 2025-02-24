@@ -26,5 +26,5 @@ class GUIPlayer {
 
     public:
         GUIPlayer(char const* work_dir);
-        stat start_loop();
+        res start_loop();
 };

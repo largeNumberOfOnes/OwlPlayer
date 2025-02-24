@@ -1,4 +1,4 @@
 
 
 
-stat read_args(int argc, const char** argv);
+res read_args(int argc, const char** argv);

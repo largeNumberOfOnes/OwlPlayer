@@ -49,7 +49,7 @@ objects/player_fileManager.o:  \
 
 test_had: \
 	objects/had.o
-	$(CC) $(FLAGS) objects/had.o tests/test_had.cpp -o ./execs/test_had.out
+	$(CC) $(FLAGS) objects/had.o tests/test_had.cpp -lasound -o ./execs/test_had.out
 	alacritty -e ./execs/test_had.out &
 
 test_player_fileManager: \

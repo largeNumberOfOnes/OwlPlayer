@@ -19,7 +19,7 @@ Config::Config(std::string conf_path) {
     // stream
 }
 
-stat Config::load() {
+res Config::load() {
 
-    return stat::success;
+    return res::success;
 }

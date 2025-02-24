@@ -21,7 +21,7 @@ void GUIPlayer::fileManager_down() {
     fileManager.down();
 }
 
-stat GUIPlayer::start_loop() {
+res GUIPlayer::start_loop() {
 
     if (had::start_window()) {
         log_err("Error while starting window");
@@ -52,5 +52,5 @@ stat GUIPlayer::start_loop() {
         log_err("Error while closing window");
     }
 
-    return stat::success;
+    return res::success;
 }

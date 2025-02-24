@@ -24,6 +24,6 @@ class Config {
         void operator =(Config const&) = delete;
         ~Config();
 
-        stat load();
+        res load();
 
 };

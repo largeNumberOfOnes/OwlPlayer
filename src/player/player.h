@@ -16,8 +16,8 @@ class Player {
         static had::dem const min_h = 4;
         // pass
 
-        stat draw(had::dem x, had::dem y, had::dem w) {return stat::success; }
+        res draw(had::dem x, had::dem y, had::dem w) {return res::success; }
 
-        stat stop();
-        stat play();
+        res stop();
+        res play();
 };

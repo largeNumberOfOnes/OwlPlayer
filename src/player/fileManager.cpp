@@ -21,9 +21,9 @@ FileManager::~FileManager() {
     delete [] draw_line_buf;
 }
 
-stat FileManager::up() {
+res FileManager::up() {
     if (list_size == 0)
-        return stat::success;
+        return res::success;
 
     if (pointer == 0) {
         pointer = list_size - 1;
@@ -37,12 +37,12 @@ stat FileManager::up() {
             --top;
     }
 
-    return stat::success;
+    return res::success;
 }
 
-stat FileManager::down() {
+res FileManager::down() {
     if (list_size == 0)
-        return stat::success;
+        return res::success;
 
     if (pointer + 1 == list_size) {
         pointer = 0;
@@ -53,10 +53,10 @@ stat FileManager::down() {
             ++top;
     }
 
-    return stat::success;
+    return res::success;
 }
 
-stat FileManager::reload() {
+res FileManager::reload() {
     list.clear();
     namespace fs = std::filesystem;
 
@@ -80,10 +80,10 @@ stat FileManager::reload() {
             top = 0;
     }
 
-    return stat::success;
+    return res::success;
 }
 
-stat FileManager::resize(had::dem new_size) {
+res FileManager::resize(had::dem new_size) {
     size = new_size;
     if (pointer >= top + size) {
         if (size < list_size)
@@ -98,13 +98,13 @@ stat FileManager::resize(had::dem new_size) {
             top = 0;
     }
 
-    return stat::success;
+    return res::success;
 }
 
-stat FileManager::draw(had::dem x, had::dem y, had::dem w, had::dem h) {
+res FileManager::draw(had::dem x, had::dem y, had::dem w, had::dem h) {
     if (w < min_w || h < min_h) {
         log_err("bad sizes");
-        return stat::error;
+        return res::error;
     }
     if (h != size + 2) {
         resize(h - 2);
@@ -149,5 +149,5 @@ stat FileManager::draw(had::dem x, had::dem y, had::dem w, had::dem h) {
 
     had::draw_text(x, y+h-1, ":");
 
-    return stat::success;
+    return res::success;
 }

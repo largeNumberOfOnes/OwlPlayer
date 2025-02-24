@@ -4,7 +4,7 @@
 
 
 
-enum stat {
+enum res {
     success = 0,
     error   = 1,
 };

@@ -41,21 +41,21 @@ namespace intf {
     //     bool top_draw = false;
     // };
     // Int_metrics imet;
-    // stat calc_vol_tim(dem w, dem h);
-    // stat calc_top(dem w, dem h);
-    // stat calc_int_metrics(dem w, dem h);
+    // res calc_vol_tim(dem w, dem h);
+    // res calc_top(dem w, dem h);
+    // res calc_int_metrics(dem w, dem h);
 
-    // stat draw_topPannel(dem w, dem h);
+    // res draw_topPannel(dem w, dem h);
 
-    // stat draw_volume(dem x, dem y, dem w);
-    // stat draw_timeline(dem x, dem y, dem w);
+    // res draw_volume(dem x, dem y, dem w);
+    // res draw_timeline(dem x, dem y, dem w);
 
     // dem old_w = 0;
     // dem old_h = 0;
 
 
     // // Interface(Abstract& abs);
-    // stat draw();
+    // res draw();
 
     // void set_top_data();
 
@@ -79,15 +79,15 @@ namespace intf {
     // extern had::ColorPair color_file;
     // extern had::ColorPair color_file_selected;
 
-    stat init_colors();
+    res init_colors();
 
-    stat draw_list_end_symbol(had::dem x, had::dem y);
-    stat draw_list_symbol(had::dem x, had::dem y);
+    res draw_list_end_symbol(had::dem x, had::dem y);
+    res draw_list_symbol(had::dem x, had::dem y);
 
-    stat setcol_dir();
-    stat setcol_file();
-    stat setcol_dir_selected();
-    stat setcol_file_selected();
-    stat setcol_default();
+    res setcol_dir();
+    res setcol_file();
+    res setcol_dir_selected();
+    res setcol_file_selected();
+    res setcol_default();
     
 };
