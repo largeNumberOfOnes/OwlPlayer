@@ -1,5 +1,5 @@
 CC = clang++-14
-FLAGS = -std=c++20 -lncursesw
+FLAGS = -std=c++20 -lncursesw -lasound
 # DEB_FLAGS = -g -std=c++17
 # FLAGS = -g
 # OBJECTS =   src/player/main.cpp\

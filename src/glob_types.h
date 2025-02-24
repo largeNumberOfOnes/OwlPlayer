@@ -11,12 +11,13 @@ enum res {
 
 #ifdef BUILD_DEB
 
-#define log_err() {                                                       \
-    std::cerr << mes << std::endl;                                        \
+#define log_err(...) {                                                       \
+    printf(__VA_ARGS__);                                        \
+    printf("\n");                                        \
 }                                                                         \
 
 #else
 
-#define log_err()
+#define log_err(...)
 
 #endif // BUILD_DEB
