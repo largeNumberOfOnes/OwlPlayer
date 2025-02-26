@@ -7,7 +7,7 @@
 
 GUIPlayer::GUIPlayer(char const* work_dir)
     : fileManager(work_dir)
-    // , player()
+    , player()
 {
     fileManager.reload();
     action_list[had::key::arrow_up] = &GUIPlayer::fileManager_up;
@@ -46,6 +46,10 @@ res GUIPlayer::start_loop() {
         
         if (h > Player::min_h + FileManager::min_h)
             fileManager.draw(0, 0, w, h - Player::min_h);
+
+        if (player.draw(0, h-Player::min_h, w)) {
+            log_err("Cannot draw player");
+        }
     }
 
     if (had::end_window()) {
