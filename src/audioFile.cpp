@@ -142,12 +142,10 @@ AudioFile::AudioFile(char const* path, res& err) {
         err = res::error;
         return;
     }
-    std::cout << "file path: " << path << std::endl; // DEV
+    
     if (!strncmp(path + len - 4, ".wav", 4)) {
-        std::cout << "file wav" << std::endl; // DEV
         err = read_wav(path);
     } else if (!strncmp(path + len - 4, ".mp3", 4)) {
-        std::cout << "file mp3" << std::endl; // DEV
         err = read_mp3(path);
     } else {
         log_err("Unknown file type");
