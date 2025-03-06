@@ -46,6 +46,9 @@ objects/player_fileManager.o:  \
 # 	$(CC) $(FLAGS) -c src/player/GUIPlayer.h.cpp -o objects/GUIPlayer.h.o
 
 
+test_audioFile:
+	$(CC) -DBUILD_DEB -g src/audioFile.cpp src/audioFile.test.cpp -lsndfile -lmpg123 -o ./execs/test_audioFile.out
+	./execs/test_audioFile.out
 
 test_had: \
 	objects/had.o
@@ -62,3 +65,8 @@ test_player_fileManager: \
 comp_and_run:
 	$(CC) $(FLAGS) src/main.cpp src/had.cpp src/intf.cpp src/player/player.cpp src/player/fileManager.cpp src/player/GUIPlayer.cpp -o execs/a.out
 	alacritty -e ./execs/a.out &
+
+
+
+
+# -fno-exceptions !!!

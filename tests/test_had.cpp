@@ -2,7 +2,7 @@
 #include <iostream>
 #include <thread>
 
-int test1() {
+int test1() { // turn on off
     had::start_window();
     had::end_window();
     return 0;
@@ -24,9 +24,9 @@ int test2() { // Test color
     return 0;
 }
 
-int test3() {
+int test3() { // 
     had::audio_device_ctor();
-    had::audio_device_dtor();
+    had::end_audio();
 
     std::cout << "test3" << std::endl;
     had::audio_device_ctor();
@@ -39,7 +39,7 @@ int test3() {
 
     had::remove();
 
-    had::audio_device_dtor();
+    had::end_audio();
 
     std::cout << "starting while(true)" << std::endl;
     while (true) {}
@@ -82,7 +82,7 @@ int test4() {
     had::remove();
 
     had::end_window();
-    had::audio_device_dtor();
+    had::end_audio();
 
     std::cout << "starting while(true)" << std::endl;
     while (true) {}

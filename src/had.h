@@ -24,13 +24,13 @@ namespace had {
         nothing,
     };
 
-    res start_window();
-    res end_window();
 
     // Cathing symbols
     key get_key();
 
     // Interface
+    res start_window();
+    res end_window();
     void set_color();
     void move();
     res draw_slider(dem x, dem y, dem len, dem val);
@@ -66,15 +66,16 @@ namespace had {
     res use_no_color_pair();
 
     // AudioPlayer
-    res audio_device_ctor();
-    res audio_device_dtor();
-    res load(char const* path);
-    res remove();
-    res play_stop_audio();
-    res player_update();
-    seconds get_duration();
-    seconds get_cur_time();
-    res jump(had::seconds pos);
+    res aud_start();
+    res aud_end();
+    res aud_load(char const* path);
+    res aud_drop();
+    res aud_play_stop();
+    res aud_set_volume(volume vol);
+    volume aud_get_volume();
+    res aud_set_cur_pos(seconds pos);
+    seconds aud_get_cur_pos();
+    seconds aud_get_duration();
 
     std::string get_system_config_path();
 };

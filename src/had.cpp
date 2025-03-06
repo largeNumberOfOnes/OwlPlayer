@@ -1,3 +1,4 @@
+#include <alsa/pcm.h>
 #include <cstddef>
 #include <cstdlib>
 #include "glob_types.h"
@@ -15,8 +16,7 @@
 // #include <sys/mman.h>
 #include <pthread.h>
 
-// struct sys_stat::res statbuf;
-// res statbuf;
+
 
 namespace had::Colors {
     Color const black = COLOR_BLACK;
@@ -190,36 +190,74 @@ namespace had { // Color support
     }
 }
 
-namespace had {
+namespace had { // Audio support
     static snd_pcm_t *pcm_handle;
-    static char* buff;
-    static size_t buff_size;
-    static snd_pcm_uframes_t frames;
-    static unsigned int rate, channels, duration;
-    // static int loops;
-    static int fd;
-    static bool is_playing = true;
+    // static char* buff;
+    // static size_t buff_size;
+    // static snd_pcm_uframes_t frames;
+    // static unsigned int rate, channels, duration;
+    // // static int loops;
+    // static int fd;
+    // static bool is_playing = true;
 
-    res audio_device_ctor() {
-        unsigned int pcm, tmp, dir;
+    res aud_start() {
+        int err = snd_pcm_open(
+            &pcm_handle,
+            "default",
+            SND_PCM_STREAM_PLAYBACK,
+            SND_PCM_NONBLOCK
+        );
 
-        pcm = snd_pcm_open(&pcm_handle, "default",
-                                        SND_PCM_STREAM_PLAYBACK, 0);
-        if (pcm < 0) {
-		    // printf("ERROR: Can't open \"%s\" PCM device. %s\n",
-			// 		PCM_DEVICE, snd_strerror(pcm));
+        if (err < 0) {
+            log_err("Cannot open PCM device: %s", snd_strerror(err));
             return res::error;
         }
+        
+        return res::success;
+    }
 
-        rate = 44100;
-        channels = 2;
-        duration = 237;
-
+    res aud_end() {
+        int err = snd_pcm_drop(pcm_handle);
+        if (err < 0) {
+            log_err("Cannot drom frames: %s", snd_strerror(err));
+        }
+        err = snd_pcm_close(pcm_handle);
+        if (err < 0) {
+            log_err("Cannot close pcm: %s", snd_strerror(err));
+        }
 
         return res::success;
     }
 
-    res audio_device_dtor() {
+    res aud_load(const char *path) {
+        int err = 0;
+
+        snd_pcm_hw_params_t *params;
+        snd_pcm_hw_params_alloca(&params);
+	    snd_pcm_hw_params_any(pcm_handle, params);
+
+        if (snd_pcm_hw_params_set_access(
+                pcm_handle, params,
+                SND_PCM_ACCESS_RW_INTERLEAVED
+            ) < 0
+        ) log_err("Cannot set interleaved mode. %s\n", snd_strerror(err));
+        if (snd_pcm_hw_params_set_format(
+                pcm_handle,
+                params,
+                SND_PCM_FORMAT_S16_LE
+            ) < 0
+        ) log_err("Cannot set format. %s\n", snd_strerror(pcm));
+
+
+        //     
+        // if ((pcm = snd_pcm_hw_params_set_channels(pcm_handle, params, channels)) < 0) 
+        //     printf("ERROR: Can't set channels number. %s\n", snd_strerror(pcm));
+        // if ((pcm = snd_pcm_hw_params_set_rate_near(pcm_handle, params, &rate, 0)) < 0) 
+        //     printf("ERROR: Can't set rate. %s\n", snd_strerror(pcm));
+        // /* Write parameters */
+        // if ((pcm = snd_pcm_hw_params(pcm_handle, params)) < 0)
+        //     printf("ERROR: Can't set harware parameters. %s\n", snd_strerror(pcm));
+
         return res::success;
     }
 
@@ -266,7 +304,6 @@ namespace had {
         struct stat statbuf;
 
         unsigned int pcm, tmp, dir;
-        snd_pcm_hw_params_t *params;
 
         if (stat(path, &statbuf)) {
             log_err("Cannot read file stat");
@@ -280,6 +317,7 @@ namespace had {
             return res::error;
         }
 
+        snd_pcm_hw_params_t *params;
         snd_pcm_hw_params_alloca(&params);
 	    snd_pcm_hw_params_any(pcm_handle, params);
 
@@ -312,7 +350,6 @@ namespace had {
     }
 
     res remove() {
-        // pass
         snd_pcm_drain(pcm_handle);
 	    snd_pcm_close(pcm_handle);
         free(buff);
@@ -321,18 +358,4 @@ namespace had {
         return res::success;
     }
 
-    seconds get_duration() {
-        // pass
-        return 7;
-    }
-
-    seconds get_cur_time() {
-        // pass
-        return 7;
-    }
-
-    res jump(seconds pos) {
-        // pass
-        return res::success;
-    }
 }
