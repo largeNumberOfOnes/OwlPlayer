@@ -10,10 +10,12 @@
 
 namespace had {
 
+    // Base types
     using dem = unsigned int;
     using seconds = unsigned int;
     using volume = unsigned int;
 
+    // Cathing symbols
     enum class key {
         arrow_rigth,
         arrow_left,
@@ -23,9 +25,6 @@ namespace had {
         q,
         nothing,
     };
-
-
-    // Cathing symbols
     key get_key();
 
     // Interface
@@ -69,6 +68,7 @@ namespace had {
     res aud_start();
     res aud_end();
     res aud_load(char const* path);
+    res aud_run();
     res aud_drop();
     res aud_play_stop();
     res aud_set_volume(volume vol);

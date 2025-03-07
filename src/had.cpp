@@ -1,4 +1,3 @@
-#include <alsa/pcm.h>
 #include <cstddef>
 #include <cstdlib>
 #include "audioFile.h"
@@ -15,7 +14,8 @@
 
 #include <sys/stat.h>
 // #include <sys/mman.h>
-#include <pthread.h>
+// #include <pthread.h>
+#include <thread>
 
 
 
@@ -194,20 +194,15 @@ namespace had { // Color support
 namespace had { // Audio support
     static snd_pcm_t *pcm_handle;
     static AudioFile audioFile{};
-    // static char* buff;
-    // static size_t buff_size;
-    // static snd_pcm_uframes_t frames;
-    // static unsigned int rate, channels, duration;
-    // // static int loops;
-    // static int fd;
-    // static bool is_playing = true;
+    static snd_pcm_uframes_t frames;
+    static bool is_playing = true;
 
     res aud_start() {
         int err = snd_pcm_open(
             &pcm_handle,
             "default",
             SND_PCM_STREAM_PLAYBACK,
-            SND_PCM_NONBLOCK
+            SND_PCM_ASYNC
         );
 
         if (err < 0) {
@@ -226,6 +221,7 @@ namespace had { // Audio support
         err = snd_pcm_close(pcm_handle);
         if (err < 0) {
             log_err("Cannot close pcm: %s", snd_strerror(err));
+            return res::error;
         }
 
         return res::success;
@@ -252,129 +248,90 @@ namespace had { // Audio support
                 pcm_handle, params,
                 SND_PCM_ACCESS_RW_INTERLEAVED
             )) < 0
-        ) log_err("Cannot set interleaved mode. %s\n", snd_strerror(err));
+        ) log_err("Cannot set interleaved mode. %s", snd_strerror(err));
         if ((err = snd_pcm_hw_params_set_format(
                 pcm_handle,
                 params,
                 SND_PCM_FORMAT_S16_LE
             )) < 0
-        ) log_err("Cannot set format. %s\n", snd_strerror(err));
+        ) log_err("Cannot set format. %s", snd_strerror(err));
         if ((err = snd_pcm_hw_params_set_channels(
                 pcm_handle,
                 params,
                 audioFile.get_channels()
             )) < 0
-        ) log_err("Cannot set channels number. %s\n", snd_strerror(err));
+        ) log_err("Cannot set channels number. %s", snd_strerror(err));
         if ((err = snd_pcm_hw_params_set_rate_near(
                 pcm_handle,
                 params,
                 &rate,
                 0
             )) < 0
-        ) log_err("Cannot set rate. %s\n", snd_strerror(err));
+        ) log_err("Cannot set rate. %s", snd_strerror(err));
         if ((err = snd_pcm_hw_params(
                 pcm_handle,
                 params
             )) < 0
-        ) log_err("Cannot set harware parameters. %s\n", snd_strerror(err));
+        ) log_err("Cannot set harware parameters. %s", snd_strerror(err));
+
+        if ((err = snd_pcm_hw_params_get_period_size(
+                params,
+                &frames,
+                0
+            )) < 0
+        ) {
+            log_err(
+                "The configuration space does not contain a single"
+                                                            "value: %s",
+                snd_strerror(err)
+            );
+            return res::error;
+        }
 
         return res::success;
     }
 
-    res player_update() {
-        int pcm;
-        for (int loops = (duration * 1000000) / rate; loops > 0; loops--) {
-        // if (loops <= 0) {
-        //     return res::error;
-        // }
-        // if (!is_playing) {
-        //     return res::success;    
-        // }
-
-            if ((pcm = read(fd, buff, buff_size)) == 0) {
-                printf("buff %p\n", buff);
-                printf("buff_size %lu\n", buff_size);
-                printf("fd %d\n", fd);
-                printf("Early end of file.\n");
-                // return res::error;
-                return res::error;
+    void player_update() {
+        log_step("Start player_update()");
+        size_t buff_size = frames*audioFile.get_channels()*2;
+        char* buff = (char*) malloc(buff_size);
+        int q = 0;
+        while (true) {
+            size_t retcount = 0;
+            res err = audioFile.read_file(buff, buff_size, retcount);
+            if (err) {
+                log_err("Cannot read audioFile");
+            }
+            if (retcount == 0) {
+                break;
             }
 
-            if ((pcm = snd_pcm_writei(pcm_handle, buff, frames)) == -EPIPE) {
-                printf("XRUN.\n");
+            int pret = snd_pcm_writei(pcm_handle, buff, frames);
+            if (pret == -EBADFD) {
+                log_err(
+                    "Cannot write to PCM device. %s",
+                    snd_strerror(pret)
+                );
+            }
+
+            if (pret == -EPIPE) {
                 snd_pcm_prepare(pcm_handle);
-            } else if (pcm < 0) {
-                printf("ERROR. Can't write to PCM device. %s\n", snd_strerror(pcm));
             }
-            
-            // std::cout << "loop" << std::endl;
-            // loops--;
-
         }
+
+        free(buff);
+        log_step("End player_update()");
+    }
+
+    res aud_run() {
+        std::thread th(player_update);
+        th.detach();
         return res::success;
     }
 
     res play_stop_audio() {
         snd_pcm_pause(pcm_handle, is_playing);
         is_playing = !is_playing;
-        return res::success;
-    }
-
-    res load(char const* path) {
-        struct stat statbuf;
-
-        unsigned int pcm, tmp, dir;
-
-        if (stat(path, &statbuf)) {
-            log_err("Cannot read file stat");
-            return res::error;
-        }
-
-        size_t size = static_cast<size_t>(statbuf.st_size);
-        fd = open(path, O_RDONLY);
-        if (fd == -1) {
-            log_err("Cannot open file");
-            return res::error;
-        }
-
-        snd_pcm_hw_params_t *params;
-        snd_pcm_hw_params_alloca(&params);
-	    snd_pcm_hw_params_any(pcm_handle, params);
-
-        if ((pcm = snd_pcm_hw_params_set_access(pcm_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) 
-		    printf("Cannot set interleaved mode. %s\n", snd_strerror(pcm));
-        if ((pcm = snd_pcm_hw_params_set_format(pcm_handle, params, SND_PCM_FORMAT_S16_LE)) < 0)
-            printf("ERROR: Can't set format. %s\n", snd_strerror(pcm));
-        if ((pcm = snd_pcm_hw_params_set_channels(pcm_handle, params, channels)) < 0) 
-            printf("ERROR: Can't set channels number. %s\n", snd_strerror(pcm));
-        if ((pcm = snd_pcm_hw_params_set_rate_near(pcm_handle, params, &rate, 0)) < 0) 
-            printf("ERROR: Can't set rate. %s\n", snd_strerror(pcm));
-        /* Write parameters */
-        if ((pcm = snd_pcm_hw_params(pcm_handle, params)) < 0)
-            printf("ERROR: Can't set harware parameters. %s\n", snd_strerror(pcm));
-
-        snd_pcm_hw_params_get_period_size(params, &frames, 0);
-
-        buff_size = frames * channels * 2;
-        std::cout << "frames: " << frames << std::endl;
-        std::cout << "channels: " << channels << std::endl;
-	    buff = (char*)malloc(buff_size);
-        if (buff == nullptr) {
-            log_err("Buffer is not allocated");
-        }
-
-        // loops = (duration * 1000000) / rate;
-        // std::cout << "loops: " << loops << std::endl;
-        
-        return res::success;
-    }
-
-    res remove() {
-        snd_pcm_drain(pcm_handle);
-	    snd_pcm_close(pcm_handle);
-        free(buff);
-        close(fd);
-
         return res::success;
     }
 

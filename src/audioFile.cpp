@@ -2,9 +2,10 @@
 #include "glob_types.h"
 
 #include <cstring>
-#include <unistd.h>
+#include <fcntl.h>
 #include <mpg123.h>
 #include <sndfile.h>
+#include <unistd.h>
 
 
 
@@ -156,6 +157,14 @@ res AudioFile::init(char const* path) {
         return res::error;
     }
 
+    fd = open(file_path_pcm, O_RDONLY);
+    if (fd == -1) {
+        log_err("Cannot open file: %s", strerror(errno));
+        is_init = true;
+        dstr();
+        return res::error;
+    }
+
     is_init = true;
     return res::success;
 }
@@ -180,6 +189,10 @@ AudioFile::AudioFile(char const* path, res& err) {
     err = init(path);
 }
 
+AudioFile::AudioFile() {
+    log_step("Creating empty AudioFile");
+}
+
 res AudioFile::read_file(void* buf, size_t count, size_t& retcount) {
     if (!is_init) {
         log_err("File is not initialized")
@@ -188,7 +201,7 @@ res AudioFile::read_file(void* buf, size_t count, size_t& retcount) {
 
     ssize_t size = read(fd, buf, count);
     if (size == -1) {
-        log_err("Cannot read file");
+        log_err("Cannot read file: %s", strerror(errno));
         retcount = 0;
         return res::error;
     }

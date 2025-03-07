@@ -1,29 +1,15 @@
 CC = clang++-14
-FLAGS = -std=c++20 -lncursesw -lasound
+# FLAGS = -std=c++20 -lncursesw -lasound
 # DEB_FLAGS = -g -std=c++17
-# FLAGS = -g
-# OBJECTS =   src/player/main.cpp\
-# 			src/player/intreface.cpp\
-# 			src/player/manager.cpp\
-# 			src/player/abstract.cpp
-# LIBS = -lncurses
-# OUT = a.out
-
-# comp_deb:
-# 	$(CC) $(DEB_FLAGS) $(OBJECTS) $(LIBS) -o $(OUT)
-
-# run:
-# 	./$(OUT)
-
-# cr: comp_deb run
-# 	echo start
+FLAGS = -g -DBUILD_DEB -std=c++20
+LIBS = -lsndfile -lmpg123 -lasound -lncursesw
 
 # /////////////////////////////
 
 objects/had.o:  \
 	src/had.cpp \
 	src/had.h
-	$(CC) $(FLAGS) -c -lncursesw src/had.cpp -o objects/had.o
+	$(CC) $(FLAGS) -c src/had.cpp -o objects/had.o
 
 objects/intf.o:  \
 	src/intf.cpp \
@@ -45,14 +31,17 @@ objects/player_fileManager.o:  \
 # 	src/player/GUIPlayer.h \
 # 	$(CC) $(FLAGS) -c src/player/GUIPlayer.h.cpp -o objects/GUIPlayer.h.o
 
+objects/audioFile.o: src/audioFile.cpp src/audioFile.h
+	$(CC) $(FLAGS) -c src/audioFile.cpp -o objects/audioFile.o
 
-test_audioFile:
-	$(CC) -DBUILD_DEB -g src/audioFile.cpp src/audioFile.test.cpp -lsndfile -lmpg123 -o ./execs/test_audioFile.out
+# -------------------------------------------------------------------- test
+
+test_audioFile: objects/audioFile.o
+	$(CC) $(FLAGS) objects/audioFile.o src/audioFile.test.cpp $(LIBS) -o ./execs/test_audioFile.out
 	./execs/test_audioFile.out
 
-test_had: \
-	objects/had.o
-	$(CC) $(FLAGS) objects/had.o tests/test_had.cpp -lasound -o ./execs/test_had.out
+test_had: objects/had.o objects/audioFile.o
+	$(CC) $(FLAGS) objects/had.o objects/audioFile.o tests/test_had.cpp $(LIBS) -o ./execs/test_had.out
 	alacritty -e ./execs/test_had.out &
 
 test_player_fileManager: \

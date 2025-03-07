@@ -12,7 +12,7 @@ enum res {
 #ifdef BUILD_DEB
 
 #define log_err(...) {                                                    \
-    printf("\033[91mError: \033[39m");                                    \
+    printf("\033[91mError: %s, %d: \033[39m", __FILE__, __LINE__);        \
     printf(__VA_ARGS__);                                                  \
     printf("\n");                                                         \
 }
@@ -28,3 +28,8 @@ enum res {
 #define log_step(...)
 
 #endif // BUILD_DEB
+
+#define TEST(test) {                                                      \
+    test();                                                               \
+    std::cout << "[OK] " << #test << std::endl;                           \
+}

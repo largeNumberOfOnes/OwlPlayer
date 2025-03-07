@@ -1,14 +1,20 @@
 #include "../src/had.h"
+#include "../src/glob_types.h"
+
+#include <cassert>
+#include <chrono>
 #include <iostream>
 #include <thread>
 
-int test1() { // turn on off
+// ########################################################################
+
+int test_Interface_turn_on_off() {
     had::start_window();
     had::end_window();
     return 0;
 }
 
-int test2() { // Test color
+int test_Interface_colors() {
     had::start_window();
 
     had::Color col;
@@ -24,78 +30,57 @@ int test2() { // Test color
     return 0;
 }
 
-int test3() { // 
-    had::audio_device_ctor();
-    had::end_audio();
-
-    std::cout << "test3" << std::endl;
-    had::audio_device_ctor();
-
-    if (had::load("/home/dt/Documents/audioPlayer/data/aud.wav")) {
-        log_err("Cannot load");
-    }
-    res ret;
-    while ((ret = had::player_update()) == res::success) {}
-
-    had::remove();
-
-    had::end_audio();
-
-    std::cout << "starting while(true)" << std::endl;
-    while (true) {}
+int test_Interface() {
+    TEST(test_Interface_turn_on_off);
+    TEST(test_Interface_colors);
 
     return 0;
 }
 
-int test4() {
-    std::cout << "test3" << std::endl;
-    had::audio_device_ctor();
-    had::start_window();
+// ########################################################################
 
-    if (had::load("/home/dt/Documents/audioPlayer/data/aud.wav")) {
-        log_err("Cannot load");
-    }
-    res ret;
-    // while (true) {
-    //     res ret = had::player_update();
-    //     if (ret == res::error) {
-    //         break;
-    //     }
-    // }
-    // ret = had::player_update();
-    std::thread newThread(had::player_update());
-    // if (ret == res::error) {
-    //     log_err("connot load file");
-    //     // break;
-    // }
-    std::cout << "End of writing" << std::endl;
+int test_AudioPlayer_turn_on_off() { // 
+    res err;
+    err = had::aud_start();
+    assert(!err);
+    err = had::aud_end();
+    assert(!err);
+    
+    return 0;
+}
 
-    while (true) {
-        had::key key = had::get_key();
-        if (key == had::key::space) {
-            had::play_stop_audio();
-        }
+int test_AudioPlayer_run_mp3() {
+    had::aud_start();
 
-        had::update();
-    }
+    res err = had::aud_load(
+                "/home/dt/Documents/audioPlayer/data/alyans_na_zare.mp3");
+    assert(!err);
+    had::aud_run();
 
-    had::remove();
-
-    had::end_window();
-    had::end_audio();
-
-    std::cout << "starting while(true)" << std::endl;
+    std::cout << "sleeping..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(1000));
     while (true) {}
+
+
+    
+    had::aud_end();
 
     return 0;
 }
+
+int test_AudioPlayer() {
+    // TEST(test_AudioPlayer_turn_on_off);
+    TEST(test_AudioPlayer_run_mp3);
+
+    return 0;
+}
+
+// ########################################################################
 
 int main() {
 
-    test1();
-    // test2();
-    // test3();
-    test4();
+    // TEST(test_Interface);
+    TEST(test_AudioPlayer);
 
     return 0;
 }
