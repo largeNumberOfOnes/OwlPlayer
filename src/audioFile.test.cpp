@@ -31,10 +31,22 @@ int test2() { // testing wav load
     return 0;
 }
 
+int test3() { // testing init
+    res err;
+    AudioFile file{"/home/dt/Documents/audioPlayer/data/alyans_na_zare.mp3", err};
+    assert(!err);
+
+    err = file.init("/home/dt/Documents/audioPlayer/data/alyans_na_zare.wav");
+    assert(!err);
+
+    return 0;
+}
+
 int main() {
 
     test1();
     test2();
+    test3();
 
     return 0;
 }

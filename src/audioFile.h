@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glob_types.h"
+#include <cstddef>
 
 
 class AudioFile {
@@ -8,11 +9,14 @@ class AudioFile {
     int rate = 0;
     int channels = 0;
     int samples = 0;
+    bool is_init = false;
 
     res read_wav(char const* path);
     res read_mp3(char const* path);
+    res dstr();
 
     public:
+        res init(char const* path);
         AudioFile(char const* path, res& err);
         ~AudioFile();
 
@@ -20,4 +24,5 @@ class AudioFile {
         int get_channels();
         int get_samples();
 
+        res read_file(void* buf, size_t count, size_t& retcount);
 };

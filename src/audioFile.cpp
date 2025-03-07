@@ -2,6 +2,7 @@
 #include "glob_types.h"
 
 #include <cstring>
+#include <unistd.h>
 #include <mpg123.h>
 #include <sndfile.h>
 
@@ -128,41 +129,71 @@ res AudioFile::read_wav(char const* path) {
         return ret;
 }
 
-AudioFile::AudioFile(char const* path, res& err) {
-    log_step("Creating AudioFile");
+res AudioFile::init(char const* path) {
+    log_step("init() file");
 
     if (path == nullptr) {
         log_err("Path refers to nullptr");
-        err = res::error;
-        return;
+        return res::error;
     }
     size_t len = strlen(path);
     if (len < 4) {
         log_err("Invalid path");
-        err = res::error;
-        return;
+        return res::error;
     }
     
+    res err;
     if (!strncmp(path + len - 4, ".wav", 4)) {
         err = read_wav(path);
     } else if (!strncmp(path + len - 4, ".mp3", 4)) {
         err = read_mp3(path);
     } else {
         log_err("Unknown file type");
-        err = res::error;
-        return;
+        return res::error;
     }
     if (err == res::error) {
         log_err("Cannot conver file to pcm");
-        return;
+        return res::error;
     }
 
-    err = res::success;
+    is_init = true;
+    return res::success;
+}
+
+res AudioFile::dstr() {
+    log_step("dstr() file");
+
+    close(fd);
+    remove(file_path_pcm);
+
+    is_init = false;
+
+    return res::success;
+}
+
+AudioFile::AudioFile(char const* path, res& err) {
+    log_step("Creating AudioFile");
+    err = init(path);
+}
+
+res AudioFile::read_file(void* buf, size_t count, size_t& retcount) {
+    if (!is_init) {
+        return res::error;
+    }
+
+    ssize_t size = read(fd, buf, count);
+    if (size == -1) {
+        retcount = 0;
+        return res::error;
+    }
+
+    retcount = size;
+    return res::success;
 }
 
 AudioFile::~AudioFile() {
     log_step("Destroying AudioFile")
-    remove(file_path_pcm);
+    dstr();
 }
 
 int AudioFile::get_rate() {
