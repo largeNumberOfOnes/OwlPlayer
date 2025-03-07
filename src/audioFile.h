@@ -6,7 +6,7 @@
 
 class AudioFile {
     int fd = -1;
-    int rate = 0;
+    unsigned int rate = 0;
     int channels = 0;
     int samples = 0;
     bool is_init = false;
@@ -18,6 +18,7 @@ class AudioFile {
     public:
         res init(char const* path);
         AudioFile(char const* path, res& err);
+        AudioFile();
         ~AudioFile();
 
         int get_rate();

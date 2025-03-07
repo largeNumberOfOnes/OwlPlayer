@@ -1,6 +1,7 @@
 #include <alsa/pcm.h>
 #include <cstddef>
 #include <cstdlib>
+#include "audioFile.h"
 #include "glob_types.h"
 #include "had.h"
 #include "ncurses.h"
@@ -192,6 +193,7 @@ namespace had { // Color support
 
 namespace had { // Audio support
     static snd_pcm_t *pcm_handle;
+    static AudioFile audioFile{};
     // static char* buff;
     // static size_t buff_size;
     // static snd_pcm_uframes_t frames;
@@ -232,31 +234,49 @@ namespace had { // Audio support
     res aud_load(const char *path) {
         int err = 0;
 
+        if (audioFile.init(path)) {
+            log_err("Cannot init audioFile");
+            return res::error;
+        }
+        unsigned int rate = audioFile.get_rate();
+
+        if (snd_pcm_hw_free(pcm_handle) < 0) {
+            log_err("Cannot reset pcm congiguration");
+            return res::error;
+        };
         snd_pcm_hw_params_t *params;
         snd_pcm_hw_params_alloca(&params);
 	    snd_pcm_hw_params_any(pcm_handle, params);
 
-        if (snd_pcm_hw_params_set_access(
+        if ((err = snd_pcm_hw_params_set_access(
                 pcm_handle, params,
                 SND_PCM_ACCESS_RW_INTERLEAVED
-            ) < 0
+            )) < 0
         ) log_err("Cannot set interleaved mode. %s\n", snd_strerror(err));
-        if (snd_pcm_hw_params_set_format(
+        if ((err = snd_pcm_hw_params_set_format(
                 pcm_handle,
                 params,
                 SND_PCM_FORMAT_S16_LE
-            ) < 0
-        ) log_err("Cannot set format. %s\n", snd_strerror(pcm));
-
-
-        //     
-        // if ((pcm = snd_pcm_hw_params_set_channels(pcm_handle, params, channels)) < 0) 
-        //     printf("ERROR: Can't set channels number. %s\n", snd_strerror(pcm));
-        // if ((pcm = snd_pcm_hw_params_set_rate_near(pcm_handle, params, &rate, 0)) < 0) 
-        //     printf("ERROR: Can't set rate. %s\n", snd_strerror(pcm));
-        // /* Write parameters */
-        // if ((pcm = snd_pcm_hw_params(pcm_handle, params)) < 0)
-        //     printf("ERROR: Can't set harware parameters. %s\n", snd_strerror(pcm));
+            )) < 0
+        ) log_err("Cannot set format. %s\n", snd_strerror(err));
+        if ((err = snd_pcm_hw_params_set_channels(
+                pcm_handle,
+                params,
+                audioFile.get_channels()
+            )) < 0
+        ) log_err("Cannot set channels number. %s\n", snd_strerror(err));
+        if ((err = snd_pcm_hw_params_set_rate_near(
+                pcm_handle,
+                params,
+                &rate,
+                0
+            )) < 0
+        ) log_err("Cannot set rate. %s\n", snd_strerror(err));
+        if ((err = snd_pcm_hw_params(
+                pcm_handle,
+                params
+            )) < 0
+        ) log_err("Cannot set harware parameters. %s\n", snd_strerror(err));
 
         return res::success;
     }
