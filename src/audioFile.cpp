@@ -163,6 +163,10 @@ res AudioFile::init(char const* path) {
 res AudioFile::dstr() {
     log_step("dstr() file");
 
+    if (!is_init) {
+        return res::error;
+    }
+
     close(fd);
     remove(file_path_pcm);
 
@@ -178,11 +182,13 @@ AudioFile::AudioFile(char const* path, res& err) {
 
 res AudioFile::read_file(void* buf, size_t count, size_t& retcount) {
     if (!is_init) {
+        log_err("File is not initialized")
         return res::error;
     }
 
     ssize_t size = read(fd, buf, count);
     if (size == -1) {
+        log_err("Cannot read file");
         retcount = 0;
         return res::error;
     }
