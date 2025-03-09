@@ -3,7 +3,9 @@
 
 #include <cassert>
 #include <chrono>
+#include <iomanip>
 #include <iostream>
+#include <ostream>
 #include <thread>
 
 // ########################################################################
@@ -50,20 +52,59 @@ int test_AudioPlayer_turn_on_off() { //
 }
 
 int test_AudioPlayer_run_mp3() {
-    had::aud_start();
+    std::cout << 
+        "test plan:\n"
+        "  load and start playback\n"
+        "  wait 10 seconds and pause\n"
+        "  wait 2 seconds and continue playback\n"
+        "  play 2 seconds with volume = 100\n"
+        "  play 2 seconds with volume = 70\n"
+        "  play 2 seconds with volume = 40\n"
+        "  play 2 seconds with volume = 10\n"
+        "  palay 10 seconds with volume = 100\n"
+        "  wait 10 seconds and close the player\n";
 
-    res err = had::aud_load(
+    res err = had::aud_start();
+    assert(!err);
+
+    err = had::aud_load(
                 "/home/dt/Documents/audioPlayer/data/alyans_na_zare.mp3");
     assert(!err);
-    had::aud_run();
 
-    std::cout << "sleeping..." << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(1000));
-    while (true) {}
+    err = had::aud_run();
+    assert(!err);
+    deb_waiting_for(10, "play");
 
+    err = had::aud_play_stop();
+    assert(!err);
+    deb_waiting_for(2, "stop");
 
+    err = had::aud_set_volume(100);
+    assert(!err);
+    err = had::aud_play_stop();
+    assert(!err);
+    deb_waiting_for(2, "play, volume = 100");
     
-    had::aud_end();
+    err = had::aud_set_volume(70);
+    assert(!err);
+    deb_waiting_for(2, "play, volume = 70");
+
+    err = had::aud_set_volume(40);
+    assert(!err);
+    deb_waiting_for(2, "play, volume = 40");
+
+    err = had::aud_set_volume(10);
+    assert(!err);
+    deb_waiting_for(2, "play, volume = 10");
+
+    err = had::aud_set_volume(100);
+    assert(!err);
+    deb_waiting_for(1000, "play");
+
+    err = had::aud_drop();
+    assert(!err);
+    err = had::aud_end();
+    assert(!err);
 
     return 0;
 }

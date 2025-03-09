@@ -10,19 +10,19 @@
 
 
 static char const* file_path_pcm = "/tmp/audplay_77777.pcm";
-static size_t const buffer_size = 1024;
+// static size_t const buffer_size = 1024; // DEV
 
 res AudioFile::read_mp3(char const* path) {
     log_step("Loading mp3 file");
 
     mpg123_handle *mh = nullptr;
     unsigned char *buffer = nullptr;
+    FILE *outfile = nullptr;
     size_t buffer_size = 0;
     size_t done = 0;
-    FILE *outfile = nullptr;
+    long int lrate = 0;
     int err = -1;
     int encoding = 0;
-    long lrate = 0;
     res ret = res::success;
 
     if (mpg123_init() != MPG123_OK) {
@@ -34,7 +34,8 @@ res AudioFile::read_mp3(char const* path) {
     }
 
     buffer_size = mpg123_outblock(mh);
-    buffer = (unsigned char*) malloc(buffer_size);
+    // buffer = (unsigned char*) malloc(buffer_size); // DEV
+    buffer = new unsigned char[buffer_size];
     if (buffer == nullptr) {
         log_err("Cannot allocate buffer");
         goto label_error;   
@@ -47,13 +48,13 @@ res AudioFile::read_mp3(char const* path) {
     }
 
     if (mpg123_getformat(mh, &lrate, &channels, &encoding) != MPG123_OK) {
-        log_err("Cannot get format: %s", mpg123_strerror(mh));
+        log_err("Cannot get file format: %s", mpg123_strerror(mh));
         goto label_error;
     }
     rate = static_cast<int>(lrate);
     samples = mpg123_length(mh);
     if (samples == MPG123_ERR) {
-        log_err("Cannot get samples: %s", mpg123_strerror(mh));
+        log_err("Cannot get length in samples: %s", mpg123_strerror(mh));
         goto label_error;
     }
 
@@ -74,7 +75,8 @@ res AudioFile::read_mp3(char const* path) {
         if (outfile != nullptr) {
             fclose(outfile);
         }
-        free(buffer);
+        // free(buffer); // DEV
+        delete [] buffer;
         if (mh != nullptr) {
             mpg123_close(mh);
             mpg123_delete(mh);
@@ -88,11 +90,11 @@ res AudioFile::read_wav(char const* path) {
     log_step("Loading wav file");
 
     SNDFILE *infile;
-    SF_INFO sfinfo;
     FILE *outfile;
+    SF_INFO sfinfo;
     res ret = res::success;
 
-    short buffer[buffer_size];
+    short buffer[1024];
 
     infile = sf_open(path, SFM_READ, &sfinfo);
     if (!infile) {
@@ -139,7 +141,7 @@ res AudioFile::init(char const* path) {
     }
     size_t len = strlen(path);
     if (len < 4) {
-        log_err("Invalid path");
+        log_err("Invalid path: no proper extension");
         return res::error;
     }
     
@@ -160,8 +162,8 @@ res AudioFile::init(char const* path) {
     fd = open(file_path_pcm, O_RDONLY);
     if (fd == -1) {
         log_err("Cannot open file: %s", strerror(errno));
-        is_init = true;
-        dstr();
+        close(fd);
+        remove(file_path_pcm);
         return res::error;
     }
 
@@ -173,12 +175,12 @@ res AudioFile::dstr() {
     log_step("dstr() file");
 
     if (!is_init) {
+        log_err("dstr an uninitialized object");
         return res::error;
     }
 
     close(fd);
     remove(file_path_pcm);
-
     is_init = false;
 
     return res::success;

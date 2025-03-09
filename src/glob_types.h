@@ -1,7 +1,8 @@
 #pragma once
 
 #include <iostream>
-
+#include <iomanip>
+#include <thread>
 
 
 enum res {
@@ -32,4 +33,20 @@ enum res {
 #define TEST(test) {                                                      \
     test();                                                               \
     std::cout << "[OK] " << #test << std::endl;                           \
+}
+
+
+inline void deb_waiting_for(
+    int time_seconds,
+    char const* mes = "",
+    int step_count = 100
+) {
+    std::cout << "waiting [" << mes << "]:   0%" << std::flush;
+    for (int q = 0; q < step_count; ++q) {
+        std::this_thread::sleep_for(
+                std::chrono::milliseconds(time_seconds*1000/step_count));
+        std::cout << "\b\b\b\b" << std::setw(3) << 100/step_count*q << "%"
+                                                            << std::flush;
+    }
+    std::cout << std::endl;
 }

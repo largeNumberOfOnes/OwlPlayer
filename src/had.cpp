@@ -196,6 +196,16 @@ namespace had { // Audio support
     static AudioFile audioFile{};
     static snd_pcm_uframes_t frames;
     static bool is_playing = true;
+    static volatile bool stop_player_update = false;
+    static volatile volume vol = 100;
+
+    res aud_set_volume(volume new_vol) {
+        vol = new_vol;
+        return res::success;
+    }
+    volume aud_get_volume() {
+        return vol;
+    }
 
     res aud_start() {
         int err = snd_pcm_open(
@@ -214,11 +224,11 @@ namespace had { // Audio support
     }
 
     res aud_end() {
-        int err = snd_pcm_drop(pcm_handle);
-        if (err < 0) {
-            log_err("Cannot drom frames: %s", snd_strerror(err));
+        aud_drop();
+        if (!pcm_handle) {
+            return res::error;
         }
-        err = snd_pcm_close(pcm_handle);
+        int err = snd_pcm_close(pcm_handle);
         if (err < 0) {
             log_err("Cannot close pcm: %s", snd_strerror(err));
             return res::error;
@@ -227,15 +237,17 @@ namespace had { // Audio support
         return res::success;
     }
 
-    res aud_load(const char *path) {
-        int err = 0;
-
-        if (audioFile.init(path)) {
-            log_err("Cannot init audioFile");
+    res aud_drop() {
+        int err = snd_pcm_drop(pcm_handle);
+        if (err < 0) {
+            log_err("Cannot drom frames: %s", snd_strerror(err));
             return res::error;
         }
-        unsigned int rate = audioFile.get_rate();
+        stop_player_update = true;
+        return res::success;
+    }
 
+    static res set_params() {
         if (snd_pcm_hw_free(pcm_handle) < 0) {
             log_err("Cannot reset pcm congiguration");
             return res::error;
@@ -243,36 +255,41 @@ namespace had { // Audio support
         snd_pcm_hw_params_t *params;
         snd_pcm_hw_params_alloca(&params);
 	    snd_pcm_hw_params_any(pcm_handle, params);
+        unsigned int rate = audioFile.get_rate();
 
-        if ((err = snd_pcm_hw_params_set_access(
-                pcm_handle, params,
-                SND_PCM_ACCESS_RW_INTERLEAVED
-            )) < 0
-        ) log_err("Cannot set interleaved mode. %s", snd_strerror(err));
-        if ((err = snd_pcm_hw_params_set_format(
-                pcm_handle,
-                params,
-                SND_PCM_FORMAT_S16_LE
-            )) < 0
-        ) log_err("Cannot set format. %s", snd_strerror(err));
-        if ((err = snd_pcm_hw_params_set_channels(
-                pcm_handle,
-                params,
-                audioFile.get_channels()
-            )) < 0
-        ) log_err("Cannot set channels number. %s", snd_strerror(err));
-        if ((err = snd_pcm_hw_params_set_rate_near(
-                pcm_handle,
-                params,
-                &rate,
-                0
-            )) < 0
-        ) log_err("Cannot set rate. %s", snd_strerror(err));
-        if ((err = snd_pcm_hw_params(
-                pcm_handle,
-                params
-            )) < 0
-        ) log_err("Cannot set harware parameters. %s", snd_strerror(err));
+        int err;
+        if (false
+            || (err = snd_pcm_hw_params_set_access(
+                    pcm_handle, params,
+                    SND_PCM_ACCESS_RW_INTERLEAVED
+                ))
+            || (err = snd_pcm_hw_params_set_format(
+                    pcm_handle,
+                    params,
+                    SND_PCM_FORMAT_S16_LE
+                ))
+            || (err = snd_pcm_hw_params_set_channels(
+                    pcm_handle,
+                    params,
+                    audioFile.get_channels()
+                ))
+            || (err = snd_pcm_hw_params_set_rate_near(
+                    pcm_handle,
+                    params,
+                    &rate,
+                    0
+                ))
+            || (err = snd_pcm_hw_params(
+                    pcm_handle,
+                    params
+                ))
+        ) {
+            log_err(
+                "Cannot set harware parameters. %s",
+                snd_strerror(err)
+            );
+            return res::error;
+        }
 
         if ((err = snd_pcm_hw_params_get_period_size(
                 params,
@@ -291,10 +308,26 @@ namespace had { // Audio support
         return res::success;
     }
 
+    res aud_load(const char *path) {
+        int err = 0;
+
+        if (audioFile.init(path)) {
+            log_err("Cannot init audioFile");
+            return res::error;
+        }
+        if (set_params()) {
+            log_err("Cannot set params");
+            audioFile.dstr();
+            return res::error;
+        }
+
+        return res::success;
+    }
+
     void player_update() {
         log_step("Start player_update()");
         size_t buff_size = frames*audioFile.get_channels()*2;
-        char* buff = (char*) malloc(buff_size);
+        char* buff = (char*) malloc(buff_size); // DEV (molloc -> new)
         int q = 0;
         while (true) {
             size_t retcount = 0;
@@ -302,11 +335,16 @@ namespace had { // Audio support
             if (err) {
                 log_err("Cannot read audioFile");
             }
+            if (stop_player_update) {
+                stop_player_update = !stop_player_update;
+                break;
+            }
             if (retcount == 0) {
                 break;
             }
 
             int pret = snd_pcm_writei(pcm_handle, buff, frames);
+            std::cout << "wri" << std::endl;
             if (pret == -EBADFD) {
                 log_err(
                     "Cannot write to PCM device. %s",
@@ -329,7 +367,7 @@ namespace had { // Audio support
         return res::success;
     }
 
-    res play_stop_audio() {
+    res aud_play_stop() {
         snd_pcm_pause(pcm_handle, is_playing);
         is_playing = !is_playing;
         return res::success;

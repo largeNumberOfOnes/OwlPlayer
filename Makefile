@@ -42,7 +42,7 @@ test_audioFile: objects/audioFile.o
 
 test_had: objects/had.o objects/audioFile.o
 	$(CC) $(FLAGS) objects/had.o objects/audioFile.o tests/test_had.cpp $(LIBS) -o ./execs/test_had.out
-	alacritty -e ./execs/test_had.out &
+	# alacritty -e ./execs/test_had.out &
 
 test_player_fileManager: \
 	objects/player_fileManager.o \

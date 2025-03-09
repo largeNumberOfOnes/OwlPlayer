@@ -13,10 +13,10 @@ class AudioFile {
 
     res read_wav(char const* path);
     res read_mp3(char const* path);
-    res dstr();
 
     public:
         res init(char const* path);
+        res dstr();
         AudioFile(char const* path, res& err);
         AudioFile();
         ~AudioFile();
