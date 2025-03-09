@@ -10,7 +10,6 @@
 
 
 static char const* file_path_pcm = "/tmp/audplay_77777.pcm";
-// static size_t const buffer_size = 1024; // DEV
 
 res AudioFile::read_mp3(char const* path) {
     log_step("Loading mp3 file");
@@ -34,7 +33,6 @@ res AudioFile::read_mp3(char const* path) {
     }
 
     buffer_size = mpg123_outblock(mh);
-    // buffer = (unsigned char*) malloc(buffer_size); // DEV
     buffer = new unsigned char[buffer_size];
     if (buffer == nullptr) {
         log_err("Cannot allocate buffer");
@@ -75,7 +73,6 @@ res AudioFile::read_mp3(char const* path) {
         if (outfile != nullptr) {
             fclose(outfile);
         }
-        // free(buffer); // DEV
         delete [] buffer;
         if (mh != nullptr) {
             mpg123_close(mh);
@@ -136,12 +133,12 @@ res AudioFile::init(char const* path) {
     log_step("init() file");
 
     if (path == nullptr) {
-        log_err("Path refers to nullptr");
+        log_err("Cannot init: Path refers to nullptr");
         return res::error;
     }
     size_t len = strlen(path);
     if (len < 4) {
-        log_err("Invalid path: no proper extension");
+        log_err("Cannot init: path has no proper extension");
         return res::error;
     }
     
@@ -162,7 +159,6 @@ res AudioFile::init(char const* path) {
     fd = open(file_path_pcm, O_RDONLY);
     if (fd == -1) {
         log_err("Cannot open file: %s", strerror(errno));
-        close(fd);
         remove(file_path_pcm);
         return res::error;
     }
@@ -180,6 +176,7 @@ res AudioFile::dstr() {
     }
 
     close(fd);
+    fd = -1;
     remove(file_path_pcm);
     is_init = false;
 
@@ -197,7 +194,11 @@ AudioFile::AudioFile() {
 
 res AudioFile::read_file(void* buf, size_t count, size_t& retcount) {
     if (!is_init) {
-        log_err("File is not initialized")
+        log_err("Cannot read file: File is not initialized")
+        return res::error;
+    }
+    if (!buf) {
+        log_err("Cannot read file: buf is refering nullptr");
         return res::error;
     }
 
@@ -207,7 +208,6 @@ res AudioFile::read_file(void* buf, size_t count, size_t& retcount) {
         retcount = 0;
         return res::error;
     }
-
     retcount = size;
     return res::success;
 }
