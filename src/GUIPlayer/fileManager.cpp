@@ -1,5 +1,5 @@
 #include "fileManager.h"
-#include "../intf.h"
+#include "intf.h"
 #include <algorithm>
 #include <cstddef>
 #include <cstdio>
@@ -13,7 +13,7 @@ FileManager::FileManager(std::string dir)
     draw_line_buf = new char[draw_line_buf_size];
     if (!draw_line_buf)
         log_err("draw_line_buf is not allocated");
-    for (int q = 0; q < draw_line_buf_size; ++q)
+    for (had::dem q = 0; q < draw_line_buf_size; ++q)
         draw_line_buf[q] = ' ';
 }
 
@@ -60,12 +60,9 @@ res FileManager::reload() {
     list.clear();
     namespace fs = std::filesystem;
 
-    try {
-        for (const auto& entry : fs::directory_iterator(dir)) {
-            list.push_back(entry);
-        }
-    } catch (const fs::filesystem_error& e) {
-        log_err("%s", e.what());
+    // DEV [maybe there should be placed try-catch block]
+    for (const auto& entry : fs::directory_iterator(dir)) {
+        list.push_back(entry);
     }
 
     list_size = list.size();
@@ -110,7 +107,7 @@ res FileManager::draw(had::dem x, had::dem y, had::dem w, had::dem h) {
         resize(h - 2);
     }
 
-    for (int q = 0; q < w; ++q)
+    for (had::dem q = 0; q < w; ++q)
         draw_line_buf[q] = ' ';
     for (std::size_t q = 0; q < h; ++q)
         had::draw_text(x, y + q, draw_line_buf);

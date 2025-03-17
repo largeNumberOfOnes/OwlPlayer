@@ -1,6 +1,6 @@
 // #include "abstract.h"
 #include "intf.h"
-#include "had.h"
+#include "../had/had.h"
 #include <curses.h>
 // #include <cstdio>
 // #include <iostream>

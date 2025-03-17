@@ -1,7 +1,7 @@
 #include "player.h"
 
 #include "../glob_types.h"
-#include "../had.h"
+#include "../had/had.h"
 
 #include <cstring>
 

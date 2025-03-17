@@ -2,7 +2,11 @@
 
 
 
-Config::Config(int argc, char const** argv) {
+Config::Config(int argc [[maybe_unused]], char const** argv[[maybe_unused]]) {
+    // pass
+}
+
+Config::~Config() {
     // pass
 }
 
