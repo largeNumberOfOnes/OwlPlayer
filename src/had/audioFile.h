@@ -1,6 +1,11 @@
+/*
+ * This is a class representing access to the raw data of an audio file.
+ *    The class is designed to be part of 'had(./had.h)' interface.
+ */
+ 
 #pragma once
 
-#include "glob_types.h"
+#include "../glob_types.h"
 #include <cstddef>
 
 

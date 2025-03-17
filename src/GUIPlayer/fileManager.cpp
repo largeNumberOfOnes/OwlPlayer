@@ -65,7 +65,7 @@ res FileManager::reload() {
             list.push_back(entry);
         }
     } catch (const fs::filesystem_error& e) {
-        log_err(e.what());
+        log_err("%s", e.what());
     }
 
     list_size = list.size();

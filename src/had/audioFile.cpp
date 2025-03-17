@@ -1,5 +1,5 @@
 #include "audioFile.h"
-#include "glob_types.h"
+#include "../glob_types.h"
 
 #include <cstring>
 #include <fcntl.h>
@@ -86,8 +86,8 @@ res AudioFile::read_mp3(char const* path) {
 res AudioFile::read_wav(char const* path) {
     log_step("Loading wav file");
 
-    SNDFILE *infile;
-    FILE *outfile;
+    SNDFILE *infile = nullptr;
+    FILE *outfile = nullptr;
     SF_INFO sfinfo;
     res ret = res::success;
 

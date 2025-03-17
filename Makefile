@@ -1,7 +1,8 @@
-CC = clang++-14
+CC := clang++-14
 # FLAGS = -std=c++20 -lncursesw -lasound
 # DEB_FLAGS = -g -std=c++17
-FLAGS = -g -DBUILD_DEB -std=c++20
+WARNINGS = -Wall -Wextra -Wpedantic -Werror -fsanitize=address # -fno-exceptions
+FLAGS = -g -DBUILD_DEB -std=c++20 # $(WARNINGS)
 LIBS = -lsndfile -lmpg123 -lasound -lncursesw
 
 # /////////////////////////////
@@ -51,8 +52,15 @@ test_player_fileManager: \
 	$(CC) $(FLAGS) objects/fileManager.o objects/had.o objects/intf.o tests/test_player_fileManager.cpp -o execs/test_player_fileManager.out
 	alacritty -e ./execs/test_player_fileManager.out &
 
+# ------------------------------------------------------------------- final
+
+OBJECTS := objects/had.o
+
+comp: $(OBJECTS)
+	$(CC) $(FLAGS) $(OBJECTS) $(LIBS) -o execs/a.out
+
 comp_and_run:
-	$(CC) $(FLAGS) src/main.cpp src/had.cpp src/intf.cpp src/player/player.cpp src/player/fileManager.cpp src/player/GUIPlayer.cpp -o execs/a.out
+	$(CC) $(FLAGS) src/main.cpp src/had.cpp src/audioFile.cpp src/intf.cpp src/player/player.cpp src/player/fileManager.cpp src/player/GUIPlayer.cpp $(LIBS) -o execs/a.out
 	alacritty -e ./execs/a.out &
 
 

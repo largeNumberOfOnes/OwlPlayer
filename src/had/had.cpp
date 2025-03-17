@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include "audioFile.h"
-#include "glob_types.h"
+#include "../glob_types.h"
 #include "had.h"
 #include "ncurses.h"
 #include <cmath>
@@ -76,57 +76,59 @@ res had::draw_slider(dem x, dem y, dem len, dem val) {
     return res::success;
 }
 
-res had::draw_text(dem x, dem y, char const* str){
-    if (mvprintw(y, x, "%s", str) == OK)
-        return res::success;
-    else
-        return res::error;
-}
+namespace had { // Drawing support
+    res draw_text(dem x, dem y, char const* str){
+        if (mvprintw(y, x, "%s", str) == OK)
+            return res::success;
+        else
+            return res::error;
+    }
 
-res had::draw_symbol(dem x, dem y, char ch) {
-    if (mvaddch(y, x, ch) == OK)
-        return res::success;
-    else
-        return res::error;
-}
+    res draw_symbol(dem x, dem y, char ch) {
+        if (mvaddch(y, x, ch) == OK)
+            return res::success;
+        else
+            return res::error;
+    }
 
-res had::draw_wide_symbol(dem x, dem y, wchar_t ch) {
-    cchar_t cch = {0, ch};
-    if (mvadd_wch(y, x, &cch) == OK)
-        return res::success;
-    else
-        return res::error;
-}
+    res draw_wide_symbol(dem x, dem y, wchar_t ch) {
+        cchar_t cch;
+        wchar_t ch_arr[2] = {ch, '\0'};
+        setcchar(&cch, ch_arr, WA_NORMAL, 0, NULL);
+        if (mvadd_wch(y, x, &cch) == OK)
+            return res::success;
+        else
+            return res::error;
+    }
 
-res had::update() {
-    if (refresh() == OK)
-        return res::success;
-    else
-        return res::error;
-}
+    res update() {
+        if (refresh() == OK)
+            return res::success;
+        else
+            return res::error;
+    }
 
-res had::cls() {
-    if (clear() == OK)
-        return res::success;
-    else
-        return res::error;
-}
+    res cls() {
+        if (clear() == OK)
+            return res::success;
+        else
+            return res::error;
+    }
 
-had::dem had::get_width() {
-    int w = 0, h = 0;
-    getmaxyx(stdscr, h, w);
-    return w;
-}
+    dem get_width() {
+        int w = getmaxx(stdscr);
+        return (w == ERR) ? 0 : w;
+    }
 
-had::dem had::get_height() {
-    int w = 0, h = 0;
-    getmaxyx(stdscr, h, w);
-    return h;
+    dem get_height() {
+        int h = getmaxy(stdscr);
+        return (h == ERR) ? 0 : h;
+    }
 }
 
 namespace had { // Color support
-    static unsigned int color_count = 10;
-    static unsigned int pair_count = 1;
+    static int color_count = 10;
+    static int pair_count = 1;
 
     res set_new_color(Color& col, int r, int g, int b) {
         if (color_count >= COLORS) {
@@ -309,8 +311,6 @@ namespace had { // Audio support
     }
 
     res aud_load(const char *path) {
-        int err = 0;
-
         if (audioFile.init(path)) {
             log_err("Cannot init audioFile");
             return res::error;
@@ -328,7 +328,6 @@ namespace had { // Audio support
         log_step("Start player_update()");
         size_t buff_size = frames*audioFile.get_channels()*2;
         char* buff = (char*) malloc(buff_size); // DEV (molloc -> new)
-        int q = 0;
         while (true) {
             size_t retcount = 0;
             res err = audioFile.read_file(buff, buff_size, retcount);

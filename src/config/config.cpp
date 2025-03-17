@@ -4,7 +4,7 @@
 
 
 
-Config::Config(std::string conf_path) {
+Config::Config(int argc, char const** argv) {
     // std::string config_full_path = conf_path + "/" + config_name;
 
     // std::ifstream config(config_full_path);
@@ -19,7 +19,10 @@ Config::Config(std::string conf_path) {
     // stream
 }
 
-res Config::load() {
+bool run_GUIPlayer() {
+    return true;
+}
 
-    return res::success;
+char const* get_path() {
+    return "/home/dt/Documents";
 }

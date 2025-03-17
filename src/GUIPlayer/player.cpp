@@ -72,7 +72,7 @@ static res draw_volume(had::dem x, had::dem y, had::dem w,
         return res::error;
     }
 
-    char str_vol[5] = {0};
+    char str_vol[15] = {};
     if (0 <= vol && vol < 1000) {
         sprintf(str_vol, "%3d%%", vol);
     } else {
@@ -117,8 +117,10 @@ static res draw_timeline(had::dem x, had::dem y, had::dem w) {
         return res::error;
     }
 
-    had::seconds cur_time = had::get_cur_time();
-    had::seconds duration = had::get_duration();
+    // had::seconds cur_time = had::get_cur_time();
+    // had::seconds duration = had::get_duration();
+    had::seconds cur_time = 0;
+    had::seconds duration = 0;
     if (false
         || had::draw_text(x, y, format_time(cur_time).c_str())
         || had::draw_slider(x + p1, y, h, (h-1)*cur_time/duration)
@@ -149,6 +151,14 @@ res Player::draw(had::dem x, had::dem y, had::dem w) {
     }
 
     return res::success;
+}
+
+bool Player::not_enougth_space(had::dem w, had::dem h) {
+    return w < min_width || h < min_height;
+}
+
+had::dem Player::get_height() {
+    return min_height;
 }
 
 res stop() {

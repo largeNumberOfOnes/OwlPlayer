@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../had.h"
-#include "../intf.h"
+#include "../had/had.h"
+#include "intf.h"
 #include "fileManager.h"
 #include "player.h"
 // #include "config.h"

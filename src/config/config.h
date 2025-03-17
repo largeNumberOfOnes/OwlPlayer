@@ -1,8 +1,8 @@
 #pragma once
 
-#include "abstract.h"
+// #include "abstract.h"
 
-#include <string>
+// #include <string>
 
 
 /** expected config (Only in this order!)
@@ -12,18 +12,23 @@
 
 class Config {
     private:
-        std::string const config_name = ".player_rc";
+        // std::string const config_name = ".player_rc";
 
-        std::string start_dir  = "";
-        std::string start_file = "";
+        // std::string start_dir  = "";
+        // std::string start_file = "";
         bool is_hiden = false;
 
     public:
-        Config(std::string path);
+        Config(int argc, char const** argv);
         Config(Config const&) = delete;
         void operator =(Config const&) = delete;
+
         ~Config();
 
-        res load();
+        bool run_GUIPlayer();
+
+        char const* get_path();
+
+        // res load();
 
 };

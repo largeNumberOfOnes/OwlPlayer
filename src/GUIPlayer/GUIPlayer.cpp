@@ -39,17 +39,15 @@ res GUIPlayer::start_loop() {
             (this->*(it->second))();
         }
 
-        if (h > Player::min_h)
-            player.draw(0, h - Player::min_h, w);
-        else
-            had::draw_text(0, 0, "No ehought space");
-        
-        if (h > Player::min_h + FileManager::min_h)
-            fileManager.draw(0, 0, w, h - Player::min_h);
-
-        if (player.draw(0, h-Player::min_h, w)) {
+        if (player.not_enougth_space(w, h)) {
+            had::draw_text(0, 0, "Not ehought space");
+        }
+        if (player.draw(0, h - player.get_height(), w)) {
             log_err("Cannot draw player");
         }
+        
+        // if (h > Player::min_h + FileManager::min_h)
+        //     fileManager.draw(0, 0, w, h - Player::min_h);
     }
 
     if (had::end_window()) {

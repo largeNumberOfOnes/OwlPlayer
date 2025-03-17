@@ -4,7 +4,8 @@
 // #include <string>
 // #include <vector>
 
-#include "had.h"
+#include "../glob_types.h"
+#include "../had/had.h"
 
 
 

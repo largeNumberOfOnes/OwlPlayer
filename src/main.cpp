@@ -1,32 +1,35 @@
 /**
+ *
  */
 
-// #include "read_args.h"
-// #include "load"
 #include "glob_types.h"
-#include "player/GUIPlayer.h"
+#include "config/config.h"
+#include "GUIPlayer/GUIPlayer.h"
+
+#ifdef USE_WHILE_BARRIER
+    #define WHILE_BARRIER {                                               \
+        int cond = true;                                                  \
+        while (cond) {}                                                   \
+    }
+#else
+    #define WHILE_BARRIER
+#endif
+
 
 
 int main(int argc, const char** argv) {
 
-    // Parse parse;
-    // if (false
-    //     || parse_args(argc, argv, cont)
-    // ) {
-    //     log_err("Error while parsing arguments");
-    //     return -1;
-    // }
+    Config conf{argc, argv};
 
-    // load config
-    // Config conf{cont.config_path()};
+    WHILE_BARRIER;
 
-    GUIPlayer player{"/home/dt/Documents"};
-    if (player.start_loop()) {
-        log_err("Error");
-        return -1;
+    if (conf.run_GUIPlayer()) {
+        GUIPlayer player{conf.get_path()};
+        if (player.start_loop()) {
+            log_err("Error");
+            return -1;
+        }
     }
-
-    // clear
 
     return 0;
 }

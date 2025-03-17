@@ -1,10 +1,15 @@
+/*
+ * This is an interface that implements all platform-dependent functions.
+ * Implementation of these functions can be overridden externally, so it
+ *    is assembled to an object file separately from the rest of the code.
+ */
+
 #pragma once
 
 #include <cstddef>
 #include <string>
 #include <iostream>
-#include "glob_types.h"
-
+#include "../glob_types.h"
 
 
 
@@ -38,8 +43,8 @@ namespace had {
     res draw_wide_symbol(dem x, dem y, wchar_t ch);
     res update();
     res cls();
-    dem get_width();
-    dem get_height();
+    dem get_width(); // On error returns 0
+    dem get_height(); // On error returns 0
 
     // Color
     using Color = int;
