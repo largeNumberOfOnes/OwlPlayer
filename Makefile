@@ -1,8 +1,8 @@
 CC := clang++-14
-# FLAGS = -std=c++20 -lncursesw -lasound
 # DEB_FLAGS = -g -std=c++17
-WARNINGS = -Wall -Wextra -Wpedantic -Werror -fsanitize=address # -fno-exceptions
-FLAGS = -g -DBUILD_DEB -std=c++20 # $(WARNINGS)
+WARNINGS := -Wall -Wextra -Wpedantic -Werror -fsanitize=address \
+															-fno-exceptions
+FLAGS := -g -DBUILD_DEB -std=c++20 # $(WARNINGS)
 LIBS := $(shell make -s -C src/had get_libs_list)
 
 # /////////////////////////////
@@ -10,28 +10,19 @@ LIBS := $(shell make -s -C src/had get_libs_list)
 objects/had.o: $(wildcard src/had/*)
 	make -C src/had build BUILD_DIR=../../objects
 
-objects/intf.o:  \
-	src/intf.cpp \
-	src/intf.o
-	$(CC) $(FLAGS) -c src/intf.cpp -o objects/intf.o
+objects/intf.o:
+	$(CC) $(FLAGS) -c src/GUIPlayer/intf.cpp -o objects/intf.o
 
-objects/player_fileManager.o:  \
-	src/player/fileManager.cpp \
-	src/player/fileManager.h
+objects/player_fileManager.o:
 	$(CC) $(FLAGS) -c src/player/fileManager.cpp -o objects/fileManager.o
 
-# objects/player_player.o:  \
-# 	src/player/player.cpp \
-# 	src/player/player.h
+# objects/player_player.o: 
 # 	$(CC) $(FLAGS) -c src/player/player.cpp -o objects/player.o
 
 # objects/player_GUIPlayer.h.o:  \
 # 	src/player/GUIPlayer.cpp \
 # 	src/player/GUIPlayer.h \
 # 	$(CC) $(FLAGS) -c src/player/GUIPlayer.h.cpp -o objects/GUIPlayer.h.o
-
-objects/audioFile.o: src/audioFile.cpp src/audioFile.h
-	$(CC) $(FLAGS) -c src/audioFile.cpp -o objects/audioFile.o
 
 # -------------------------------------------------------------------- test
 
@@ -62,3 +53,7 @@ comp_and_run:
 	alacritty -e ./execs/a.out &
 
 # -fno-exceptions !!!
+# потоковые редакторы текста
+# sed
+# awk
+# cut
