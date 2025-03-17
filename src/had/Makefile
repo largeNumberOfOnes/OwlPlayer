@@ -13,8 +13,9 @@ get_libs_list:
 
 build:
 	mkdir had_tmp
-	- $(CC) $(FLAGS) -c had.cpp -o had_tmp/had.o \
-	&& $(CC) $(FLAGS) -c audioFile.cpp -o had_tmp/audioFile.o \
-	&& $(LD) -r had_tmp/had.o had_tmp/audioFile.o \
-											-o $(BUILD_DIR)/$(OUTPUT_NAME)
-	rm -r had_tmp
+	$(CC) $(FLAGS) -c had.cpp -o had_tmp/had.o \
+		&& $(CC) $(FLAGS) -c audioFile.cpp -o had_tmp/audioFile.o \
+		&& $(LD) -r had_tmp/had.o had_tmp/audioFile.o \
+										-o $(BUILD_DIR)/$(OUTPUT_NAME) \
+		&& rm -r had_tmp \
+		|| (rm -r had_tmp && false)

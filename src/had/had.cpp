@@ -13,8 +13,6 @@
 #include <stdio.h>
 
 #include <sys/stat.h>
-// #include <sys/mman.h>
-// #include <pthread.h>
 #include <thread>
 
 

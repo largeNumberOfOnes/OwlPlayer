@@ -3,14 +3,12 @@ CC := clang++-14
 # DEB_FLAGS = -g -std=c++17
 WARNINGS = -Wall -Wextra -Wpedantic -Werror -fsanitize=address # -fno-exceptions
 FLAGS = -g -DBUILD_DEB -std=c++20 # $(WARNINGS)
-LIBS = -lsndfile -lmpg123 -lasound -lncursesw
+LIBS := $(shell make -s -C src/had get_libs_list)
 
 # /////////////////////////////
 
-objects/had.o:  \
-	src/had.cpp \
-	src/had.h
-	$(CC) $(FLAGS) -c src/had.cpp -o objects/had.o
+objects/had.o: $(wildcard src/had/*)
+	make -C src/had build BUILD_DIR=../../objects
 
 objects/intf.o:  \
 	src/intf.cpp \
@@ -62,8 +60,5 @@ comp: $(OBJECTS)
 comp_and_run:
 	$(CC) $(FLAGS) src/main.cpp src/had.cpp src/audioFile.cpp src/intf.cpp src/player/player.cpp src/player/fileManager.cpp src/player/GUIPlayer.cpp $(LIBS) -o execs/a.out
 	alacritty -e ./execs/a.out &
-
-
-
 
 # -fno-exceptions !!!
