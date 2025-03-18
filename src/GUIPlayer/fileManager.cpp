@@ -98,6 +98,10 @@ res FileManager::resize(had::dem new_size) {
     return res::success;
 }
 
+bool FileManager::is_enougth_space(had::dem w, had::dem h) {
+    return w >= min_w && h >= min_h;
+}
+
 res FileManager::draw(had::dem x, had::dem y, had::dem w, had::dem h) {
     if (w < min_w || h < min_h) {
         log_err("bad sizes");

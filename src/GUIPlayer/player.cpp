@@ -121,9 +121,10 @@ static res draw_timeline(had::dem x, had::dem y, had::dem w) {
     // had::seconds duration = had::get_duration();
     had::seconds cur_time = 0;
     had::seconds duration = 0;
+    had::seconds slider_pos =  (duration) ? ((h-1)*cur_time/duration) : 0;
     if (false
         || had::draw_text(x, y, format_time(cur_time).c_str())
-        || had::draw_slider(x + p1, y, h, (h-1)*cur_time/duration)
+        || had::draw_slider(x + p1, y, h, slider_pos)
         || had::draw_text(x + p1 + h + p2, y, format_time(duration).c_str())
         || had::draw_text(x + p1 + h + p2 + 5 + p3, y, "<  &  >")
     ) {
@@ -153,7 +154,7 @@ res Player::draw(had::dem x, had::dem y, had::dem w) {
     return res::success;
 }
 
-bool Player::not_enougth_space(had::dem w, had::dem h) {
+bool Player::is_enougth_space(had::dem w, had::dem h) {
     return w < min_width || h < min_height;
 }
 

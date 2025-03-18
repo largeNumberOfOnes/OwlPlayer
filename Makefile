@@ -51,8 +51,14 @@ OBJECTS := objects/had.o \
 	objects/player_GUIPlayer.o \
 	objects/config_config.o
 
+clean:
+	rm objects/*
+
 comp: $(OBJECTS)
 	$(CC) $(FLAGS) src/main.cpp $(OBJECTS) $(LIBS) -o execs/a.out
+
+run: ./execs/a.out
+	alacritty -e ./execs/a.out &
 
 comp_and_run:
 	$(CC) $(FLAGS) src/main.cpp src/had.cpp src/audioFile.cpp src/intf.cpp src/player/player.cpp src/player/fileManager.cpp src/player/GUIPlayer.cpp $(LIBS) -o execs/a.out
