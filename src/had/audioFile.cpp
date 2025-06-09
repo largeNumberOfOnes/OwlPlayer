@@ -118,18 +118,6 @@ namespace had {
         channels = sfinfo.channels;
         samples  = sfinfo.frames;
 
-        std::cout << "format " << sfinfo.format << std::endl;
-        printf("  • Тип: %s\n", 
-            (sfinfo.format & SF_FORMAT_TYPEMASK) == SF_FORMAT_MPEG ? "MP3" :
-            (sfinfo.format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV ? "WAV" :
-            (sfinfo.format & SF_FORMAT_TYPEMASK) == SF_FORMAT_FLAC ? "FLAC" : "Другой");
-
-        printf("  • Подтип: 0x%x %s\n", 
-            sfinfo.format & SF_FORMAT_SUBMASK,
-            (sfinfo.format & SF_FORMAT_SUBMASK) == SF_FORMAT_PCM_16 ? "PCM 16-bit" :
-            (sfinfo.format & SF_FORMAT_SUBMASK) == SF_FORMAT_PCM_24 ? "PCM 24-bit" :
-            (sfinfo.format & SF_FORMAT_SUBMASK) == SF_FORMAT_FLOAT ? "32-bit Float" : "Другой");
-
         outfile = fopen(file_path_pcm, "wb");
         if (!outfile) {
             log.log_err(std::string("Cannot open output file: ")
@@ -186,9 +174,7 @@ namespace had {
             return res_code::other_error;
         }
 
-        // fd = open(file_path_pcm, O_RDONLY);
         file = fopen(file_path_pcm, "rb");
-        // if (fd == -1) {
         if (!file) {
             log.log_err(std::string("Cannot open file: %s") +
                                                         strerror(errno));
@@ -201,10 +187,9 @@ namespace had {
     }
 
     AudioFile::res_code AudioFile::erase() {
-        log.log_info("dstr() file");
+        log.log_info("Erasing file");
 
         if (!is_inited) {
-            log.log_err("dstr an uninitialized object");
             return res_code::success;
         }
 
@@ -222,15 +207,14 @@ namespace had {
 
     AudioFile::res_code AudioFile::read_file(void* buf, size_t count, size_t& retcount) {
         if (!is_inited) {
-            log.log_err("Cannot read file: File is not initialized");
+            log.log_err("File is not initialized");
             return res_code::other_error;
         }
         if (!buf) {
-            log.log_err("Cannot read file: buf is refering nullptr");
+            log.log_err("buf is derefering nullptr");
             return res_code::other_error;
         }
 
-        assert(file != nullptr);
         std::size_t size = fread(buf, 1, count, file);
         if (size == 0) {
             log.log_err(std::string("Cannot read file: %s") +
@@ -249,7 +233,11 @@ namespace had {
             return res_code::not_initialized;
         }
 
-        fseek(file, position, SEEK_SET);
+        int err = fseek(file, position, SEEK_SET);
+        if (err) {
+            log.log_warn("Cannot seek file");
+            return res_code::cannot_set_position;
+        }
         cur_pos = position;
 
         return res_code::success;
@@ -264,6 +252,10 @@ namespace had {
 
     std::size_t AudioFile::get_cur_pos() {
         return cur_pos;
+    }
+
+    std::size_t AudioFile::get_max_pos() {
+        return samples * channels * 2; // DEV [mult depends on lib]
     }
 
     int AudioFile::get_rate() {

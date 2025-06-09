@@ -34,8 +34,8 @@ test_had:
 
 test_audioFile:
 	$(CC) $(DFLAGS) audioFile.cpp audioFile.test.cpp $(LIBS) \
-		-o ../../objects/test_audioFile.out
+		-o ../../execs/test_audioFile.out
 
 test_had_audio:
 	$(CC) $(DFLAGS) had_audio.cpp audioFile.cpp had_audio.test.cpp \
-		$(LIBS) -o ../../objects/test_had_audio.out
+		$(LIBS) -o ../../execs/test_had_audio.out

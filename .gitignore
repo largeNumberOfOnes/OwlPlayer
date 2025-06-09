@@ -1,3 +1,5 @@
+.gitignore
+
 bin/
 execs/
 test_data/

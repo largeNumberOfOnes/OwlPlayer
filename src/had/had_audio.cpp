@@ -10,6 +10,8 @@
 
 #include "pipewire/pipewire.h"
 #include "spa/param/audio/raw.h"
+#include <cstddef>
+#include <curses.h>
 #include <spa/param/audio/format-utils.h>
 #include <spa/param/props.h>
 
@@ -104,7 +106,7 @@ namespace had {
         Data_pw& data = *static_cast<Data_pw*>(userdata);
 
         std::lock_guard<std::mutex> lock{*data.mutex};
-        
+        pw_thread_loop_lock(data.loop);
         struct pw_buffer* buffer;
         struct spa_buffer* spa_buf;
         float* dst;
@@ -137,33 +139,36 @@ namespace had {
         spa_buf->datas[0].chunk->size = bytes_read;
 
         pw_stream_queue_buffer(data.stream, buffer);
+        pw_thread_loop_unlock(data.loop);
     }
 
-    res Audio::load(std::string path) {
+    Audio::res_code Audio::drop() {
+        return res_code::success;
+    }
 
-        // if (state == State::inited) 
+    Audio::res_code Audio::load(std::string path) {
         std::lock_guard<std::mutex> lock{mutex};
-
         audio_file.load(path);
-
         pw_thread_loop_lock(data.loop);
-
         if (is_stream_connected) {
             pw_stream_disconnect(data.stream);
             is_stream_connected = false;
         }
 
         uint8_t buffer[1024];
-        struct spa_pod_builder builder = SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
+        struct spa_pod_builder builder =
+                            SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
         spa_audio_info_raw audio_info = SPA_AUDIO_INFO_RAW_INIT(
-            .format = SPA_AUDIO_FORMAT_S16, // DEV [Must depend on audio_file] // if mpg123 lib is used
-            // .format = SPA_AUDIO_FORMAT_S32, // DEV [Must depend on audio_file] // if sndfile lib is used
-            .rate = static_cast<uint32_t>(audio_file.get_rate()),
+            .format = SPA_AUDIO_FORMAT_S16,
+                // DEV [Must depend on audio_file] // if mpg123 is used
+            // .format = SPA_AUDIO_FORMAT_S32,
+                // DEV [Must depend on audio_file] // if sndfile is used
+            .rate     = static_cast<uint32_t>(audio_file.get_rate()),
             .channels = static_cast<uint32_t>(audio_file.get_channels())
         );
 
-        std::cout << "rate " << audio_file.get_rate() << std::endl;
-        std::cout << "chan " << audio_file.get_channels() << std::endl;
+        // std::cout << "rate " << audio_file.get_rate() << std::endl;
+        // std::cout << "chan " << audio_file.get_channels() << std::endl;
 
         const struct spa_pod *params[1] = {
             spa_format_audio_raw_build(
@@ -172,8 +177,13 @@ namespace had {
                 &audio_info
             )
         };
-
-        pw_stream_connect(data.stream,
+        if (!params[0]) {
+            drop();
+            return res_code::other_error;
+        }
+std::cout << "samples " << audio_file.get_samples() << std::endl;
+std::cout << "rate " << audio_file.get_rate() << std::endl;
+        int err = pw_stream_connect(data.stream,
                           PW_DIRECTION_OUTPUT,
                           PW_ID_ANY,
                           static_cast<pw_stream_flags>(
@@ -182,31 +192,46 @@ namespace had {
                             PW_STREAM_FLAG_RT_PROCESS
                           ),
                           params, 1);
+        if (err) {
+            drop();
+            return res_code::other_error;
+        }
         is_stream_connected = true;
+        pw_stream_set_active(data.stream, false);
+        state = State::stop;
 
         pw_thread_loop_unlock(data.loop);
         
-        return res::success;
+        return res_code::success;
     }
 
     // res Audio::drop();
     // res Audio::run();
-    res Audio::stop() {
+    Audio::res_code Audio::stop() {
+        if (state != State::play) {
+            return res_code::bad_state;
+        }
         std::lock_guard<std::mutex> lock{mutex};
         pw_thread_loop_lock(data.loop);
+        pw_stream_flush(data.stream, true);
         pw_stream_set_active(data.stream, false);
         pw_thread_loop_unlock(data.loop);
-        return res::success;
+        state = State::stop;
+        return res_code::success;
     }
-    res Audio::play() {
+    Audio::res_code Audio::play() {
+        if (state != State::stop) {
+            return res_code::bad_state;
+        }
         std::lock_guard<std::mutex> lock{mutex};
         pw_thread_loop_lock(data.loop);
         pw_stream_set_active(data.stream, true);
         pw_thread_loop_unlock(data.loop);
-        return res::success;
+        state = State::play;
+        return res_code::success;
     }
 
-    res Audio::set_volume(volume vol) {
+    Audio::res_code Audio::set_volume(volume vol) {
         std::lock_guard<std::mutex> lock{mutex};
         pw_thread_loop_lock(data.loop);
         std::size_t channels = audio_file.get_channels();
@@ -223,37 +248,54 @@ namespace had {
         );
         delete[] volumes;
         pw_thread_loop_unlock(data.loop);
-        return res::success;
+        return res_code::success;
     }
 
-    res Audio::jump(seconds pos) {
+    std::size_t Audio::pos_to_byte(seconds pos) {
+        return pos * audio_file.get_rate() * audio_file.get_channels() * 2;
+        // DEV [if sndfile is used the mult is 4]
+    }
+
+    Audio::res_code Audio::jump(seconds pos) {
+        if (state != State::stop && state != State::play) {
+            return res_code::bad_state;
+        }
         std::lock_guard<std::mutex> lock{mutex};
         pw_thread_loop_lock(data.loop);
         pw_stream_flush(data.stream, false);
-        std::size_t samples_pos = pos * audio_file.get_rate();
+        std::size_t samples_pos = pos_to_byte(pos);
+        std::cout << "pos " << samples_pos << std::endl;
         samples_pos = std::min(
             samples_pos,
-            static_cast<std::size_t>(audio_file.get_samples())
+            audio_file.get_max_pos()
         );
-        audio_file.set_position(samples_pos);
+        AudioFile::res_code res = audio_file.set_position(samples_pos);
         pw_thread_loop_unlock(data.loop);
-        return res::success;
+        if (res == AudioFile::res_code::success) {
+            return res_code::success;
+        } else {
+            std::cout << "boom" << std::endl;
+            return res_code::other_error;
+        }
     }
-    
-    res Audio::jump_rel(seconds pos_rel) {
+
+    Audio::res_code Audio::jump_rel(seconds pos_rel) {
+        if (state != State::stop && state != State::play) {
+            return res_code::bad_state;
+        }
         std::lock_guard<std::mutex> lock{mutex};
         pw_thread_loop_lock(data.loop);
         pw_stream_flush(data.stream, false);
-        std::size_t samples_pos = pos_rel * audio_file.get_rate();
+        std::size_t samples_pos = pos_to_byte(pos_rel);
         samples_pos = audio_file.get_cur_pos() + samples_pos;
         samples_pos = std::max(0lu, samples_pos);
         samples_pos = std::min(
             samples_pos,
-            static_cast<std::size_t>(audio_file.get_samples())
+            audio_file.get_max_pos()
         );
         audio_file.set_position(samples_pos);
         pw_thread_loop_unlock(data.loop);
-        return res::success;
+        return res_code::success;
     }
 
 }

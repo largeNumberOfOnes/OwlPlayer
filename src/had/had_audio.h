@@ -41,24 +41,26 @@ namespace had {
             play,
         } state;
 
-        enum class res_code {
-            success,
-            // pass
-        };
+        std::size_t pos_to_byte(seconds pos);
 
         public:
+            enum class res_code {
+                success,
+                bad_state,
+                other_error,
+            };
+
             Audio(res& result, const Logger& log);
             ~Audio();
 
-            res load(std::string path);
-            res drop();
-            res run();
-            res stop();
-            res play();
+            res_code load(std::string path);
+            res_code drop();
+            res_code stop();
+            res_code play();
 
-            res set_volume(volume vol);
-            res jump(seconds pos);
-            res jump_rel(seconds pos_rel);
+            res_code set_volume(volume vol);
+            res_code jump(seconds pos);
+            res_code jump_rel(seconds pos_rel);
     };
 
     // res aud_set_volume(volume vol);

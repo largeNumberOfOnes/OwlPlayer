@@ -14,13 +14,12 @@
 
 namespace had {
     class AudioFile {
-        bool is_inited = false;
-        FILE* file = nullptr;
-        int rate = 0;
-        int channels = 0;
-        int samples = 0;
-
+        bool is_inited      = false;
         std::size_t cur_pos = 0;
+        FILE* file          = nullptr;
+        int rate     = 0;
+        int channels = 0;
+        int samples  = 0;
 
         const Logger& log;
 
@@ -31,6 +30,7 @@ namespace had {
             enum class res_code {
                 success,
                 not_initialized,
+                cannot_set_position,
                 file_does_not_exist,
                 other_error,
             };
@@ -41,6 +41,7 @@ namespace had {
             ~AudioFile();
 
             std::size_t get_cur_pos();
+            std::size_t get_max_pos();
             int get_rate();
             int get_channels();
             int get_samples();
