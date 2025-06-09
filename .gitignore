@@ -1,0 +1,5 @@
+bin/
+execs/
+test_data/
+objects/
+.clangd

@@ -1,2 +1,0 @@
-[96mStep: [39mCreating empty AudioFile
-[?1049h[22;0;0t[1;26r(B[m[4l[?7h[39;49m[?25l[?1h=]4;10;rgb:3B/3B/3B\[39;49m[37m[40m[H[2J

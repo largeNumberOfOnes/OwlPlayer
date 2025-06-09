@@ -1,12 +1,15 @@
 BUILD_DIR := .
-CC := clang++-14
+# CC := clang++-14
+CC := g++
 LD := ld
-WARNINGS := -Wall -Wextra -Wpedantic -Werror -fsanitize=address \
+# WARNINGS := -Wall -Wextra -Wpedantic -Werror -fsanitize=address \
+WARNINGS := -Wall -Wextra -Werror -fsanitize=address \
 															-fno-exceptions
-FLAGS := -g -DBUILD_DEB -std=c++20 $(WARNINGS)
+DFLAGS := -g -DBUILD_DEB -std=c++20 $(WARNINGS)
 OUTPUT_NAME := had.o
 
-LIBS := -lsndfile -lmpg123 -lasound -lncursesw
+LIBS := -lsndfile -lmpg123 -lasound -lncursesw \
+		 $(shell pkg-config --cflags --libs libpipewire-0.3)
 
 get_libs_list:
 	@echo $(LIBS)
@@ -19,3 +22,20 @@ build:
 										-o $(BUILD_DIR)/$(OUTPUT_NAME) \
 		&& rm -r had_tmp \
 		|| (rm -r had_tmp && false)
+
+test_had:
+	$(CC) $(FLAGS) had.cpp audioFile.cpp had.test.cpp $(LIBS) -o test_had.out
+
+test_had:
+	$(CC) $(FLAGS) audioFile.cpp audioFile.test.cpp $(LIBS) -o test_audioFile.out
+
+
+# Tests
+
+test_audioFile:
+	$(CC) $(DFLAGS) audioFile.cpp audioFile.test.cpp $(LIBS) \
+		-o ../../objects/test_audioFile.out
+
+test_had_audio:
+	$(CC) $(DFLAGS) had_audio.cpp audioFile.cpp had_audio.test.cpp \
+		$(LIBS) -o ../../objects/test_had_audio.out

@@ -1,7 +1,7 @@
 /*
  * This is an interface that implements all platform-dependent functions.
  * Implementation of these functions can be overridden externally, so it
- *    is assembled to an object file separately from the rest of the code.
+ *    is assembled to an object file separately from the rest.
  */
 
 #pragma once
@@ -9,17 +9,11 @@
 #include <cstddef>
 #include <string>
 #include <iostream>
-#include "../glob_types.h"
+// #include "../glob_types.h"
 
 
 
 namespace had {
-
-    // Base types
-    using dem = unsigned int;
-    using seconds = unsigned int;
-    using volume = unsigned int;
-
     // Cathing symbols
     enum class key {
         arrow_rigth,
@@ -70,17 +64,7 @@ namespace had {
     res use_no_color_pair();
 
     // AudioPlayer
-    res aud_start();
-    res aud_end();
-    res aud_load(char const* path);
-    res aud_run();
-    res aud_drop();
-    res aud_play_stop();
-    res aud_set_volume(volume vol);
-    volume aud_get_volume();
-    res aud_set_cur_pos(seconds pos);
-    seconds aud_get_cur_pos();
-    seconds aud_get_duration();
+
 
     std::string get_system_config_path();
 };

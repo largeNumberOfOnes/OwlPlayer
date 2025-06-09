@@ -5,30 +5,48 @@
  
 #pragma once
 
-#include "../glob_types.h"
+#include <functional>
+#include <string>
 #include <cstddef>
 
+#include "had_logger.h"
+#include "had_types.h"
 
-class AudioFile {
-    int fd = -1;
-    unsigned int rate = 0;
-    int channels = 0;
-    int samples = 0;
-    bool is_init = false;
+namespace had {
+    class AudioFile {
+        bool is_inited = false;
+        FILE* file = nullptr;
+        int rate = 0;
+        int channels = 0;
+        int samples = 0;
 
-    res read_wav(char const* path);
-    res read_mp3(char const* path);
+        std::size_t cur_pos = 0;
 
-    public:
-        res init(char const* path);
-        res dstr();
-        AudioFile(char const* path, res& err);
-        AudioFile();
-        ~AudioFile();
+        const Logger& log;
 
-        int get_rate();
-        int get_channels();
-        int get_samples();
+        res read_wav(char const* path);
+        res read_mp3(char const* path);
 
-        res read_file(void* buf, size_t count, size_t& retcount);
-};
+        public:
+            enum class res_code {
+                success,
+                not_initialized,
+                file_does_not_exist,
+                other_error,
+            };
+
+            res_code load(const std::string& path);
+            res_code erase();
+            AudioFile(const Logger& log);
+            ~AudioFile();
+
+            std::size_t get_cur_pos();
+            int get_rate();
+            int get_channels();
+            int get_samples();
+
+            res_code read_file(void* buf, std::size_t count,
+                                                    std::size_t& retcount);
+            res_code set_position(std::size_t position);
+    };
+}

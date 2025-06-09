@@ -4,12 +4,18 @@
 #include "../glob_types.h"
 #include "had.h"
 #include "ncurses.h"
+#include "pipewire/core.h"
+#include "pipewire/port.h"
+#include "pipewire/stream.h"
+#include "pipewire/thread-loop.h"
 #include <cmath>
 #include <curses.h>
 #include <fcntl.h>
 #include <iterator>
 
-#include <alsa/asoundlib.h>
+#include <mutex>
+#include <pipewire/pipewire.h>
+#include <spa/param/audio/format-utils.h>
 #include <stdio.h>
 
 #include <sys/stat.h>
@@ -189,185 +195,4 @@ namespace had { // Color support
         else
             return res::error;
     }
-}
-
-namespace had { // Audio support
-    static snd_pcm_t *pcm_handle;
-    static AudioFile audioFile{};
-    static snd_pcm_uframes_t frames;
-    static bool is_playing = true;
-    static volatile bool stop_player_update = false;
-    static volatile volume vol = 100;
-
-    res aud_set_volume(volume new_vol) {
-        vol = new_vol;
-        return res::success;
-    }
-    volume aud_get_volume() {
-        return vol;
-    }
-
-    res aud_start() {
-        int err = snd_pcm_open(
-            &pcm_handle,
-            "default",
-            SND_PCM_STREAM_PLAYBACK,
-            SND_PCM_ASYNC
-        );
-
-        if (err < 0) {
-            log_err("Cannot open PCM device: %s", snd_strerror(err));
-            return res::error;
-        }
-        
-        return res::success;
-    }
-
-    res aud_end() {
-        aud_drop();
-        if (!pcm_handle) {
-            return res::error;
-        }
-        int err = snd_pcm_close(pcm_handle);
-        if (err < 0) {
-            log_err("Cannot close pcm: %s", snd_strerror(err));
-            return res::error;
-        }
-
-        return res::success;
-    }
-
-    res aud_drop() {
-        int err = snd_pcm_drop(pcm_handle);
-        if (err < 0) {
-            log_err("Cannot drom frames: %s", snd_strerror(err));
-            return res::error;
-        }
-        stop_player_update = true;
-        return res::success;
-    }
-
-    static res set_params() {
-        if (snd_pcm_hw_free(pcm_handle) < 0) {
-            log_err("Cannot reset pcm congiguration");
-            return res::error;
-        };
-        snd_pcm_hw_params_t *params;
-        snd_pcm_hw_params_alloca(&params);
-	    snd_pcm_hw_params_any(pcm_handle, params);
-        unsigned int rate = audioFile.get_rate();
-
-        int err;
-        if (false
-            || (err = snd_pcm_hw_params_set_access(
-                    pcm_handle, params,
-                    SND_PCM_ACCESS_RW_INTERLEAVED
-                ))
-            || (err = snd_pcm_hw_params_set_format(
-                    pcm_handle,
-                    params,
-                    SND_PCM_FORMAT_S16_LE
-                ))
-            || (err = snd_pcm_hw_params_set_channels(
-                    pcm_handle,
-                    params,
-                    audioFile.get_channels()
-                ))
-            || (err = snd_pcm_hw_params_set_rate_near(
-                    pcm_handle,
-                    params,
-                    &rate,
-                    0
-                ))
-            || (err = snd_pcm_hw_params(
-                    pcm_handle,
-                    params
-                ))
-        ) {
-            log_err(
-                "Cannot set harware parameters. %s",
-                snd_strerror(err)
-            );
-            return res::error;
-        }
-
-        if ((err = snd_pcm_hw_params_get_period_size(
-                params,
-                &frames,
-                0
-            )) < 0
-        ) {
-            log_err(
-                "The configuration space does not contain a single"
-                                                            "value: %s",
-                snd_strerror(err)
-            );
-            return res::error;
-        }
-
-        return res::success;
-    }
-
-    res aud_load(const char *path) {
-        if (audioFile.init(path)) {
-            log_err("Cannot init audioFile");
-            return res::error;
-        }
-        if (set_params()) {
-            log_err("Cannot set params");
-            audioFile.dstr();
-            return res::error;
-        }
-
-        return res::success;
-    }
-
-    void player_update() {
-        log_step("Start player_update()");
-        size_t buff_size = frames*audioFile.get_channels()*2;
-        char* buff = (char*) malloc(buff_size); // DEV (molloc -> new)
-        while (true) {
-            size_t retcount = 0;
-            res err = audioFile.read_file(buff, buff_size, retcount);
-            if (err) {
-                log_err("Cannot read audioFile");
-            }
-            if (stop_player_update) {
-                stop_player_update = !stop_player_update;
-                break;
-            }
-            if (retcount == 0) {
-                break;
-            }
-
-            int pret = snd_pcm_writei(pcm_handle, buff, frames);
-            std::cout << "wri" << std::endl;
-            if (pret == -EBADFD) {
-                log_err(
-                    "Cannot write to PCM device. %s",
-                    snd_strerror(pret)
-                );
-            }
-
-            if (pret == -EPIPE) {
-                snd_pcm_prepare(pcm_handle);
-            }
-        }
-
-        free(buff);
-        log_step("End player_update()");
-    }
-
-    res aud_run() {
-        std::thread th(player_update);
-        th.detach();
-        return res::success;
-    }
-
-    res aud_play_stop() {
-        snd_pcm_pause(pcm_handle, is_playing);
-        is_playing = !is_playing;
-        return res::success;
-    }
-
 }
