@@ -181,8 +181,7 @@ namespace had {
             drop();
             return res_code::other_error;
         }
-std::cout << "samples " << audio_file.get_samples() << std::endl;
-std::cout << "rate " << audio_file.get_rate() << std::endl;
+        
         int err = pw_stream_connect(data.stream,
                           PW_DIRECTION_OUTPUT,
                           PW_ID_ANY,

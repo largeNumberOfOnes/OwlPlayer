@@ -5,24 +5,45 @@
 #include <vector>
 #include <queue>
 
+#include "had/had.h"
+
 class Event {
+    Event() {}
+    public:
+        enum class EventType {
+            keypress,
+            draw,
+        } type;
 
-};
+        had::Key key;
 
-class Event_KeyPress : public Event {
-    // Key key;
+        static Event create_keypress(had::Key key) {
+            Event e;
+            e.type = EventType::keypress;
+            e.key = key;
+            return e;
+        }
+        static Event create_draw() {
+            Event e;
+            e.type = EventType::draw;
+            return e;
+        }
 };
 
 class EventQueue {
-    private:
-        std::queue<std::unique_ptr<Event>> events;
-        std::vector<std::pair<
-            std::function<bool(const Event&)>,
-            std::vector<std::function<void(const Event&)>>
-        >> observers;
+    std::queue<std::unique_ptr<Event>> events;
+    std::vector<std::pair<
+        std::function<bool(const Event&)>,
+        std::function<void(const Event&)>
+    >> observers;
 
     public:
         void push_event(Event&& event);
         void pop_event();
+        bool empty() const;
+        void add_oserver(
+            std::function<bool(const Event&)> comp,
+            std::function<void(const Event&)> observer
+        );
 
 };

@@ -14,20 +14,30 @@ LIBS := -lsndfile -lmpg123 -lasound -lncursesw \
 get_libs_list:
 	@echo $(LIBS)
 
-build:
-	mkdir had_tmp
-	$(CC) $(FLAGS) -c had.cpp -o had_tmp/had.o \
-		&& $(CC) $(FLAGS) -c audioFile.cpp -o had_tmp/audioFile.o \
-		&& $(LD) -r had_tmp/had.o had_tmp/audioFile.o \
-										-o $(BUILD_DIR)/$(OUTPUT_NAME) \
-		&& rm -r had_tmp \
-		|| (rm -r had_tmp && false)
+SOURCE = $(shell ls | grep cpp | grep -v test)
+get_source_files:
+	@echo $(SOURCE)
 
-test_had:
-	$(CC) $(FLAGS) had.cpp audioFile.cpp had.test.cpp $(LIBS) -o test_had.out
+# build:
+# 	mkdir had_tmp
+# 	$(CC) $(FLAGS) -c had.cpp -o had_tmp/had.o \
+# 		&& $(CC) $(FLAGS) -c audioFile.cpp -o had_tmp/audioFile.o \
+# 		&& $(LD) -r had_tmp/had.o had_tmp/audioFile.o \
+# 										-o $(BUILD_DIR)/$(OUTPUT_NAME) \
+# 		&& rm -r had_tmp \
+# 		|| (rm -r had_tmp && false)
 
-test_had:
-	$(CC) $(FLAGS) audioFile.cpp audioFile.test.cpp $(LIBS) -o test_audioFile.out
+# test_had:
+# 	$(CC) $(FLAGS) had.cpp audioFile.cpp had.test.cpp $(LIBS) -o test_had.out
+
+# test_had:
+# 	$(CC) $(FLAGS) audioFile.cpp audioFile.test.cpp $(LIBS) -o test_audioFile.out
+
+
+SOURCE = $(shell ls | grep cpp | grep -v test)
+comp:
+	echo $(SOURCE)
+	cd src; $(CC) $(DFLAGS) $(SOURCE) $(LIBS) -o ../execs/output.out
 
 
 # Tests
