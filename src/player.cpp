@@ -57,7 +57,9 @@ had::Res Player::draw_volume() {
     // <--p1-->        <-p2>
     //         <---h-->
     // <-----------w----------->
-    had::Dem w = drawer.get_width();
+    had::Dem x = grid.vol_x;
+    had::Dem y = grid.vol_y;
+    had::Dem w = grid.vol_w;
     had::Dem const p1 = 4;
     had::Dem const p2 = 1;
     had::Dem h = w - p1 - p2 - 4;
@@ -81,10 +83,10 @@ had::Res Player::draw_volume() {
     if (slider_pos >= h) slider_pos = h-1;
 
     if (false
-        || drawer.draw_text(0, 0, "vol ")
-        || drawer.draw_slider(p1, 0, h, slider_pos)
-        || drawer.draw_text(p1 + h, 0, " ")
-        || drawer.draw_text(p1 + h + p2, 0, str_vol)
+        || drawer.draw_text(x, y, "vol ")
+        || drawer.draw_slider(x + p1, y, h, slider_pos)
+        || drawer.draw_text(x + p1 + h, y, " ")
+        || drawer.draw_text(x + p1 + h + p2, y, str_vol)
     ) {
         log.log_err("Cannot draw volume");
         return had::Res::error;
@@ -104,7 +106,9 @@ had::Res Player::draw_timeline() {
     // <--p1-->        <-p2>     <-p3->
     //         <---h-->
     // <-----------w------------------------->
-    had::Dem w = drawer.get_width();
+    had::Dem x = grid.tim_x;
+    had::Dem y = grid.tim_y;
+    had::Dem w = grid.tim_w;
     had::Dem const p1 = 5 + 1;
     had::Dem const p2 = 1;
     had::Dem const p3 = 4;
@@ -121,10 +125,10 @@ had::Res Player::draw_timeline() {
     had::seconds duration = 0;
     had::seconds slider_pos =  (duration) ? ((h-1)*cur_time/duration) : 0;
     if (false
-        || drawer.draw_text(0, 0, format_time(cur_time).c_str())
-        || drawer.draw_slider(p1, 0, h, slider_pos)
-        || drawer.draw_text(p1 + h + p2, 0, format_time(duration).c_str())
-        || drawer.draw_text(p1 + h + p2 + 5 + p3, 0, "<  &  >")
+        || drawer.draw_text(x, y, format_time(cur_time).c_str())
+        || drawer.draw_slider(x + p1, y, h, slider_pos)
+        || drawer.draw_text(x + p1 + h + p2, y, format_time(duration).c_str())
+        || drawer.draw_text(x + p1 + h + p2 + 5 + p3, y, "<  &  >")
     ) {
         log.log_err("Cannot draw timeline");
         return had::Res::error;
@@ -140,7 +144,7 @@ had::Res Player::draw() {
         log.log_err("Not enought space to draw player");
         return had::Res::error;
     }
-    
+
     if (calc_grid()) {
         log.log_err("Cannot calc grid");
         return had::Res::error;

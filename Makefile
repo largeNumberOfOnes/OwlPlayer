@@ -28,3 +28,6 @@ car: comp
 tetd:
 	$(CC) src/eventQueue.cpp src/eventQueue.test.cpp src/eventQueue.hpp
 	./a.out
+
+lint:
+	cpplint src/*

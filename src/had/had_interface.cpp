@@ -1,13 +1,12 @@
-
-
-
-
 #include "had_interface.h"
+
 #include <curses.h>
+#include <locale.h>
 
 
 namespace had {
     Interface::Interface() {
+        setlocale(LC_ALL, "");
         initscr();
         start_color();
         noecho();
@@ -74,6 +73,16 @@ namespace had {
             return Res::error;
     }
 
+    Res Drawer::draw_wide_symbol(Dem x, Dem y, wchar_t ch) {
+        cchar_t cch;
+        wchar_t ch_arr[2] = {ch, '\0'};
+        setcchar(&cch, ch_arr, WA_NORMAL, 0, NULL);
+        if (mvadd_wch(this->y + y, this->x + x, &cch) == OK)
+            return Res::success;
+        else
+            return Res::error;
+    }
+
     Res Drawer::draw_text(Dem x, Dem y, std::string str) {
         if (mvprintw(this->y + y, this->x + x, "%s", str.c_str()) == OK)
             return Res::success;
@@ -82,9 +91,16 @@ namespace had {
     }
 
     Res Drawer::draw_slider(Dem x, Dem y, Dem len, Dem val) {
-        std::string slider(len, '-');
-        slider[val] = '0';
-        mvprintw(this->y + y, this->x + x, "%s", slider.c_str());
+        // std::string slider(len, '-');
+        // slider[val] = '0';
+        // mvprintw(this->y + y, this->x + x, "%s", slider.c_str());
+        for (int q = 0; q < len; ++q) {
+            if (q == val) {
+                draw_wide_symbol(x + q, y, L'■');
+            } else {
+                draw_wide_symbol(x + q, y, L'─');
+            }
+        }
         return Res::success;
     }
 

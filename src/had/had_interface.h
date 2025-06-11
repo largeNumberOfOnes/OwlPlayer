@@ -47,6 +47,7 @@ namespace had {
 
             Res set_color(Color& color);
             Res draw_symbol(Dem x, Dem y, char ch);
+            Res draw_wide_symbol(Dem x, Dem y, wchar_t ch);
             Res draw_text(Dem x, Dem y, std::string str);
             Res draw_slider(Dem x, Dem y, Dem len, Dem val);
             Res cls();

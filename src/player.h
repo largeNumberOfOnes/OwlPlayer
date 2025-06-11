@@ -26,7 +26,7 @@ class Player {
 
     had::Res draw_volume();
     had::Res draw_timeline();
-    
+
     public:
         Player(had::Drawer& drawer, const had::Logger& log);
 
