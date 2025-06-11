@@ -5,11 +5,11 @@
 
 
 namespace had {
-    using dem     = int;
+    using Dem     = int;
     using seconds = int;
-    using volume  = int;
+    using Volume  = int;
 
-    enum res {
+    enum Res {
         success = 0,
         error   = 1,
     };

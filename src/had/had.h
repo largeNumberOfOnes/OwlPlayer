@@ -8,6 +8,9 @@
 
 
 #include "had_keys.h"
+#include "had_types.h"
+#include "had_audio.h"
+#include "had_logger.h"
 #include "had_interface.h"
 
 

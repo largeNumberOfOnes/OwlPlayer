@@ -23,8 +23,8 @@ namespace had {
 
         const Logger& log;
 
-        res read_wav(char const* path);
-        res read_mp3(char const* path);
+        Res read_wav(char const* path);
+        Res read_mp3(char const* path);
 
         public:
             enum class res_code {

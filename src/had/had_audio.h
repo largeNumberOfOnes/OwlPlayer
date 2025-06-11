@@ -10,11 +10,12 @@
 #include <string>
 
 namespace had {
-
     class Audio {
-
         AudioFile audio_file;
         mutable std::mutex mutex;
+
+        Volume vol = 100;
+        
         struct Data_pw {
             pw_thread_loop* loop;
             pw_stream*      stream;
@@ -32,7 +33,7 @@ namespace had {
             int samples;
         };
 
-        res set_params(const AudioProperties& props);
+        Res set_params(const AudioProperties& props);
 
         bool is_stream_connected = false;
         enum class State {
@@ -42,6 +43,7 @@ namespace had {
         } state;
 
         std::size_t pos_to_byte(seconds pos);
+        Res set_volume_unsafe();
 
         public:
             enum class res_code {
@@ -50,7 +52,7 @@ namespace had {
                 other_error,
             };
 
-            Audio(res& result, const Logger& log);
+            Audio(Res& result, const Logger& log);
             ~Audio();
 
             res_code load(std::string path);
@@ -58,14 +60,9 @@ namespace had {
             res_code stop();
             res_code play();
 
-            res_code set_volume(volume vol);
+            res_code set_volume(Volume vol);
+            Volume get_volume();
             res_code jump(seconds pos);
             res_code jump_rel(seconds pos_rel);
     };
-
-    // res aud_set_volume(volume vol);
-    // volume aud_get_volume();
-    // res aud_set_cur_pos(seconds pos);
-    // seconds aud_get_cur_pos();
-    // seconds aud_get_duration();
 };

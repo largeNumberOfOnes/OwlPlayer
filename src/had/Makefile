@@ -14,7 +14,7 @@ LIBS := -lsndfile -lmpg123 -lasound -lncursesw \
 get_libs_list:
 	@echo $(LIBS)
 
-SOURCE = $(shell ls | grep cpp | grep -v test)
+SOURCE = $(shell ls | grep cpp | grep -v test | sed "s/^/had\//")
 get_source_files:
 	@echo $(SOURCE)
 
@@ -34,7 +34,7 @@ get_source_files:
 # 	$(CC) $(FLAGS) audioFile.cpp audioFile.test.cpp $(LIBS) -o test_audioFile.out
 
 
-SOURCE = $(shell ls | grep cpp | grep -v test)
+# SOURCE = $(shell ls | grep cpp | grep -v test)
 comp:
 	echo $(SOURCE)
 	cd src; $(CC) $(DFLAGS) $(SOURCE) $(LIBS) -o ../execs/output.out

@@ -19,7 +19,11 @@ SOURCE = $(shell ls src | grep cpp | grep -v test)
 HAD_SOURCE = $(shell make -s -C src/had get_source_files)
 HAD_LIBS = $(shell make -s -C src/had get_libs_list)
 comp:
-	cd src; $(CC) $(DFLAGS) $(SOURCE) $(HAD_SOURCE) $(LIBS) -o ../execs/output.out
+	echo $(HAD_SOURCE)
+	cd src; $(CC) $(DFLAGS) $(SOURCE) $(HAD_SOURCE) $(HAD_LIBS) -o ../execs/output.out
+
+car: comp
+	alacritty -e ./execs/output.out &
 
 tetd:
 	$(CC) src/eventQueue.cpp src/eventQueue.test.cpp src/eventQueue.hpp

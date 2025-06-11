@@ -10,6 +10,7 @@
 
 #include "pipewire/pipewire.h"
 #include "spa/param/audio/raw.h"
+#include <cmath>
 #include <cstddef>
 #include <curses.h>
 #include <spa/param/audio/format-utils.h>
@@ -19,7 +20,7 @@
 
 namespace had {
 
-    Audio::Audio(res& result, const Logger& log)
+    Audio::Audio(Res& result, const Logger& log)
         : audio_file(log)
     {
         data.audio_file = &audio_file;
@@ -80,7 +81,7 @@ namespace had {
         pw_thread_loop_start(data.loop);
 
         on_error:
-            result = res::error;
+            result = Res::error;
             // pass
     }
 
@@ -95,11 +96,11 @@ namespace had {
         pw_deinit();
     }
 
-    res Audio::set_params(const AudioProperties& props) {
+    Res Audio::set_params(const AudioProperties& props) {
         if (is_stream_connected) {
             pw_stream_disconnect(data.stream);
         }
-        return res::success;
+        return Res::success;
     }
 
     void Audio::on_process(void* userdata) {
@@ -199,6 +200,8 @@ namespace had {
         pw_stream_set_active(data.stream, false);
         state = State::stop;
 
+        set_volume_unsafe();
+
         pw_thread_loop_unlock(data.loop);
         
         return res_code::success;
@@ -230,9 +233,7 @@ namespace had {
         return res_code::success;
     }
 
-    Audio::res_code Audio::set_volume(volume vol) {
-        std::lock_guard<std::mutex> lock{mutex};
-        pw_thread_loop_lock(data.loop);
+    Res Audio::set_volume_unsafe() {
         std::size_t channels = audio_file.get_channels();
         float* volumes = new float[channels];
         for (long q = 0; q < channels; q++) {
@@ -246,8 +247,21 @@ namespace had {
             0
         );
         delete[] volumes;
+        return Res::success;
+    }
+
+    Audio::res_code Audio::set_volume(Volume vol) {
+        std::lock_guard<std::mutex> lock{mutex};
+        pw_thread_loop_lock(data.loop);
+        this->vol = vol;
+        Res res = set_volume_unsafe();
         pw_thread_loop_unlock(data.loop);
-        return res_code::success;
+        return (res == Res::success) ? res_code::success
+                                                : res_code::other_error;
+    }
+
+    Volume Audio::get_volume() {
+        return vol;
     }
 
     std::size_t Audio::pos_to_byte(seconds pos) {
@@ -285,9 +299,17 @@ namespace had {
         std::lock_guard<std::mutex> lock{mutex};
         pw_thread_loop_lock(data.loop);
         pw_stream_flush(data.stream, false);
-        std::size_t samples_pos = pos_to_byte(pos_rel);
-        samples_pos = audio_file.get_cur_pos() + samples_pos;
-        samples_pos = std::max(0lu, samples_pos);
+        bool is_positive = pos_rel > 0;
+        std::size_t samples_pos = pos_to_byte(std::abs(pos_rel));
+        if (is_positive) {
+            samples_pos = audio_file.get_cur_pos() + samples_pos;
+        } else {
+            if (audio_file.get_cur_pos() < samples_pos) {
+                samples_pos = 0;
+            } else {
+                samples_pos = audio_file.get_cur_pos() - samples_pos;
+            }
+        }
         samples_pos = std::min(
             samples_pos,
             audio_file.get_max_pos()

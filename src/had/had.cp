@@ -1,13 +1,7 @@
 #include <cstddef>
 #include <cstdlib>
-#include "audioFile.h"
-#include "../glob_types.h"
 #include "had.h"
 #include "ncurses.h"
-#include "pipewire/core.h"
-#include "pipewire/port.h"
-#include "pipewire/stream.h"
-#include "pipewire/thread-loop.h"
 #include <cmath>
 #include <curses.h>
 #include <fcntl.h>

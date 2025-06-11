@@ -18,7 +18,7 @@
 static char const* file_path_pcm = "/tmp/audplay_77777.pcm";
 
 namespace had {
-    res AudioFile::read_mp3(char const* path) {
+    Res AudioFile::read_mp3(char const* path) {
         log.log_info("Loading mp3 file");
 
         mpg123_handle *mh = nullptr;
@@ -29,7 +29,7 @@ namespace had {
         long int lrate = 0;
         int err = -1;
         int encoding = 0;
-        res ret = res::success;
+        Res ret = Res::success;
 
         if (mpg123_init() != MPG123_OK) {
             goto label_error;
@@ -79,7 +79,7 @@ namespace had {
 
         goto label_success;
         label_error:
-            ret = res::error;
+            ret = Res::error;
         label_success:
             if (outfile != nullptr) {
                 fclose(outfile);
@@ -94,13 +94,13 @@ namespace had {
             return ret;
     }
 
-    res AudioFile::read_wav(char const* path) { // Whis is also works for mp3 files...
+    Res AudioFile::read_wav(char const* path) { // Whis is also works for mp3 files...
         log.log_info("Loading wav file");
 
         SNDFILE *infile = nullptr;
         FILE *outfile = nullptr;
         SF_INFO sfinfo;
-        res ret = res::success;
+        Res ret = Res::success;
 
         constexpr std::size_t buffer_size = 1024;
         // short buffer[buffer_size];
@@ -134,7 +134,7 @@ namespace had {
 
         goto label_success;
         label_error:
-            ret = res::error;
+            ret = Res::error;
         label_success:
             if (infile != nullptr) {
                 sf_close(infile);
@@ -155,21 +155,21 @@ namespace had {
 
         // if (path.length() < 4) {
         //     log.log_err("Cannot init: path has no proper extension");
-        //     return res::error;
+        //     return Res::error;
         // }
         
-        res err;
+        Res err;
         // if (!strncmp(path + len - 4, ".wav", 4)) {
         //     err = read_wav(path);
         // } else if (!strncmp(path + len - 4, ".mp3", 4)) {
         //     err = read_mp3(path);
         // } else {
         //     log.log_err("Unknown file type");
-        //     return res::error;
+        //     return Res::error;
         // }
         // err = read_wav(path.c_str());
         err = read_mp3(path.c_str());
-        if (err == res::error) {
+        if (err == Res::error) {
             log.log_err("Cannot conver file to pcm");
             return res_code::other_error;
         }
