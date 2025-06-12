@@ -1,6 +1,6 @@
 
 CC := clang++-14
-DFLAGS := -g
+DFLAGS := -g -std=c++20
 
 FLAGS = $(DFLAGS)
 

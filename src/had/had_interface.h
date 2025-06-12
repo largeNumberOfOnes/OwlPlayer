@@ -3,21 +3,24 @@
 
 #pragma once
 
+#include "had_keys.h"
 #include "had_logger.h"
 #include "had_types.h"
 #include <curses.h>
 
 
 namespace had {
-
+    class Interface;
     class Color {
-
+        int color;
+        friend Interface;
     };
 
     class Interface {
+        const Logger& log;
 
         public:
-            Interface();
+            Interface(const Logger& log);
             ~Interface();
 
             Dem get_width();
@@ -25,6 +28,21 @@ namespace had {
 
             Res update();
             Res cls();
+
+            Res create_color(
+                Color col,
+                int tr, int tg, int tb,
+                int br, int bg, int bb
+            );
+            Res change_color(Color col, bool cb, int r, int g, int b);
+            Res set_color(Color col);
+            
+            KeySequence catch_key_seq();
+    };
+
+    enum class SpSymbol {
+        list_symbol,
+        list_end_symbol,
     };
 
     class Drawer {
@@ -48,9 +66,12 @@ namespace had {
             Res set_color(Color& color);
             Res draw_symbol(Dem x, Dem y, char ch);
             Res draw_wide_symbol(Dem x, Dem y, wchar_t ch);
+            Res draw_sp_symbol(Dem x, Dem y, SpSymbol ch);
             Res draw_text(Dem x, Dem y, std::string str);
             Res draw_slider(Dem x, Dem y, Dem len, Dem val);
             Res cls();
+
+            Res set_color(Color col);
 
             Dem get_width();
             Dem get_heigth();
