@@ -34,21 +34,23 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
         [&](const Event& event) -> void {
             manager.resize(manager_drawer.get_heigth());
             manager.reload();
-            manager.draw();
+            // manager.draw();
         }
     );
 }
 
 App::Circle_res App::circle() {
     player_drawer.set(
-        // 0, interface.get_height() - player.get_height(),
-        0, 10,
+        0, interface.get_height() - player.get_height(),
+        // 0, 10,
         interface.get_width(), player.get_height()
     );
-    // manager_drawer.set(
-    //     0, 0,
-    //     interface.get_width(), interface.get_height() - player.get_height()
-    // );
+    manager_drawer.set(
+        0, 0,
+        // interface.get_width(), interface.get_height() - player.get_height()
+        interface.get_width(), 10
+    );
+    interface.set_color(setup.colors.def);
 
     interface.cls();
 

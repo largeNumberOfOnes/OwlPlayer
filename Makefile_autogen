@@ -1,6 +1,4 @@
-# THIS FILE IS AUTOGEN!!!
-
-objects/app.o: src/app.cpp src/app.h src/had/had.h src/had/had_keys.h \
+app.o: src/app.cpp src/app.h src/had/had.h src/had/had_keys.h \
   src/had/had_types.h src/had/had_audio.h src/had/audioFile.h \
   src/had/had_logger.h /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
@@ -58,12 +56,12 @@ objects/app.o: src/app.cpp src/app.h src/had/had.h src/had/had_keys.h \
   /usr/include/pipewire-0.3/pipewire/type.h \
   /usr/include/pipewire-0.3/pipewire/version.h src/had/had_interface.h \
   src/fileManager.h src/setup.h src/eventQueue.h src/player.h
-	clang++-14 -g -std=c++20 -c src/app.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/app.o
+	clang++-14 -g -std=c++20 src/app.cpp -c objects/app.o
 
-objects/config.o: src/config.cpp src/config.h
-	clang++-14 -g -std=c++20 -c src/config.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/config.o
+config.o: src/config.cpp src/config.h
+	clang++-14 -g -std=c++20 src/config.cpp -c objects/config.o
 
-objects/eventQueue.o: src/eventQueue.cpp src/eventQueue.h src/had/had.h \
+eventQueue.o: src/eventQueue.cpp src/eventQueue.h src/had/had.h \
   src/had/had_keys.h src/had/had_types.h src/had/had_audio.h \
   src/had/audioFile.h src/had/had_logger.h \
   /usr/include/pipewire-0.3/pipewire/pipewire.h \
@@ -121,9 +119,9 @@ objects/eventQueue.o: src/eventQueue.cpp src/eventQueue.h src/had/had.h \
   /usr/include/spa-0.2/spa/support/thread.h \
   /usr/include/pipewire-0.3/pipewire/type.h \
   /usr/include/pipewire-0.3/pipewire/version.h src/had/had_interface.h
-	clang++-14 -g -std=c++20 -c src/eventQueue.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/eventQueue.o
+	clang++-14 -g -std=c++20 src/eventQueue.cpp -c objects/eventQueue.o
 
-objects/fileManager.o: src/fileManager.cpp src/fileManager.h src/had/had.h \
+fileManager.o: src/fileManager.cpp src/fileManager.h src/had/had.h \
   src/had/had_keys.h src/had/had_types.h src/had/had_audio.h \
   src/had/audioFile.h src/had/had_logger.h \
   /usr/include/pipewire-0.3/pipewire/pipewire.h \
@@ -182,9 +180,9 @@ objects/fileManager.o: src/fileManager.cpp src/fileManager.h src/had/had.h \
   /usr/include/pipewire-0.3/pipewire/type.h \
   /usr/include/pipewire-0.3/pipewire/version.h src/had/had_interface.h \
   src/setup.h
-	clang++-14 -g -std=c++20 -c src/fileManager.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/fileManager.o
+	clang++-14 -g -std=c++20 src/fileManager.cpp -c objects/fileManager.o
 
-objects/main.o: src/main.cpp src/had/had.h src/had/had_keys.h src/had/had_types.h \
+main.o: src/main.cpp src/had/had.h src/had/had_keys.h src/had/had_types.h \
   src/had/had_audio.h src/had/audioFile.h src/had/had_logger.h \
   /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
@@ -242,9 +240,9 @@ objects/main.o: src/main.cpp src/had/had.h src/had/had_keys.h src/had/had_types.
   /usr/include/pipewire-0.3/pipewire/type.h \
   /usr/include/pipewire-0.3/pipewire/version.h src/had/had_interface.h \
   src/setup.h src/app.h src/fileManager.h src/eventQueue.h src/player.h
-	clang++-14 -g -std=c++20 -c src/main.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/main.o
+	clang++-14 -g -std=c++20 src/main.cpp -c objects/main.o
 
-objects/player.o: src/player.cpp src/player.h src/had/had.h src/had/had_keys.h \
+player.o: src/player.cpp src/player.h src/had/had.h src/had/had_keys.h \
   src/had/had_types.h src/had/had_audio.h src/had/audioFile.h \
   src/had/had_logger.h /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
@@ -301,9 +299,9 @@ objects/player.o: src/player.cpp src/player.h src/had/had.h src/had/had_keys.h \
   /usr/include/spa-0.2/spa/support/thread.h \
   /usr/include/pipewire-0.3/pipewire/type.h \
   /usr/include/pipewire-0.3/pipewire/version.h src/had/had_interface.h
-	clang++-14 -g -std=c++20 -c src/player.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/player.o
+	clang++-14 -g -std=c++20 src/player.cpp -c objects/player.o
 
-objects/setup.o: src/setup.cpp src/setup.h src/had/had.h src/had/had_keys.h \
+setup.o: src/setup.cpp src/setup.h src/had/had.h src/had/had_keys.h \
   src/had/had_types.h src/had/had_audio.h src/had/audioFile.h \
   src/had/had_logger.h /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
@@ -360,13 +358,13 @@ objects/setup.o: src/setup.cpp src/setup.h src/had/had.h src/had/had_keys.h \
   /usr/include/spa-0.2/spa/support/thread.h \
   /usr/include/pipewire-0.3/pipewire/type.h \
   /usr/include/pipewire-0.3/pipewire/version.h src/had/had_interface.h
-	clang++-14 -g -std=c++20 -c src/setup.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/setup.o
+	clang++-14 -g -std=c++20 src/setup.cpp -c objects/setup.o
 
-objects/audioFile.o: src/had/audioFile.cpp src/had/audioFile.h \
+audioFile.o: src/had/audioFile.cpp src/had/audioFile.h \
   src/had/had_logger.h src/had/had_types.h
-	clang++-14 -g -std=c++20 -c src/had/audioFile.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/audioFile.o
+	clang++-14 -g -std=c++20 src/had/audioFile.cpp -c objects/had/audioFile.o
 
-objects/had_audio.o: src/had/had_audio.cpp src/had/audioFile.h \
+had_audio.o: src/had/had_audio.cpp src/had/audioFile.h \
   src/had/had_logger.h src/had/had_types.h src/had/had_audio.h \
   /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
@@ -458,18 +456,16 @@ objects/had_audio.o: src/had/had_audio.cpp src/had/audioFile.h \
   /usr/include/spa-0.2/spa/param/audio/flac-utils.h \
   /usr/include/spa-0.2/spa/param/audio/ape-utils.h \
   /usr/include/spa-0.2/spa/param/props.h
-	clang++-14 -g -std=c++20 -c src/had/had_audio.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/had_audio.o
+	clang++-14 -g -std=c++20 src/had/had_audio.cpp -c objects/had/had_audio.o
 
-objects/had_interface.o: src/had/had_interface.cpp src/had/had_interface.h \
+had_interface.o: src/had/had_interface.cpp src/had/had_interface.h \
   src/had/had_keys.h src/had/had_logger.h src/had/had_types.h
-	clang++-14 -g -std=c++20 -c src/had/had_interface.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/had_interface.o
+	clang++-14 -g -std=c++20 src/had/had_interface.cpp -c objects/had/had_interface.o
 
 
-comp: objects/app.o objects/config.o objects/eventQueue.o objects/fileManager.o objects/main.o objects/player.o objects/setup.o objects/audioFile.o objects/had_audio.o objects/had_interface.o
-	clang++-14 objects/app.o objects/config.o objects/eventQueue.o objects/fileManager.o objects/main.o objects/player.o objects/setup.o objects/audioFile.o objects/had_audio.o objects/had_interface.o -lsndfile -lmpg123 -lasound -lncursesw -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -lpipewire-0.3 -o execs/output.out
+comp: objects/app.o objects/config.o objects/eventQueue.o objects/fileManager.o objects/main.o objects/player.o objects/setup.o objects/had/audioFile.o objects/had/had_audio.o objects/had/had_interface.o
+	clang++-14 objects/app.o objects/config.o objects/eventQueue.o objects/fileManager.o objects/main.o objects/player.o objects/setup.o objects/had/audioFile.o objects/had/had_audio.o objects/had/had_interface.o -o execs/output.out
 
-run:
+run: comp
 	alacritty -e execs/output.out
-
-car: comp run
 

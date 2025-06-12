@@ -4,6 +4,8 @@
 
 #include <curses.h>
 #include <locale.h>
+#include <assert.h>
+
 
 
 namespace had {
@@ -18,6 +20,8 @@ namespace had {
         // raw();
         curs_set(0);
         keypad(stdscr, true);
+        assert(can_change_color());
+
     }
 
     Interface::~Interface() {
@@ -50,9 +54,9 @@ namespace had {
         }
     }
 
-    static int color_count = 1;
+    static int color_count = 2;
     Res Interface::create_color(
-        Color col,
+        Color& col,
         int tr, int tg, int tb,
         int br, int bg, int bb
     ) {
@@ -61,15 +65,15 @@ namespace had {
             return Res::error;
         }
         int ret1 = init_color(
-            2 * color_count + 1, tr*1000/256, tg*1000/256, tb*1000/256
+            2 * color_count, tr*1000/256, tg*1000/256, tb*1000/256
         );
         int ret2 = init_color(
-            2 * color_count, br*1000/256, bg*1000/256, bb*1000/256
+            2 * color_count + 1, br*1000/256, bg*1000/256, bb*1000/256
         );
         int ret3 = init_pair(
             color_count,
             2 * color_count,
-            2 * color_count + 2
+            2 * color_count + 1
         );
 
         if (ret1 == OK && ret2 == OK && ret3 == OK) {
@@ -80,9 +84,9 @@ namespace had {
         }
     }
 
-    // If 'cb' is set to 'true' the the 'text color' will be changed,
+    // If 'cb' is set to 'false' the the 'text color' will be changed,
     //                                       'background color' otherwise.
-    Res Interface::change_color(Color col, bool cb, int r, int g, int b) {
+    Res Interface::change_color(Color& col, bool cb, int r, int g, int b) {
         int ret = init_color(
             2 * col.color + cb, r*1000/256, g*1000/256, b*1000/256
         );
@@ -93,13 +97,37 @@ namespace had {
         }
     }
 
-    Res Interface::set_color(Color col) {
-        int ret = attron(COLOR_PAIR(col.color)) == OK;
+    Res Interface::set_color(const Color& col) {
+        int ret = attron(COLOR_PAIR(col.color));
         if (ret == OK) {
             return Res::success;
         } else {
             return Res::error;
         }
+    }
+
+    Res Interface::get_defult_color(Color& col) {
+        int ret1 = init_color(0, 1000, 1000, 1000);
+        int ret2 = init_pair(1, 0, COLOR_BLACK);
+        col.color = 1;
+        return Res::success;
+    }
+
+    Res Interface::get_color_comp(
+        const Color& col,
+        short& tr, short& tg, short& tb,
+        short& br, short& bg, short& bb
+    ) {
+        // int ret1 = color_content(2 * col.color    , &tr, &tg, &tb);
+        int ret1 = OK;
+        int ret2 = color_content(2 * col.color + 1, &br, &bg, &bb);
+        tr = 255;
+        tg = 255;
+        tb = 255;
+        br *= 256/1000;
+        bg *= 256/1000;
+        bb *= 256/1000;
+        return (ret1 == OK && ret2 == OK) ? Res::success : Res::error;
     }
 
     KeySequence pre_catch_key_seq(int ch) {
@@ -183,9 +211,6 @@ namespace had {
     }
 
     Res Drawer::draw_slider(Dem x, Dem y, Dem len, Dem val) {
-        // std::string slider(len, '-');
-        // slider[val] = '0';
-        // mvprintw(this->y + y, this->x + x, "%s", slider.c_str());
         for (int q = 0; q < len; ++q) {
             if (q == val) {
                 draw_wide_symbol(x + q, y, L'■');

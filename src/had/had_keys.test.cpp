@@ -34,7 +34,6 @@ int main() {
             cls_str += ' ';
         }
 
-
         drawer.draw_text(0, 0, cls_str);
         drawer.draw_text(0, 1, cls_str);
         drawer.draw_text(0, 0, "cur key seq: "  + seq_str);

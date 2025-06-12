@@ -11,8 +11,13 @@ OUTPUT_NAME := had.o
 LIBS := -lsndfile -lmpg123 -lasound -lncursesw \
 		 $(shell pkg-config --cflags --libs libpipewire-0.3)
 
+INCLUDES := $(shell pkg-config --cflags libpipewire-0.3)
+
 get_libs_list:
 	@echo $(LIBS)
+
+get_include_list:
+	@echo $(INCLUDES)
 
 SOURCE = $(shell ls | grep cpp | grep -v test | sed "s/^/had\//")
 get_source_files:

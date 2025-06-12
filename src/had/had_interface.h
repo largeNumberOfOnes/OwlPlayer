@@ -30,12 +30,18 @@ namespace had {
             Res cls();
 
             Res create_color(
-                Color col,
+                Color& col,
                 int tr, int tg, int tb,
                 int br, int bg, int bb
             );
-            Res change_color(Color col, bool cb, int r, int g, int b);
-            Res set_color(Color col);
+            Res change_color(Color& col, bool cb, int r, int g, int b);
+            Res set_color(const Color& col);
+            Res get_defult_color(Color& col);
+            Res get_color_comp(
+                const Color& col,
+                short& tr, short& tg, short& tb,
+                short& br, short& bg, short& bb
+            );
             
             KeySequence catch_key_seq();
     };
