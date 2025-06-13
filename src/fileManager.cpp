@@ -110,6 +110,21 @@ had::Res FileManager::reload() {
         list.push_back(entry);
     }
 
+    std::sort(
+        list.begin(), list.end(),
+        [](auto a, auto b) {
+            if (a.is_directory() and b.is_directory()
+                || a.is_regular_file() and b.is_regular_file()
+            ) {
+                return a.path() < b.path();
+            } else if (a.is_directory()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    );
+
     list_size = list.size();
     if (list_size == 0) {
         top = 0;

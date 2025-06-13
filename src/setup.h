@@ -11,7 +11,7 @@
 
 class Setup {
 
-    std::string default_file_dir = "/home/dt";
+    std::string default_file_dir = "/home/dt/Desktop/mus";
 
     int fps = 20;
 
