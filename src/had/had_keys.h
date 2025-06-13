@@ -13,14 +13,14 @@ namespace had {
     enum struct Key {
         a, b, c, d, e, f, g, h, i, j, k, l, m,
         n, o, p, q, r, s, t, u, v, w, x, y, z,
-        // arrow_rigth,
-        // arrow_left,
-        // arrow_up,
-        // arrow_down,
+        arrow_rigth,
+        arrow_left,
+        arrow_up,
+        arrow_down,
         space,
     };
-    inline Key char_to_key(int num) { // Only for a, b, ..., z
-        return static_cast<Key>(num - 'a');
+    inline Key char_to_key(char ch) { // Only for a, b, ..., z
+        return static_cast<Key>(ch - 'a');
     }
     inline std::string key_to_str(Key key) {
         int num = static_cast<int>(key);
@@ -77,6 +77,16 @@ namespace had {
 
             bool is_empty() const {
                 return is_empty_val;
+            }
+
+            bool operator==(KeySequence other) {
+                return key      == other.key
+                    && is_alt   == other.is_alt
+                    && is_ctrl  == other.is_ctrl
+                    && is_shift == other.is_shift
+                    ||
+                    is_empty_val && other.is_empty_val
+                ;
             }
     };
 

@@ -43,6 +43,7 @@ class App {
         success,
         exit,
     };
+    bool is_time_to_exit = false;
     Circle_res circle();
 
     public:

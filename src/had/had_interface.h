@@ -45,11 +45,6 @@ namespace had {
             Res change_color(Color& col, bool cb, int r, int g, int b);
             Res set_color(const Color& col);
             Res get_default_color(Color& col);
-            Res get_color_comp(
-                const Color& col,
-                int& tr, int& tg, int& tb,
-                int& br, int& bg, int& bb
-            );
             
             KeySequence catch_key_seq();
 
@@ -86,7 +81,7 @@ namespace had {
             Res draw_slider(Dem x, Dem y, Dem len, Dem val);
             Res cls();
 
-            Res set_color(Color& col);
+            Res set_color(const Color& col);
 
             Dem get_width();
             Dem get_heigth();

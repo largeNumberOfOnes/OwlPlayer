@@ -15,29 +15,9 @@ int main() {
     Setup setup;
 
     had::Interface interface{log};
-    // interface.create_color(setup.colors.def ,          255, 255, 255, 0, 0, 0);
-    // interface.get_defult_color(setup.colors.def);
-    int dtr, dtg, dtb, dbr, dbg, dbb;
-    had::Color def_col;
-    interface.get_default_color(def_col);
-    interface.get_color_comp(def_col, dtr, dtg, dtb, dbr, dbg, dbb);
-    setup.colors.def = def_col;
-    // std::cout
-    //     << dtr << " "
-    //     << dtg << " "
-    //     << dtb << " "
-    //     << dbr << " "
-    //     << dbg << " "
-    //     << dbb << " "
-    //     << std::endl;
-
-    // interface.create_color(setup.colors.def ,          100, 100, 100, dbr, dbg, dbb);
-    // interface.create_color(setup.colors.def ,          dtr, dtg, dtb, dbr, dbg, dbb);
-    // interface.create_color(setup.colors.def ,          dtr, dtg, dtb, 100, 100, 100);
-    // int m = 255;
-    // interface.create_color(setup.colors.def ,          0, 0, 0, m, m, m);
-    interface.create_color(setup.colors.dir ,           21, 118, 230, 0, 0, 0);
-    interface.create_color(setup.colors.file,          240, 240, 240, 0, 0, 0);
+    interface.get_default_color(setup.colors.def);
+    interface.create_text_color(setup.colors.dir ,           21, 118, 230);
+    interface.create_text_color(setup.colors.file,          240, 240, 240);
     interface.create_color(setup.colors.dir_selected,   21, 118, 230, 100, 100, 100);
     interface.create_color(setup.colors.file_selected, 240, 240, 240, 100, 100, 100);
     

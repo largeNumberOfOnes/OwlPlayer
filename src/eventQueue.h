@@ -15,12 +15,12 @@ class Event {
             draw,
         } type;
 
-        had::Key key;
+        had::KeySequence seq = had::KeySequence::create_empty();
 
-        static Event create_keypress(had::Key key) {
+        static Event create_keypress(had::KeySequence seq) {
             Event e;
             e.type = EventType::keypress;
-            e.key = key;
+            e.seq = seq;
             return e;
         }
         static Event create_draw() {
