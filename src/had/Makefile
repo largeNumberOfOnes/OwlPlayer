@@ -59,3 +59,8 @@ test_had_keys:
 	$(CC) $(DFLAGS) had_interface.cpp had_keys.test.cpp \
 		$(LIBS) -o ../../execs/test_had_keys.out
 	alacritty -e ../../execs/test_had_keys.out &
+
+test_had_colors:
+	$(CC) $(DFLAGS) had_interface.cpp had_colors.test.cpp \
+		$(LIBS) -o ../../execs/test_had_colors.out
+	alacritty -e ../../execs/test_had_colors.out &

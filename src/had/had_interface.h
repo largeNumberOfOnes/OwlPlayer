@@ -11,6 +11,8 @@
 
 namespace had {
     class Interface;
+    class Drawer;
+
     class Color {
         int color;
         friend Interface;
@@ -19,9 +21,11 @@ namespace had {
     class Interface {
         const Logger& log;
 
+        Res set_default_color();
         public:
             Interface(const Logger& log);
             ~Interface();
+
 
             Dem get_width();
             Dem get_height();
@@ -34,16 +38,22 @@ namespace had {
                 int tr, int tg, int tb,
                 int br, int bg, int bb
             );
+            Res create_text_color(
+                Color& col,
+                int tr, int tg, int tb
+            );
             Res change_color(Color& col, bool cb, int r, int g, int b);
             Res set_color(const Color& col);
-            Res get_defult_color(Color& col);
+            Res get_default_color(Color& col);
             Res get_color_comp(
                 const Color& col,
-                short& tr, short& tg, short& tb,
-                short& br, short& bg, short& bb
+                int& tr, int& tg, int& tb,
+                int& br, int& bg, int& bb
             );
             
             KeySequence catch_key_seq();
+
+            Drawer produce_drawer();
     };
 
     enum class SpSymbol {
@@ -69,7 +79,6 @@ namespace had {
 
             void set(Dem x, Dem y, Dem w, Dem h);
 
-            Res set_color(Color& color);
             Res draw_symbol(Dem x, Dem y, char ch);
             Res draw_wide_symbol(Dem x, Dem y, wchar_t ch);
             Res draw_sp_symbol(Dem x, Dem y, SpSymbol ch);
@@ -77,7 +86,7 @@ namespace had {
             Res draw_slider(Dem x, Dem y, Dem len, Dem val);
             Res cls();
 
-            Res set_color(Color col);
+            Res set_color(Color& col);
 
             Dem get_width();
             Dem get_heigth();

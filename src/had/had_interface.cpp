@@ -2,7 +2,7 @@
 #include "had_keys.h"
 #include "had_types.h"
 
-#include <curses.h>
+#include <ncurses.h>
 #include <locale.h>
 #include <assert.h>
 
@@ -21,7 +21,9 @@ namespace had {
         curs_set(0);
         keypad(stdscr, true);
         assert(can_change_color());
-
+        // set_default_color();
+        // std::cout << COLORS << std::endl;
+        // std::cout << COLOR_PAIRS << std::endl;
     }
 
     Interface::~Interface() {
@@ -54,7 +56,7 @@ namespace had {
         }
     }
 
-    static int color_count = 2;
+    static int color_count = 7;
     Res Interface::create_color(
         Color& col,
         int tr, int tg, int tb,
@@ -83,6 +85,30 @@ namespace had {
             return Res::error;
         }
     }
+    Res Interface::create_text_color(
+        Color& col,
+        int tr, int tg, int tb
+    ) {
+        if (2*color_count + 1 >= COLORS && color_count >= COLOR_PAIRS) {
+            log.log_err("Too many colors");
+            return Res::error;
+        }
+        int ret1 = init_color(
+            2 * color_count, tr*1000/256, tg*1000/256, tb*1000/256
+        );
+        int ret2 = init_pair(
+            color_count,
+            2 * color_count,
+            COLOR_BLACK
+        );
+
+        if (ret1 == OK && ret2 == OK) {
+            col.color = color_count++;
+            return Res::success;
+        } else {
+            return Res::error;
+        }
+    }
 
     // If 'cb' is set to 'false' the the 'text color' will be changed,
     //                                       'background color' otherwise.
@@ -98,7 +124,12 @@ namespace had {
     }
 
     Res Interface::set_color(const Color& col) {
-        int ret = attron(COLOR_PAIR(col.color));
+        int ret = ERR;
+        if (col.color == 0) {
+            attroff(~0);
+        } else {
+            ret = attron(COLOR_PAIR(col.color));
+        }
         if (ret == OK) {
             return Res::success;
         } else {
@@ -106,24 +137,58 @@ namespace had {
         }
     }
 
-    Res Interface::get_defult_color(Color& col) {
-        int ret1 = init_color(0, 1000, 1000, 1000);
-        int ret2 = init_pair(1, 0, COLOR_BLACK);
-        col.color = 1;
+    Res Interface::set_default_color() {
+        // short f, b;
+        // int ret = pair_content(0, &f, &b);
+        // std::cout << "--> " << f << " " << b << std::endl;
+        // short str, stg, stb, sbr, sbg, sbb;
+        // int ret1 = color_content(f, &str, &stg, &stb);
+        // int ret2 = color_content(b, &sbr, &sbg, &sbb);
+        // std::cout
+        //     << "str: " << str << " " << std::endl
+        //     << "stg: " << stg << " " << std::endl
+        //     << "stb: " << stb << " " << std::endl
+        //     << "sbr: " << sbr << " " << std::endl
+        //     << "sbg: " << sbg << " " << std::endl
+        //     << "sbb: " << sbb << " " << std::endl;
+        // int ret3 = init_color(0, str, stg, stb);
+        // int ret4 = init_color(1, sbr, sbg, sbb);
+        // int ret5 = init_pair(0, 1, 0);
+        return Res::success;
+    }
+
+    Res Interface::get_default_color(Color& col) {
+        // int ret1 = init_color(1, 1000, 1000, 1000);
+        // int ret2 = init_pair(1, 1, COLOR_BLACK);
+        // short f, b;
+        // int ret = pair_content(0, &f, &b);
+        // std::cout << "f " << f << std::endl;
+        // std::cout << "b " << b << std::endl;
+        col.color = 0;
         return Res::success;
     }
 
     Res Interface::get_color_comp(
         const Color& col,
-        short& tr, short& tg, short& tb,
-        short& br, short& bg, short& bb
+        int& tr, int& tg, int& tb,
+        int& br, int& bg, int& bb
     ) {
-        // int ret1 = color_content(2 * col.color    , &tr, &tg, &tb);
-        int ret1 = OK;
-        int ret2 = color_content(2 * col.color + 1, &br, &bg, &bb);
+        short str, stg, stb, sbr, sbg, sbb;
+        // int ret1 = OK;
+        // int ret2 = OK;
+        // int ret2 = color_content(2 * col.color + 1, &br, &bg, &bb);
+        // int ret1 = color_content(2 * col.color + 1, &str, &stg, &stb);
+        // int ret2 = color_content(2 * col.color    , &sbr, &sbg, &sbb);
+        int ret1 = color_content(0, &str, &stg, &stb);
+        int ret2 = color_content(7, &sbr, &sbg, &sbb);
+        tr = str; tg = stg; tb = stb;
+        br = sbr; bg = sbg; bb = sbb;
         tr = 255;
         tg = 255;
         tb = 255;
+        // tr *= 256/1000;
+        // tg *= 256/1000;
+        // tb *= 256/1000;
         br *= 256/1000;
         bg *= 256/1000;
         bb *= 256/1000;
@@ -156,6 +221,10 @@ namespace had {
             return pre_catch_key_seq(getch()).add_alt();
         }
         return pre_catch_key_seq(ch);
+    }
+
+    Drawer Interface::produce_drawer() {
+        return Drawer{*this, 0, 0, get_width(), get_height(), log};
     }
 }
 
@@ -221,7 +290,7 @@ namespace had {
         return Res::success;
     }
 
-    Res Drawer::set_color(Color col) {
+    Res Drawer::set_color(Color& col) {
         return interface.set_color(col);
     }
 
