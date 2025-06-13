@@ -13,8 +13,8 @@
 int main() {
 
 
-    had::res result;
-    had::Audio audio{result, stdlogger};
+    had::Res result;
+    had::Audio audio{result, had::stdlogger};
 
     // audio.load("/home/dt/Documents/audioPlayer/data/alyans_na_zare.mp3");
     // audio.load("/home/dt/Documents/audioPlayer/data/Korn - Lost In The Grandeur.mp3");
@@ -33,6 +33,9 @@ int main() {
     audio.stop();
     // std::this_thread::sleep_for(std::chrono::seconds(5));
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    std::cout << "cur time: " << audio.get_cur_time() << std::endl;
+    std::cout << "duration: " << audio.get_duration() << std::endl;
 
     int tim = 100;
     std::cout << "play" << std::endl;

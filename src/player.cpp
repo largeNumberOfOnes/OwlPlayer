@@ -1,4 +1,5 @@
 #include "player.h"
+#include "had/had.h"
 
 #include <cstring>
 
@@ -119,10 +120,10 @@ had::Res Player::draw_timeline() {
         return had::Res::error;
     }
 
-    // had::seconds cur_time = had::get_cur_time();
-    // had::seconds duration = had::get_duration();
-    had::seconds cur_time = 0;
-    had::seconds duration = 0;
+    // had::seconds cur_time = 0;
+    // had::seconds duration = 0;
+    had::seconds cur_time = audio.get_cur_time();
+    had::seconds duration = audio.get_duration();
     had::seconds slider_pos =  (duration) ? ((h-1)*cur_time/duration) : 0;
     if (false
         || drawer.draw_text(x, y, format_time(cur_time).c_str())
@@ -178,10 +179,29 @@ had::Dem Player::get_height() {
     return min_height;
 }
 
-had::Res stop() {
-    return had::Res::error;
+had::Res Player::load_and_play(std::string path) {
+    if (audio.load(path) == had::Audio::res_code::success
+        && audio.play() == had::Audio::res_code::success
+    ) {
+        return had::Res::success;
+    } else {
+        return had::Res::error;
+    }
 }
 
-had::Res play() {
-    return had::Res::error;
+had::Res Player::play_or_stop() {
+    had::Audio::res_code ret;
+    if (audio.is_playing()) {
+        ret = audio.stop();
+    } else if (audio.is_stoped()) {
+        ret = audio.play();
+    } else {
+        return had::Res::error;
+    }
+
+    if (ret == had::Audio::res_code::success) {
+        return had::Res::success;
+    } else {
+        return had::Res::error;
+    }
 }

@@ -50,10 +50,12 @@ comp:
 test_audioFile:
 	$(CC) $(DFLAGS) audioFile.cpp audioFile.test.cpp $(LIBS) \
 		-o ../../execs/test_audioFile.out
+	../../execs/test_audioFile.out
 
 test_had_audio:
 	$(CC) $(DFLAGS) had_audio.cpp audioFile.cpp had_audio.test.cpp \
 		$(LIBS) -o ../../execs/test_had_audio.out
+	../../execs/test_had_audio.out
 
 test_had_keys:
 	$(CC) $(DFLAGS) had_interface.cpp had_keys.test.cpp \

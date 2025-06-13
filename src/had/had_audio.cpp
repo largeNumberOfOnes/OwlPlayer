@@ -319,4 +319,25 @@ namespace had {
         return res_code::success;
     }
 
+    bool Audio::is_playing() {
+        return state == State::play;
+    }
+
+    bool Audio::is_stoped() {
+        return state == State::stop;
+    }
+
+    had::seconds Audio::get_cur_time() {
+        if (state != State::play && state != State::stop) {
+            return 0;
+        }
+        return audio_file.get_cur_pos() / audio_file.get_rate();
+    }
+    had::seconds Audio::get_duration() {
+        if (state != State::play && state != State::stop) {
+            return 0;
+        }
+        return audio_file.get_samples() / audio_file.get_rate();
+    }
+
 }

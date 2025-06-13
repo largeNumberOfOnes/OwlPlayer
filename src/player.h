@@ -36,6 +36,6 @@ class Player {
         had::Res draw();
         had::Res resize();
 
-        had::Res stop();
-        had::Res play();
+        had::Res load_and_play(std::string path);
+        had::Res play_or_stop();
 };

@@ -59,6 +59,11 @@ namespace had {
             res_code drop();
             res_code stop();
             res_code play();
+            bool is_playing();
+            bool is_stoped();
+
+            had::seconds get_cur_time();
+            had::seconds get_duration();
 
             res_code set_volume(Volume vol);
             Volume get_volume();

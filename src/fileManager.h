@@ -25,6 +25,7 @@ class FileManager {
     const Setup& setup;
 
     std::string dir;
+    std::function<void(std::string)> call_on_file;
     had::Dem pointer = 0;
     had::Dem top = 0;
     had::Dem size = 0;
@@ -37,8 +38,13 @@ class FileManager {
     public:
         static had::Dem const min_h = 3;
         
-        FileManager(std::string dir, had::Drawer& drawer,
-                            const Setup& setup, const had::Logger& log);
+        FileManager(
+            std::string dir, 
+            std::function<void(std::string)> call_on_file,
+            had::Drawer& drawer,
+            const Setup& setup,
+            const had::Logger& log
+        );
         ~FileManager();
 
         had::Res go();

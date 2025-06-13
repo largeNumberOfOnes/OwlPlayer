@@ -1,8 +1,6 @@
 #include "app.h"
 
 #include "had/had.h"
-#include "had/had_interface.h"
-#include "had/had_keys.h"
 #include "player.h"
 
 #include <chrono>
@@ -18,7 +16,10 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
     , player_drawer(interface, 0, 0, 0, 0, log)
     , player(player_drawer, log)
     , manager_drawer(interface, 0, 0, 0, 0, log)
-    , manager(setup.get_default_file_dir(), manager_drawer, setup, log)
+    , manager(
+        setup.get_default_file_dir(),
+        [&](std::string path) { player.load_and_play(path); },
+        manager_drawer, setup, log)
 {
     event_queue.add_oserver(
         [](const Event& event) -> bool {
@@ -95,6 +96,15 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
         },
         [&](const Event& event) -> void {
             manager.back();
+        }
+    );
+    event_queue.add_oserver(
+        [](const Event& event) -> bool {
+            return event.type == Event::EventType::keypress
+                && event.seq == had::KeySequence{had::Key::space};
+        },
+        [&](const Event& event) -> void {
+            player.play_or_stop();
         }
     );
 }

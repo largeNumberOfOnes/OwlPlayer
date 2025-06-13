@@ -11,12 +11,14 @@
 
 
 FileManager::FileManager(
-    std::string dir,
+    std::string dir, 
+    std::function<void(std::string)> call_on_file,
     had::Drawer& drawer,
     const Setup& setup,
     const had::Logger& log
 )
     : dir(dir)
+    , call_on_file(call_on_file)
     , drawer(drawer)
     , setup(setup)
     , log(log)
@@ -43,6 +45,11 @@ had::Res FileManager::go() {
         dir = list[pointer].path();
         dir += '/';
         reload();
+    } else if (list[pointer].is_regular_file()) {
+        std::string path = list[pointer].path();
+        if (path.ends_with(".mp3")) {
+            call_on_file(path);
+        } // DEV [for temporary safety]
     }
     return had::Res::success;
 }
