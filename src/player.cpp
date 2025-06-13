@@ -161,9 +161,17 @@ had::Res Player::draw() {
     return had::Res::success;
 }
 
+had::Res Player::resize() {
+    if (!drawer.cls() && !draw()) {
+        return had::Res::success;
+    } else {
+        return had::Res::error;
+    }
+}
+
 bool Player::is_enougth_space() {
     return drawer.get_width() < min_width
-        || drawer.get_heigth() < min_height;
+        || drawer.get_height() < min_height;
 }
 
 had::Dem Player::get_height() {

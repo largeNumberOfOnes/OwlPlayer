@@ -46,7 +46,8 @@ namespace had {
     }
 
     Res Interface::cls() {
-        if (clear() == OK){
+        // if (clear() == OK){
+        if (erase() == OK){
             return Res::success;
         } else {
             return Res::error;
@@ -151,14 +152,14 @@ namespace had {
         }
         if (true) {
             switch (ch) {
+                case ' '      : return KeySequence{Key::space};
                 case KEY_UP   : return KeySequence{had::Key::arrow_up};
                 case KEY_DOWN : return KeySequence{had::Key::arrow_down};
                 case KEY_RIGHT: return KeySequence{had::Key::arrow_rigth};
                 case KEY_LEFT : return KeySequence{had::Key::arrow_left};
+                case KEY_ENTER: return KeySequence{had::Key::enter};
+                case KEY_BACKSPACE: return KeySequence{had::Key::backspace};
             }
-        }
-        if (ch == ' ') {
-            return KeySequence{Key::space};
         }
         if (1 <= ch && ch <= 26) {
             return KeySequence{char_to_key('a' + ch - 1)}.add_ctrl();
@@ -177,6 +178,16 @@ namespace had {
 
     Drawer Interface::produce_drawer() {
         return Drawer{*this, 0, 0, get_width(), get_height(), log};
+    }
+
+    bool Interface::is_resized() {
+        if (old_w == get_width() && old_h == get_height()) {
+            return false;
+        } else {
+            old_w = get_width();
+            old_h = get_height();
+            return true;
+        }
     }
 }
 
@@ -218,8 +229,9 @@ namespace had {
     Res Drawer::draw_sp_symbol(Dem x, Dem y, SpSymbol ch) {
         wchar_t ch_;
         switch (ch) {
-            case SpSymbol::list_symbol    : ch_ = L'├'; break;
-            case SpSymbol::list_end_symbol: ch_ = L'└'; break;
+            case SpSymbol::list_symbol     : ch_ = L'├'; break;
+            case SpSymbol::list_end_symbol : ch_ = L'└'; break;
+            case SpSymbol::list_line_symbol: ch_ = L'─'; break;
         }
         return draw_wide_symbol(x, y, ch_);
     }
@@ -242,6 +254,13 @@ namespace had {
         return Res::success;
     }
 
+    Res Drawer::cls() {
+        for (int q = 0; q < w; ++q) {
+            mvhline(y = q, x, ' ', w);
+        } // DEV [Ret code]
+        return Res::success;
+    }
+
     Res Drawer::set_color(const Color& col) {
         return interface.set_color(col);
     }
@@ -250,7 +269,7 @@ namespace had {
         return w;
     }
 
-    Dem Drawer::get_heigth() {
+    Dem Drawer::get_height() {
         return h;
     }
 

@@ -8,12 +8,15 @@
 #include "had/had.h"
 
 class Event {
-    Event() {}
     public:
         enum class EventType {
             keypress,
+            resize,
             draw,
         } type;
+    private:
+        Event() {}
+    public:
 
         had::KeySequence seq = had::KeySequence::create_empty();
 
@@ -26,6 +29,11 @@ class Event {
         static Event create_draw() {
             Event e;
             e.type = EventType::draw;
+            return e;
+        }
+        static Event create_resize() {
+            Event e;
+            e.type = EventType::resize;
             return e;
         }
 };

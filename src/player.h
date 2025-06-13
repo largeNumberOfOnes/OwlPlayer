@@ -34,6 +34,7 @@ class Player {
 
         bool is_enougth_space();
         had::Res draw();
+        had::Res resize();
 
         had::Res stop();
         had::Res play();

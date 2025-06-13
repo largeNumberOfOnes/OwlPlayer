@@ -18,6 +18,8 @@ namespace had {
         arrow_up,
         arrow_down,
         space,
+        enter,
+        backspace,
     };
     inline Key char_to_key(char ch) { // Only for a, b, ..., z
         return static_cast<Key>(ch - 'a');
@@ -31,7 +33,13 @@ namespace had {
             return ret;
         }
         switch(key) {
-            case Key::space: return "space";
+            case Key::space      : return "space";
+            case Key::enter      : return "enter";
+            case Key::backspace  : return "backspace";
+            case Key::arrow_up   : return "arrow_up";
+            case Key::arrow_down : return "arrow_down";
+            case Key::arrow_left : return "arrow_left";
+            case Key::arrow_rigth: return "arrow_rigth";
             default:         return "unknown";
         }
     }

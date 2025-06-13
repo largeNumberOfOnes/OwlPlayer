@@ -19,6 +19,8 @@ namespace had {
     };
 
     class Interface {
+        Dem old_w = 0;
+        Dem old_h = 0;
         const Logger& log;
 
         Res set_default_color();
@@ -47,13 +49,14 @@ namespace had {
             Res get_default_color(Color& col);
             
             KeySequence catch_key_seq();
-
             Drawer produce_drawer();
+            bool is_resized();
     };
 
     enum class SpSymbol {
         list_symbol,
         list_end_symbol,
+        list_line_symbol,
     };
 
     class Drawer {
@@ -84,7 +87,7 @@ namespace had {
             Res set_color(const Color& col);
 
             Dem get_width();
-            Dem get_heigth();
+            Dem get_height();
             void set_width(Dem w);
             void set_heigth(Dem h);
 

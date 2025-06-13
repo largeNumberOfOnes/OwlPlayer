@@ -1,7 +1,6 @@
 #include "fileManager.h"
 
 #include "had/had.h"
-#include "had/had_types.h"
 
 #include <algorithm>
 
@@ -27,6 +26,11 @@ FileManager::FileManager(
         log.log_err("draw_line_buf is not allocated");
     for (had::Dem q = 0; q < draw_line_buf_size; ++q)
         draw_line_buf[q] = ' ';
+
+    if (!this->dir.ends_with('/')) {
+        this->dir += '/';
+    }
+    reload();    
 }
 
 FileManager::~FileManager() {
@@ -34,6 +38,24 @@ FileManager::~FileManager() {
 }
 
 had::Res FileManager::go() {
+    if (list[pointer].is_directory()) {
+        std::cout << list[pointer].path() << std::endl;
+        dir = list[pointer].path();
+        dir += '/';
+        reload();
+    }
+    return had::Res::success;
+}
+
+had::Res FileManager::back() {
+    // int ind = dir.find_last_of('/');
+    if (dir != "/") {
+        dir.pop_back();
+        while (!dir.ends_with('/')) {
+            dir.pop_back();
+        }
+        reload();
+    }
     return had::Res::success;
 }
 
@@ -96,8 +118,8 @@ had::Res FileManager::reload() {
     return had::Res::success;
 }
 
-had::Res FileManager::resize(had::Dem new_size) {
-    size = new_size;
+had::Res FileManager::resize() {
+    size = drawer.get_height() - 2;
     if (pointer >= top + size) {
         if (size < list_size)
             top = pointer - size + 1;
@@ -110,8 +132,11 @@ had::Res FileManager::resize(had::Dem new_size) {
         else
             top = 0;
     }
-
-    return had::Res::success;
+    if (!drawer.cls() && !draw()) {
+        return had::Res::success;
+    } else {
+        return had::Res::error;
+    }
 }
 
 bool FileManager::is_enougth_space(had::Dem w, had::Dem h) {
@@ -120,13 +145,10 @@ bool FileManager::is_enougth_space(had::Dem w, had::Dem h) {
 
 had::Res FileManager::draw() {
     had::Dem w = drawer.get_width();
-    had::Dem h = drawer.get_heigth();
+    had::Dem h = drawer.get_height();
     if (w < min_w || h < min_h) {
         log.log_err("bad sizes");
         return had::Res::error;
-    }
-    if (h != size + 2) {
-        resize(h - 2);
     }
 
     for (had::Dem q = 0; q < w; ++q)
@@ -173,6 +195,7 @@ had::Res FileManager::draw() {
         } else {
             drawer.draw_sp_symbol(1, q + 1, had::SpSymbol::list_symbol);
         }
+        drawer.draw_sp_symbol(2, q + 1, had::SpSymbol::list_line_symbol);
         drawer.set_color(setup.colors.def);
     }
 

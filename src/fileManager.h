@@ -42,10 +42,11 @@ class FileManager {
         ~FileManager();
 
         had::Res go();
+        had::Res back();
         had::Res up();
         had::Res down();
         had::Res reload();
-        had::Res resize(had::Dem newh);
+        had::Res resize();
 
         bool is_enougth_space(had::Dem w, had::Dem h);
         had::Res draw();
