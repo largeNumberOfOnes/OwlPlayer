@@ -1,6 +1,7 @@
 #include "fileManager.h"
 
 #include "had/had.h"
+#include "had/had_interface.h"
 
 #include <algorithm>
 
@@ -41,7 +42,6 @@ FileManager::~FileManager() {
 
 had::Res FileManager::go() {
     if (list[pointer].is_directory()) {
-        std::cout << list[pointer].path() << std::endl;
         dir = list[pointer].path();
         dir += '/';
         reload();
@@ -165,6 +165,25 @@ bool FileManager::is_enougth_space(had::Dem w, had::Dem h) {
     return w >= min_w && h >= min_h;
 }
 
+had::Res FileManager::draw_scrol_line() {
+    for (int q = 2; q < drawer.get_height() - 1; ++q) {
+        drawer.draw_sp_symbol(
+            drawer.get_width() - 1, q,
+            had::SpSymbol::scrol_middle_symbol
+        );
+    }
+    drawer.draw_sp_symbol(
+        drawer.get_width() - 1, 1,
+        had::SpSymbol::scrol_up_symbol
+    );
+    drawer.draw_sp_symbol(
+        drawer.get_width() - 1, drawer.get_height() - 1,
+        had::SpSymbol::scrol_bottom_symbol
+    );
+
+    return had::Res::success;
+}
+
 had::Res FileManager::draw() {
     had::Dem w = drawer.get_width();
     had::Dem h = drawer.get_height();
@@ -212,16 +231,17 @@ had::Res FileManager::draw() {
             // draw_line_buf[1] = ' ';
         }
         drawer.draw_text(0, q + 1, draw_line_buf);
+        drawer.set_color(setup.colors.def);
         if (top + q + 1 == list_size) {
             drawer.draw_sp_symbol(1, q + 1, had::SpSymbol::list_end_symbol);
         } else {
             drawer.draw_sp_symbol(1, q + 1, had::SpSymbol::list_symbol);
         }
         drawer.draw_sp_symbol(2, q + 1, had::SpSymbol::list_line_symbol);
-        drawer.set_color(setup.colors.def);
     }
 
     drawer.draw_symbol(0, h-1, ':');
+    draw_scrol_line();
 
     return had::Res::success;
 }

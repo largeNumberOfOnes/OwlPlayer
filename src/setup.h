@@ -4,8 +4,10 @@
 #pragma once
 
 #include "had/had.h"
+#include "had/had_keys.h"
 
 #include <string>
+#include <unordered_map>
 
 
 
@@ -15,9 +17,11 @@ class Setup {
 
     int fps = 20;
 
-    // std::vector<std::pair<had::Key, App::action>> key_bindings;
+    std::unordered_map<std::string, had::KeySequence> key_bindings;
+
 
     public:
+        had::Res read_config(std::string path);
         struct Colors {
             had::Color def;
             had::Color dir;

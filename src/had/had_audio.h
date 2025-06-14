@@ -15,17 +15,29 @@ namespace had {
         mutable std::mutex mutex;
 
         Volume vol = 100;
+
+        bool is_stream_connected = false;
+        bool was_finalized_val = false;
+        enum class State {
+            inited,
+            stop,
+            play,
+        } state;
         
         struct Data_pw {
             pw_thread_loop* loop;
             pw_stream*      stream;
             AudioFile*      audio_file;
             std::mutex*     mutex;
+            State*          state;
+            bool*           was_finalized_val;
         } data;
 
         static void on_process(void* userdata);
+        // static void on_drain(void* userdata);
         struct pw_stream_events stream_events = {
             .process = on_process,
+            // .drained = on_drain,
         };
         struct AudioProperties {
             int rate;
@@ -34,13 +46,6 @@ namespace had {
         };
 
         Res set_params(const AudioProperties& props);
-
-        bool is_stream_connected = false;
-        enum class State {
-            inited,
-            stop,
-            play,
-        } state;
 
         std::size_t pos_to_byte(seconds pos);
         Res set_volume_unsafe();
@@ -61,6 +66,7 @@ namespace had {
             res_code play();
             bool is_playing();
             bool is_stoped();
+            bool was_finalized();
 
             had::seconds get_cur_time();
             had::seconds get_duration();

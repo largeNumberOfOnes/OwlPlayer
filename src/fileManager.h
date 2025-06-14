@@ -13,7 +13,7 @@
 
 class FileManager {
     static had::Dem const min_w = 14;
-    static had::Dem const line_offset = 3;
+    static had::Dem const line_offset = 4;
     static had::Dem const free_space = 5;
 
     static had::Dem const draw_line_buf_size = 1024;
@@ -55,6 +55,7 @@ class FileManager {
         had::Res resize();
 
         bool is_enougth_space(had::Dem w, had::Dem h);
+        had::Res draw_scrol_line();
         had::Res draw();
 
 };

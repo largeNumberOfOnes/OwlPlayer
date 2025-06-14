@@ -57,6 +57,9 @@ namespace had {
         list_symbol,
         list_end_symbol,
         list_line_symbol,
+        scrol_up_symbol,
+        scrol_middle_symbol,
+        scrol_bottom_symbol,
     };
 
     class Drawer {

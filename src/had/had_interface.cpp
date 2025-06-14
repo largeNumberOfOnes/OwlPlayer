@@ -229,9 +229,12 @@ namespace had {
     Res Drawer::draw_sp_symbol(Dem x, Dem y, SpSymbol ch) {
         wchar_t ch_;
         switch (ch) {
-            case SpSymbol::list_symbol     : ch_ = L'├'; break;
-            case SpSymbol::list_end_symbol : ch_ = L'└'; break;
-            case SpSymbol::list_line_symbol: ch_ = L'─'; break;
+            case SpSymbol::list_symbol        : ch_ = L'┣'; break;
+            case SpSymbol::list_end_symbol    : ch_ = L'┗'; break;
+            case SpSymbol::list_line_symbol   : ch_ = L'━'; break;
+            case SpSymbol::scrol_up_symbol    : ch_ = L'▲'; break;
+            case SpSymbol::scrol_middle_symbol: ch_ = L'║'; break;
+            case SpSymbol::scrol_bottom_symbol: ch_ = L'▼'; break;
         }
         return draw_wide_symbol(x, y, ch_);
     }

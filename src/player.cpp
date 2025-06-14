@@ -1,5 +1,6 @@
 #include "player.h"
 #include "had/had.h"
+#include "had/had_types.h"
 
 #include <cstring>
 
@@ -20,6 +21,13 @@ Player::Player(had::Drawer& drawer, const had::Logger& log)
     , drawer(drawer)
     , log(log)
 {}
+
+Player::~Player() {
+    if (audio.is_playing()) {
+        audio.stop();
+    }
+    audio.drop();
+}
 
 had::Res Player::calc_grid() {
     // From tim_min_width tim_w increases throw tim_half_width, while
@@ -98,7 +106,8 @@ had::Res Player::draw_volume() {
 
 static std::string format_time(had::seconds time) {
     char str[6] = {0};
-    sprintf(str, "%2d:%02d", time/60, time-(time/60));
+    // sprintf(str, "%2d:%02d", time/60, time-(time/60));
+    sprintf(str, "%2d:%02d", time / 60, time % 60);
     return std::string(str);
 }
 
@@ -159,6 +168,10 @@ had::Res Player::draw() {
         return had::Res::error;
     }
 
+    if (audio.was_finalized()) {
+        call_on_play_end();
+    }
+
     return had::Res::success;
 }
 
@@ -180,6 +193,11 @@ had::Dem Player::get_height() {
 }
 
 had::Res Player::load_and_play(std::string path) {
+    if (audio.is_playing()) {
+        if (audio.stop() != had::Audio::res_code::success) {
+            return had::Res::error;
+        }
+    }
     if (audio.load(path) == had::Audio::res_code::success
         && audio.play() == had::Audio::res_code::success
     ) {
@@ -200,6 +218,22 @@ had::Res Player::play_or_stop() {
     }
 
     if (ret == had::Audio::res_code::success) {
+        return had::Res::success;
+    } else {
+        return had::Res::error;
+    }
+}
+
+had::Res Player::jump(had::seconds pos) {
+    if (audio.jump(pos) == had::Audio::res_code::success) {
+        return had::Res::success;
+    } else {
+        return had::Res::error;
+    }
+}
+
+had::Res Player::jump_rel(had::seconds pos_rel) {
+    if (audio.jump_rel(pos_rel) == had::Audio::res_code::success) {
         return had::Res::success;
     } else {
         return had::Res::error;

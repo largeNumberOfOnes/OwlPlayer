@@ -182,6 +182,8 @@ namespace had {
             return res_code::other_error;
         }
 
+        cur_pos = 0;
+        is_end_reached = false;
         is_inited = true;
         return res_code::success;
     }
@@ -190,6 +192,7 @@ namespace had {
         log.log_info("Erasing file");
 
         if (!is_inited) {
+            is_end_reached = false;
             return res_code::success;
         }
 
@@ -197,12 +200,28 @@ namespace had {
         file = nullptr;
         remove(file_path_pcm);
         is_inited = false;
+        is_end_reached = false;
+
+        delete [] buf;
+        buf = nullptr;
+        buf_size = 0;
 
         return res_code::success;
     }
 
     AudioFile::AudioFile(const Logger& log) : log(log) {
         log.log_info("Creating an empty AudioFile");
+    }
+
+    void AudioFile::copy_to_buf(short* ref_buf, int size) {
+        if (!buf || buf_size != size) {
+            buf = new int[size];
+            buf_size = size;
+        }
+
+        for (int q = 0; q < size; ++q) {
+            buf[q] = static_cast<int>(ref_buf[q]);
+        }
     }
 
     AudioFile::res_code AudioFile::read_file(void* buf, size_t count, size_t& retcount) {
@@ -215,15 +234,26 @@ namespace had {
             return res_code::other_error;
         }
 
+        // std::cout << "get_max_pos() " << get_max_pos() << std::endl;
+        // std::cout << "cur_pos " << cur_pos << std::endl;
+        // if (cur_pos == get_max_pos()) {
+        if (is_end_reached) {
+            retcount = 0;
+            return res_code::end_of_file;
+        }
         std::size_t size = fread(buf, 1, count, file);
         if (size == 0) {
-            log.log_err(std::string("Cannot read file: %s") +
-                                                        strerror(errno));
             retcount = 0;
-            return res_code::other_error;
+            is_end_reached = true;
+            return res_code::success;
+            // log.log_err(std::string("Cannot read file: ") +
+            //                                             strerror(errno));
         }
         cur_pos += size;
         retcount = size;
+
+        copy_to_buf(reinterpret_cast<short*>(buf), count / 2);
+
         return res_code::success;
     }
 
@@ -235,10 +265,13 @@ namespace had {
 
         int err = fseek(file, position, SEEK_SET);
         if (err) {
-            log.log_warn("Cannot seek file");
-            return res_code::cannot_set_position;
+            // log.log_warn("Cannot seek file");
+            is_end_reached = true;
+            return res_code::success;
+            // return res_code::cannot_set_position;
         }
         cur_pos = position;
+        is_end_reached = false;
 
         return res_code::success;
     }

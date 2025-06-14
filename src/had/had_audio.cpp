@@ -9,6 +9,7 @@
 #include "had_logger.h"
 
 #include "pipewire/pipewire.h"
+#include "pipewire/stream.h"
 #include "spa/param/audio/raw.h"
 #include <cmath>
 #include <cstddef>
@@ -25,6 +26,8 @@ namespace had {
     {
         data.audio_file = &audio_file;
         data.mutex = &mutex;
+        data.state = &state;
+        data.was_finalized_val = &was_finalized_val;
         pw_init(nullptr, nullptr);
 
         data.loop = pw_thread_loop_new("audio_player", nullptr);
@@ -50,39 +53,10 @@ namespace had {
             goto on_error;
         }
 
-        // uint8_t buffer[1024];
-        // struct spa_pod_builder builder = SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
-        // spa_audio_info_raw audio_info = SPA_AUDIO_INFO_RAW_INIT(
-        //     .format = SPA_AUDIO_FORMAT_S16,
-        //     .rate = static_cast<uint32_t>(audioFile.get_rate()),
-        //     .channels = static_cast<uint32_t>(audioFile.get_channels())
-        // );
-
-        // const struct spa_pod *params[1] = {
-        //     spa_format_audio_raw_build(
-        //         &builder,
-        //         SPA_PARAM_EnumFormat,
-        //         &audio_info
-        //     )
-        // };
-
-        // pw_stream_connect(
-        //     data.stream,
-        //     PW_DIRECTION_OUTPUT,
-        //     PW_ID_ANY,
-        //     (pw_stream_flags)(
-        //         PW_STREAM_FLAG_AUTOCONNECT
-        //         | PW_STREAM_FLAG_MAP_BUFFERS
-        //         | PW_STREAM_FLAG_RT_PROCESS
-        //     ),
-        //     nullptr, 0
-        // );
-
         pw_thread_loop_start(data.loop);
 
         on_error:
             result = Res::error;
-            // pass
     }
 
     Audio::~Audio() {
@@ -90,9 +64,9 @@ namespace had {
             pw_stream_disconnect(data.stream);
             is_stream_connected = false;
         }
-        // pw_stream_destroy(data.stream);
-        // pw_thread_loop_stop(data.loop);
-        // pw_thread_loop_destroy(data.loop);
+        pw_stream_destroy(data.stream);
+        pw_thread_loop_stop(data.loop);
+        pw_thread_loop_destroy(data.loop);
         pw_deinit();
     }
 
@@ -105,9 +79,13 @@ namespace had {
 
     void Audio::on_process(void* userdata) {
         Data_pw& data = *static_cast<Data_pw*>(userdata);
-
+        AudioFile::res_code ret;
         std::lock_guard<std::mutex> lock{*data.mutex};
         pw_thread_loop_lock(data.loop);
+        if (*data.state != State::play) {
+            pw_thread_loop_unlock(data.loop);
+            return;
+        }
         struct pw_buffer* buffer;
         struct spa_buffer* spa_buf;
         float* dst;
@@ -125,25 +103,31 @@ namespace had {
             return;
         }
 
-    //     // Read audio data from the file
-        // size_t bytes_read =
-                //  fread(dst, 1, spa_buf->datas[0].maxsize, data->file);
         size_t bytes_read;
-        // data.audio_file->read_file(dst, spa_buf->datas[0].maxsize/sizeof(short), bytes_read);
-        data.audio_file->read_file(dst, spa_buf->datas[0].maxsize, bytes_read);
-        if (bytes_read == 0) {
-            // End of file, stop the main loop
-            // pw_main_loop_quit(data.loop);
+        ret = data.audio_file->read_file(dst, spa_buf->datas[0].maxsize, bytes_read);
+        if (ret == AudioFile::res_code::end_of_file) {
+            *data.state = State::inited;
+            *data.was_finalized_val = true;
+            spa_buf->datas[0].chunk->size = 0;
+            pw_stream_queue_buffer(data.stream, buffer);
+            pw_stream_flush(data.stream, true);
+            pw_thread_loop_unlock(data.loop);
             return;
         }
-
         spa_buf->datas[0].chunk->size = bytes_read;
 
         pw_stream_queue_buffer(data.stream, buffer);
+
         pw_thread_loop_unlock(data.loop);
     }
 
     Audio::res_code Audio::drop() {
+        pw_thread_loop_lock(data.loop);
+        if (is_stream_connected) {
+            pw_stream_disconnect(data.stream);
+            is_stream_connected = false;
+        }
+        pw_thread_loop_unlock(data.loop);
         return res_code::success;
     }
 
@@ -170,7 +154,7 @@ namespace had {
 
         // std::cout << "rate " << audio_file.get_rate() << std::endl;
         // std::cout << "chan " << audio_file.get_channels() << std::endl;
-
+        
         const struct spa_pod *params[1] = {
             spa_format_audio_raw_build(
                 &builder,
@@ -199,7 +183,7 @@ namespace had {
         is_stream_connected = true;
         pw_stream_set_active(data.stream, false);
         state = State::stop;
-
+        
         set_volume_unsafe();
 
         pw_thread_loop_unlock(data.loop);
@@ -228,6 +212,7 @@ namespace had {
         std::lock_guard<std::mutex> lock{mutex};
         pw_thread_loop_lock(data.loop);
         pw_stream_set_active(data.stream, true);
+        was_finalized_val = false;
         pw_thread_loop_unlock(data.loop);
         state = State::play;
         return res_code::success;
@@ -277,7 +262,6 @@ namespace had {
         pw_thread_loop_lock(data.loop);
         pw_stream_flush(data.stream, false);
         std::size_t samples_pos = pos_to_byte(pos);
-        std::cout << "pos " << samples_pos << std::endl;
         samples_pos = std::min(
             samples_pos,
             audio_file.get_max_pos()
@@ -287,7 +271,6 @@ namespace had {
         if (res == AudioFile::res_code::success) {
             return res_code::success;
         } else {
-            std::cout << "boom" << std::endl;
             return res_code::other_error;
         }
     }
@@ -331,13 +314,24 @@ namespace had {
         if (state != State::play && state != State::stop) {
             return 0;
         }
-        return audio_file.get_cur_pos() / audio_file.get_rate();
+        return audio_file.get_cur_pos() / audio_file.get_rate()
+            / audio_file.get_channels() / 2; // DEV [mult depends on lib]
     }
+
     had::seconds Audio::get_duration() {
         if (state != State::play && state != State::stop) {
             return 0;
         }
         return audio_file.get_samples() / audio_file.get_rate();
+    }
+
+    bool Audio::was_finalized() {
+        if (was_finalized_val) {
+            was_finalized_val = false;
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

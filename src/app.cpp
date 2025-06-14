@@ -107,6 +107,24 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             player.play_or_stop();
         }
     );
+    event_queue.add_oserver(
+        [](const Event& event) -> bool {
+            return event.type == Event::EventType::keypress
+                && event.seq == had::KeySequence{had::Key::arrow_rigth};
+        },
+        [&](const Event& event) -> void {
+            player.jump_rel(5);
+        }
+    );
+    event_queue.add_oserver(
+        [](const Event& event) -> bool {
+            return event.type == Event::EventType::keypress
+                && event.seq == had::KeySequence{had::Key::arrow_left};
+        },
+        [&](const Event& event) -> void {
+            player.jump_rel(-5);
+        }
+    );
 }
 
 App::Circle_res App::circle() {

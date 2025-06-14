@@ -466,7 +466,7 @@ objects/had_interface.o: src/had/had_interface.cpp src/had/had_interface.h \
 
 
 comp: objects/app.o objects/config.o objects/eventQueue.o objects/fileManager.o objects/main.o objects/player.o objects/setup.o objects/audioFile.o objects/had_audio.o objects/had_interface.o
-	clang++-14 objects/app.o objects/config.o objects/eventQueue.o objects/fileManager.o objects/main.o objects/player.o objects/setup.o objects/audioFile.o objects/had_audio.o objects/had_interface.o -lsndfile -lmpg123 -lasound -lncursesw -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -lpipewire-0.3 -o execs/output.out
+	clang++-14 -g -std=c++20 objects/app.o objects/config.o objects/eventQueue.o objects/fileManager.o objects/main.o objects/player.o objects/setup.o objects/audioFile.o objects/had_audio.o objects/had_interface.o -lsndfile -lmpg123 -lasound -lncursesw -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -lpipewire-0.3 -o execs/output.out
 
 run:
 	alacritty -e execs/output.out

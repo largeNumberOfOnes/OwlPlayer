@@ -15,6 +15,7 @@
 namespace had {
     class AudioFile {
         bool is_inited      = false;
+        bool is_end_reached = false;
         std::size_t cur_pos = 0;
         FILE* file          = nullptr;
         int rate     = 0;
@@ -26,9 +27,14 @@ namespace had {
         Res read_wav(char const* path);
         Res read_mp3(char const* path);
 
+        int buf_size = 0;
+        int* buf = nullptr;
+        void copy_to_buf(short* ref_buf, int size);
+
         public:
             enum class res_code {
                 success,
+                end_of_file,
                 not_initialized,
                 cannot_set_position,
                 file_does_not_exist,

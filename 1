@@ -21,7 +21,7 @@
 import subprocess as sp
 
 compiler = 'clang++-14'
-flags = '-g -std=c++20'
+flags = '-g -std=c++20 -fsanitize=address'
 gen_makefile_name = 'Makefile'
 output_file_name = 'execs/output.out'
 message = '# THIS FILE IS AUTOGEN!!!'

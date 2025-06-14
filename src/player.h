@@ -5,6 +5,8 @@
 #pragma once
 
 #include "had/had.h"
+#include "had/had_types.h"
+#include <functional>
 
 
 
@@ -27,10 +29,17 @@ class Player {
     had::Res draw_volume();
     had::Res draw_timeline();
 
+    std::function<void(void)> call_on_play_end = []() {};
+
     public:
         Player(had::Drawer& drawer, const had::Logger& log);
+        ~Player();
 
         had::Dem get_height();
+
+        void set_on_play_end(std::function<void(void)> call_on_play_end) {
+            this->call_on_play_end = call_on_play_end;
+        }
 
         bool is_enougth_space();
         had::Res draw();
@@ -38,4 +47,6 @@ class Player {
 
         had::Res load_and_play(std::string path);
         had::Res play_or_stop();
+        had::Res jump(had::seconds pos_rel);
+        had::Res jump_rel(had::seconds pos_rel);
 };
