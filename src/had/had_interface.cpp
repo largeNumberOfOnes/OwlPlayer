@@ -235,6 +235,15 @@ namespace had {
             case SpSymbol::scrol_up_symbol    : ch_ = L'▲'; break;
             case SpSymbol::scrol_middle_symbol: ch_ = L'║'; break;
             case SpSymbol::scrol_bottom_symbol: ch_ = L'▼'; break;
+
+            case SpSymbol::spectre_1_symbol: ch_ = L'▁'; break;
+            case SpSymbol::spectre_2_symbol: ch_ = L'▂'; break;
+            case SpSymbol::spectre_3_symbol: ch_ = L'▃'; break;
+            case SpSymbol::spectre_4_symbol: ch_ = L'▄'; break;
+            case SpSymbol::spectre_5_symbol: ch_ = L'▆'; break;
+            case SpSymbol::spectre_6_symbol: ch_ = L'▆'; break;
+            case SpSymbol::spectre_7_symbol: ch_ = L'▇'; break;
+            case SpSymbol::spectre_8_symbol: ch_ = L'█'; break;
         }
         return draw_wide_symbol(x, y, ch_);
     }

@@ -1,3 +1,8 @@
+/**
+    This class represent interface to load and play audio files
+ */
+
+#pragma once
 
 #include "audioFile.h"
 #include "had_types.h"
@@ -8,6 +13,9 @@
 #include <functional>
 #include <mutex>
 #include <string>
+#include <complex>
+
+
 
 namespace had {
     class Audio {
@@ -70,6 +78,7 @@ namespace had {
 
             had::seconds get_cur_time();
             had::seconds get_duration();
+            void get_samples(std::vector<std::complex<float>>& ret);
 
             res_code set_volume(Volume vol);
             Volume get_volume();

@@ -60,6 +60,14 @@ namespace had {
         scrol_up_symbol,
         scrol_middle_symbol,
         scrol_bottom_symbol,
+        spectre_1_symbol,
+        spectre_2_symbol,
+        spectre_3_symbol,
+        spectre_4_symbol,
+        spectre_5_symbol,
+        spectre_6_symbol,
+        spectre_7_symbol,
+        spectre_8_symbol,
     };
 
     class Drawer {

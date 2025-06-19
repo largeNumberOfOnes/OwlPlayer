@@ -8,6 +8,7 @@
 #include <functional>
 #include <string>
 #include <cstddef>
+#include <vector>
 
 #include "had_logger.h"
 #include "had_types.h"
@@ -27,8 +28,8 @@ namespace had {
         Res read_wav(char const* path);
         Res read_mp3(char const* path);
 
-        int buf_size = 0;
-        int* buf = nullptr;
+        // int buf_size = 0;
+        std::vector<int> buf;
         void copy_to_buf(short* ref_buf, int size);
 
         public:
@@ -55,5 +56,7 @@ namespace had {
             res_code read_file(void* buf, std::size_t count,
                                                     std::size_t& retcount);
             res_code set_position(std::size_t position);
+
+            const std::vector<int>& get_buf();
     };
 }

@@ -202,9 +202,11 @@ namespace had {
         is_inited = false;
         is_end_reached = false;
 
-        delete [] buf;
-        buf = nullptr;
-        buf_size = 0;
+        // delete [] buf;
+        // delete [] buf2;
+        // buf = nullptr;
+        // buf2 = nullptr;
+        // buf_size = 0;
 
         return res_code::success;
     }
@@ -214,13 +216,15 @@ namespace had {
     }
 
     void AudioFile::copy_to_buf(short* ref_buf, int size) {
-        if (!buf || buf_size != size) {
-            buf = new int[size];
-            buf_size = size;
-        }
+        // if (!buf || buf_size != size) {
+        //     buf = new short[size];
+        //     buf_size = size;
+        // }
+        buf.clear();
 
         for (int q = 0; q < size; ++q) {
-            buf[q] = static_cast<int>(ref_buf[q]);
+            // buf[q] = static_cast<int>(ref_buf[q]);
+            buf.push_back(static_cast<int>(ref_buf[q]));
         }
     }
 
@@ -303,4 +307,7 @@ namespace had {
         return samples;
     }
 
+    const std::vector<int>& AudioFile::get_buf() {
+        return buf;
+    }
 }

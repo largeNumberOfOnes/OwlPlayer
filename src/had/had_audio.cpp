@@ -12,6 +12,7 @@
 #include "pipewire/stream.h"
 #include "spa/param/audio/raw.h"
 #include <cmath>
+#include <complex>
 #include <cstddef>
 #include <curses.h>
 #include <spa/param/audio/format-utils.h>
@@ -331,6 +332,14 @@ namespace had {
             return true;
         } else {
             return false;
+        }
+    }
+
+    void Audio::get_samples(std::vector<std::complex<float>>& ret) {
+        std::lock_guard<std::mutex> lock{mutex};
+        ret.clear();
+        for (const auto& elem : audio_file.get_buf()) {
+            ret.push_back(std::complex<float>(elem));
         }
     }
 
