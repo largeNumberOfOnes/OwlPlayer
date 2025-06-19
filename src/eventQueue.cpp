@@ -27,7 +27,7 @@ bool EventQueue::empty() const {
     return events.empty();
 }
 
-void EventQueue::add_oserver(
+void EventQueue::add_observer(
     std::function<bool(const Event&)> comp,
     std::function<void(const Event&)> observer
 ) {

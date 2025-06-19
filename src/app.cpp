@@ -21,7 +21,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
         [&](std::string path) { player.load_and_play(path); },
         manager_drawer, setup, log)
 {
-    event_queue.add_oserver(
+    event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::draw;
         },
@@ -32,7 +32,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             player.draw();
         }
     );
-    event_queue.add_oserver(
+    event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::resize;
         },
@@ -52,7 +52,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             // manager.reload();
         }
     );
-    event_queue.add_oserver(
+    event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::keypress
                 && event.seq == had::KeySequence{had::Key::q};
@@ -61,7 +61,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             is_time_to_exit = true;
         }
     );
-    event_queue.add_oserver(
+    event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::keypress
                 && event.seq == had::KeySequence{had::Key::arrow_up};
@@ -70,7 +70,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             manager.up();
         }
     );
-    event_queue.add_oserver(
+    event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::keypress
                 && event.seq == had::KeySequence{had::Key::arrow_down};
@@ -79,7 +79,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             manager.down();
         }
     );
-    event_queue.add_oserver(
+    event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::keypress
                 && event.seq == had::KeySequence{had::Key::j}.add_ctrl(); // DEV [enter]
@@ -89,7 +89,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             manager.go();
         }
     );
-    event_queue.add_oserver(
+    event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::keypress
                 && event.seq == had::KeySequence{had::Key::backspace};
@@ -98,7 +98,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             manager.back();
         }
     );
-    event_queue.add_oserver(
+    event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::keypress
                 && event.seq == had::KeySequence{had::Key::space};
@@ -107,7 +107,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             player.play_or_stop();
         }
     );
-    event_queue.add_oserver(
+    event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::keypress
                 && event.seq == had::KeySequence{had::Key::arrow_rigth};
@@ -116,7 +116,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             player.jump_rel(5);
         }
     );
-    event_queue.add_oserver(
+    event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::keypress
                 && event.seq == had::KeySequence{had::Key::arrow_left};
@@ -129,6 +129,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
 
 App::Circle_res App::circle() {
     interface.set_color(setup.colors.def);
+    
     player_drawer.set(
         0, interface.get_height() - player.get_height(),
         interface.get_width(), player.get_height()
@@ -138,8 +139,6 @@ App::Circle_res App::circle() {
         interface.get_width(),
         interface.get_height() - player.get_height()
     );
-
-    // interface.cls();
 
     had::KeySequence seq = interface.catch_key_seq();
     if (!seq.is_empty()) {

@@ -1,4 +1,8 @@
+/**
+ * pass
+ */
 
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -6,6 +10,8 @@
 #include <queue>
 
 #include "had/had.h"
+
+
 
 class Event {
     public:
@@ -49,7 +55,7 @@ class EventQueue {
         void push_event(Event&& event);
         void pop_event();
         bool empty() const;
-        void add_oserver(
+        void add_observer(
             std::function<bool(const Event&)> comp,
             std::function<void(const Event&)> observer
         );
