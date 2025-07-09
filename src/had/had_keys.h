@@ -87,7 +87,7 @@ namespace had {
                 return is_empty_val;
             }
 
-            bool operator==(KeySequence other) {
+            bool operator==(const KeySequence& other) const {
                 return key      == other.key
                     && is_alt   == other.is_alt
                     && is_ctrl  == other.is_ctrl

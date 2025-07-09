@@ -2,6 +2,7 @@
 
 #include "had/had.h"
 #include "player.h"
+#include "setup.h"
 
 #include <chrono>
 #include <iostream>
@@ -52,84 +53,101 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             // manager.reload();
         }
     );
-    event_queue.add_observer(
-        [](const Event& event) -> bool {
-            return event.type == Event::EventType::keypress
-                && event.seq == had::KeySequence{had::Key::q};
-        },
-        [&](const Event& event) -> void {
-            is_time_to_exit = true;
+    // event_queue.add_observer(
+    //     [](const Event& event) -> bool {
+    //         return event.type == Event::EventType::keypress
+    //             && event.seq == had::KeySequence{had::Key::q};
+    //     },
+    //     [&](const Event& event) -> void {
+    //         is_time_to_exit = true;
+    //     }
+    // );
+    // event_queue.add_observer(
+    //     [](const Event& event) -> bool {
+    //         return event.type == Event::EventType::keypress
+    //             && event.seq == had::KeySequence{had::Key::arrow_up};
+    //     },
+    //     [&](const Event& event) -> void {
+    //         manager.up();
+    //     }
+    // );
+    // event_queue.add_observer(
+    //     [](const Event& event) -> bool {
+    //         return event.type == Event::EventType::keypress
+    //             && event.seq == had::KeySequence{had::Key::arrow_down};
+    //     },
+    //     [&](const Event& event) -> void {
+    //         manager.down();
+    //     }
+    // );
+    // event_queue.add_observer(
+    //     [](const Event& event) -> bool {
+    //         return event.type == Event::EventType::keypress
+    //             && event.seq == had::KeySequence{had::Key::j}.add_ctrl(); // DEV [enter]
+    //     },
+    //     [&](const Event& event) -> void {
+    //         // manager_drawer.draw_text(7, 7, "go meth");
+    //         manager.go();
+    //     }
+    // );
+    // event_queue.add_observer(
+    //     [](const Event& event) -> bool {
+    //         return event.type == Event::EventType::keypress
+    //             && event.seq == had::KeySequence{had::Key::backspace};
+    //     },
+    //     [&](const Event& event) -> void {
+    //         manager.back();
+    //     }
+    // );
+    // event_queue.add_observer(
+    //     [](const Event& event) -> bool {
+    //         return event.type == Event::EventType::keypress
+    //             && event.seq == had::KeySequence{had::Key::space};
+    //     },
+    //     [&](const Event& event) -> void {
+    //         player.play_or_stop();
+    //     }
+    // );
+    // event_queue.add_observer(
+    //     [](const Event& event) -> bool {
+    //         return event.type == Event::EventType::keypress
+    //             && event.seq == had::KeySequence{had::Key::arrow_rigth};
+    //     },
+    //     [&](const Event& event) -> void {
+    //         player.jump_rel(5);
+    //     }
+    // );
+    // event_queue.add_observer(
+    //     [](const Event& event) -> bool {
+    //         return event.type == Event::EventType::keypress
+    //             && event.seq == had::KeySequence{had::Key::arrow_left};
+    //     },
+    //     [&](const Event& event) -> void {
+    //         player.jump_rel(-5);
+    //     }
+    // );
+
+    for (const auto& it : setup.get_key_bindings()) {
+        if (actions.contains(it.first)) {
+            event_queue.add_observer(
+                [=, &setup](const Event& event) -> bool {
+                    return event.type == Event::EventType::keypress
+                        && event.seq == it.second;
+                },
+                [&](const Event& event) -> void {
+                    actions[it.first]();
+                }
+            );
+        } else {
+            log.log_warn("Setup file contains keybinding for "
+                                                    "nonexistent action");
         }
-    );
-    event_queue.add_observer(
-        [](const Event& event) -> bool {
-            return event.type == Event::EventType::keypress
-                && event.seq == had::KeySequence{had::Key::arrow_up};
-        },
-        [&](const Event& event) -> void {
-            manager.up();
-        }
-    );
-    event_queue.add_observer(
-        [](const Event& event) -> bool {
-            return event.type == Event::EventType::keypress
-                && event.seq == had::KeySequence{had::Key::arrow_down};
-        },
-        [&](const Event& event) -> void {
-            manager.down();
-        }
-    );
-    event_queue.add_observer(
-        [](const Event& event) -> bool {
-            return event.type == Event::EventType::keypress
-                && event.seq == had::KeySequence{had::Key::j}.add_ctrl(); // DEV [enter]
-        },
-        [&](const Event& event) -> void {
-            // manager_drawer.draw_text(7, 7, "go meth");
-            manager.go();
-        }
-    );
-    event_queue.add_observer(
-        [](const Event& event) -> bool {
-            return event.type == Event::EventType::keypress
-                && event.seq == had::KeySequence{had::Key::backspace};
-        },
-        [&](const Event& event) -> void {
-            manager.back();
-        }
-    );
-    event_queue.add_observer(
-        [](const Event& event) -> bool {
-            return event.type == Event::EventType::keypress
-                && event.seq == had::KeySequence{had::Key::space};
-        },
-        [&](const Event& event) -> void {
-            player.play_or_stop();
-        }
-    );
-    event_queue.add_observer(
-        [](const Event& event) -> bool {
-            return event.type == Event::EventType::keypress
-                && event.seq == had::KeySequence{had::Key::arrow_rigth};
-        },
-        [&](const Event& event) -> void {
-            player.jump_rel(5);
-        }
-    );
-    event_queue.add_observer(
-        [](const Event& event) -> bool {
-            return event.type == Event::EventType::keypress
-                && event.seq == had::KeySequence{had::Key::arrow_left};
-        },
-        [&](const Event& event) -> void {
-            player.jump_rel(-5);
-        }
-    );
+    }
 }
 
 App::Circle_res App::circle() {
     interface.set_color(setup.colors.def);
-    
+
     player_drawer.set(
         0, interface.get_height() - player.get_height(),
         interface.get_width(), player.get_height()

@@ -16,15 +16,21 @@
 #include <unordered_map>
 
 class App {
-    std::unordered_map<std::string, std::function<void(void)>> actions {
-        {"manager_go"  , [&]() { manager.go(); }},
-        {"manager_up"  , [&]() { manager.up(); }},
-        {"manager_down", [&]() { manager.down(); }},
-        {"play_stop", [&]() {  }},
-        {"inc", [&]() {  }},
-        {"dec", [&]() {  }},
-        {"inc_vol", [&]() {  }},
-        {"dec_vol", [&]() {  }},
+
+    had::Volume jump_val = 5;
+
+    using Action = std::string;
+    using Actions = std::unordered_map<Action, std::function<void(void)>>;
+    Actions actions {
+        {"manager_go"  , [this]() { manager.go(); }},
+        {"manager_up"  , [this]() { manager.up(); }},
+        {"manager_down", [this]() { manager.down(); }},
+        {"play_stop",    [this]() { player.play_or_stop(); }},
+        {"play_inc",     [this]() { player.jump_rel(jump_val); }},
+        {"play_dec",     [this]() { player.jump_rel(-jump_val); }},
+        {"play_inc_vol", [this]() {  }},
+        {"play_dec_vol", [this]() {  }},
+        {"glob_quit",    [this]() { is_time_to_exit = true; }},
     };
 
     const had::Logger& log;

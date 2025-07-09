@@ -2,6 +2,7 @@
 
 bin/
 execs/
+logs/
 test_data/
 objects/
 .clangd

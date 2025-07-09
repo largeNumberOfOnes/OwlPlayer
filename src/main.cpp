@@ -6,11 +6,28 @@
 #include "setup.h"
 #include "app.h"
 
+#include <fstream>
 #include <iomanip>
+#include <string>
 
 int main() {
 
-    had::Logger log = had::blacklogger;
+    // had::Logger log = had::blacklogger;
+    std::string log_file_path =
+        "/home/dt/Documents/audioPlayer/logs/log.txt";
+    std::ofstream log_file(log_file_path);
+    if (!log_file.is_open()) {
+        std::cerr << "Error cannot open log file" << std::endl;
+        return -1;
+    }
+    had::Logger log = {
+        [&log_file](std::string mes)
+            { log_file << "Error: " << mes << std::endl; },
+        [&log_file](std::string mes)
+            { log_file << "Warn : " << mes << std::endl; },
+        [&log_file](std::string mes)
+            { log_file << "Info : " << mes << std::endl; },
+    };
 
     Setup setup;
 
@@ -26,7 +43,6 @@ int main() {
 
     // while (true) {}
     app.run();
-
 
     return 0;
 }
