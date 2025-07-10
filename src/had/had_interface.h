@@ -60,6 +60,7 @@ namespace had {
         scrol_up_symbol,
         scrol_middle_symbol,
         scrol_bottom_symbol,
+        spectre_0_symbol,
         spectre_1_symbol,
         spectre_2_symbol,
         spectre_3_symbol,
@@ -69,6 +70,20 @@ namespace had {
         spectre_7_symbol,
         spectre_8_symbol,
     };
+    inline SpSymbol get_spectre_symbol_by_number(int n) {
+        switch (n) {
+            case 0:  return SpSymbol::spectre_0_symbol;
+            case 1:  return SpSymbol::spectre_1_symbol;
+            case 2:  return SpSymbol::spectre_2_symbol;
+            case 3:  return SpSymbol::spectre_3_symbol;
+            case 4:  return SpSymbol::spectre_4_symbol;
+            case 5:  return SpSymbol::spectre_5_symbol;
+            case 6:  return SpSymbol::spectre_6_symbol;
+            case 7:  return SpSymbol::spectre_7_symbol;
+            default: return SpSymbol::spectre_8_symbol;
+        }
+    }
+    constexpr int SPECTRE_SYMBOLS_COUNT = 8;
 
     class Drawer {
         Interface& interface;

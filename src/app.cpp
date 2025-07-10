@@ -8,6 +8,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <string>
 #include <thread>
 
 
@@ -21,15 +22,12 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
     , manager_drawer(interface, 0, 0, 0, 0, log)
     , manager(
         setup.get_default_file_dir(),
-        [&](std::string path) { player.load_and_play(path); },
+        [this](std::string path) { player.load_and_play(path); },
         manager_drawer, setup, log)
     , spectre(
         manager_drawer,
-        [](Spectre::DataArray& data) {
-            data.clear();
-            for (int q = 0; q < 7; ++q) {
-                data.push_back(7);
-            }
+        [this](Spectre::DataArray& data) {
+            player.get_cur_samples(data);
         },
         log)
 {
@@ -41,6 +39,10 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
         [this]() -> had::Res { return spectre.draw(); },
         [this]() -> had::Res { return spectre.resize(); }
     );
+    manager.go();
+    manager.go();
+    manager.go();
+    switch_panel.inc();
 
     event_queue.add_observer(
         [](const Event& event) -> bool {

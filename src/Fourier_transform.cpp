@@ -6,7 +6,7 @@
 
 
 void FourierTransformer::transform(
-    std::vector<std::complex<float>>& input,
+    const std::vector<std::complex<float>>& input,
     std::vector<std::complex<float>>& output
 ) {
     using namespace std::complex_literals;

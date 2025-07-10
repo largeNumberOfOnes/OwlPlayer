@@ -39,7 +39,7 @@ class Player {
 
         void set_on_play_end(std::function<void(void)> call_on_play_end) {
             this->call_on_play_end = call_on_play_end;
-        }
+        } // DEV [Should be replaced in source file]
 
         bool is_enougth_space();
         had::Res draw();
@@ -49,4 +49,6 @@ class Player {
         had::Res play_or_stop();
         had::Res jump(had::seconds pos_rel);
         had::Res jump_rel(had::seconds pos_rel);
+
+        void get_cur_samples(std::vector<std::complex<float>>& ret);
 };

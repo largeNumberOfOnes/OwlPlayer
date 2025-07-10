@@ -53,7 +53,7 @@ namespace had {
             int get_channels();
             int get_samples();
 
-            res_code read_file(void* buf, std::size_t count,
+            res_code read_file(void* buf, std::size_t byte_count,
                                                     std::size_t& retcount);
             res_code set_position(std::size_t position);
 

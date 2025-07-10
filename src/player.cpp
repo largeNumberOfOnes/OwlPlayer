@@ -3,6 +3,7 @@
 #include "had/had_types.h"
 
 #include <cstring>
+#include <string>
 
 
 
@@ -238,4 +239,8 @@ had::Res Player::jump_rel(had::seconds pos_rel) {
     } else {
         return had::Res::error;
     }
+}
+
+void Player::get_cur_samples(std::vector<std::complex<float>>& ret) {
+    audio.get_samples(ret);
 }

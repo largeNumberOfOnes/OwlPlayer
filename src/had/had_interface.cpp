@@ -236,6 +236,7 @@ namespace had {
             case SpSymbol::scrol_middle_symbol: ch_ = L'║'; break;
             case SpSymbol::scrol_bottom_symbol: ch_ = L'▼'; break;
 
+            case SpSymbol::spectre_0_symbol: ch_ = L' '; break;
             case SpSymbol::spectre_1_symbol: ch_ = L'▁'; break;
             case SpSymbol::spectre_2_symbol: ch_ = L'▂'; break;
             case SpSymbol::spectre_3_symbol: ch_ = L'▃'; break;
@@ -268,7 +269,7 @@ namespace had {
 
     Res Drawer::cls() {
         for (int q = 0; q < w; ++q) {
-            mvhline(y = q, x, ' ', w);
+            mvhline(y + q, x, ' ', w);
         } // DEV [Ret code]
         return Res::success;
     }

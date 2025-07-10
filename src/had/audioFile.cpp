@@ -224,11 +224,14 @@ namespace had {
 
         for (int q = 0; q < size; ++q) {
             // buf[q] = static_cast<int>(ref_buf[q]);
-            buf.push_back(static_cast<int>(ref_buf[q]));
+            if (q % 100 == 0) {
+                buf.push_back(static_cast<int>(ref_buf[q]));
+            }
         }
     }
 
-    AudioFile::res_code AudioFile::read_file(void* buf, size_t count, size_t& retcount) {
+    AudioFile::res_code AudioFile::read_file(void* buf, size_t byte_count,
+                                                        size_t& retcount) {
         if (!is_inited) {
             log.log_err("File is not initialized");
             return res_code::other_error;
@@ -245,7 +248,7 @@ namespace had {
             retcount = 0;
             return res_code::end_of_file;
         }
-        std::size_t size = fread(buf, 1, count, file);
+        std::size_t size = fread(buf, 1, byte_count, file);
         if (size == 0) {
             retcount = 0;
             is_end_reached = true;
@@ -256,7 +259,7 @@ namespace had {
         cur_pos += size;
         retcount = size;
 
-        copy_to_buf(reinterpret_cast<short*>(buf), count / 2);
+        copy_to_buf(reinterpret_cast<short*>(buf), byte_count / 2);
 
         return res_code::success;
     }

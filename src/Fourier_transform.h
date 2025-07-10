@@ -7,7 +7,7 @@
 class FourierTransformer {
     public:
         void transform(
-            std::vector<std::complex<float>>& input,
+            const std::vector<std::complex<float>>& input,
             std::vector<std::complex<float>>& output
         );
 };

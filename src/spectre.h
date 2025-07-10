@@ -19,6 +19,7 @@ class Spectre {
         GetDataPtr get_data;
 
         DataArray input_data;
+        DataArray output_data;
         SpData sp_data;
 
         had::Res prepare_data(had::Dem w, had::Dem h);
