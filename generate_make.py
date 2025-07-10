@@ -1,24 +1,8 @@
 #!/bin/python3
 
-# MAKEFILE_NAME="MAKEFILE_AUTOGEN"
-
-# # echo -e "deb:\n\t$MAKEFILE_NAME" > $MAKEFILE_NAME
-
-# # make -f
-
-# HAD_SOURCE=$(make -s -C src/had get_source_files)
-# SOURCE=$(ls src | grep cpp | grep -v test)
-# SOURCE=$SOURCE$(echo -e "\n")$HAD_SOURCE
-
-# target_list=$SOURCE
-# for target in $target_list
-# do
-#     echo $target
-# done
-
-# print('hello')
-
 import subprocess as sp
+
+
 
 compiler = 'clang++-14'
 flags = '-g -std=c++20'
