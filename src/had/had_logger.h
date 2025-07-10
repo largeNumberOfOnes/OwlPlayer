@@ -20,7 +20,7 @@ namespace had {
         [](std::string mes){ std::cerr << "Warn : " << mes << std::endl; },
         [](std::string mes){ std::cerr << "Info : " << mes << std::endl; },
     };
-    static had::Logger blacklogger = {
+    static had::Logger black_logger = {
         [](std::string mes){},
         [](std::string mes){},
         [](std::string mes){},

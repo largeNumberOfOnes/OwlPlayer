@@ -7,30 +7,56 @@
 #pragma once
 
 #include "had/had.h"
-
 #include "fileManager.h"
 #include "eventQueue.h"
 #include "player.h"
+#include "spectre.h"
 #include "setup.h"
+#include "switchPanel.h"
 
 #include <unordered_map>
 
-class App {
 
+
+class App {
     had::Volume jump_val = 5;
 
     using Action = std::string;
     using Actions = std::unordered_map<Action, std::function<void(void)>>;
     Actions actions {
-        {"manager_go"  , [this]() { manager.go(); }},
-        {"manager_up"  , [this]() { manager.up(); }},
-        {"manager_down", [this]() { manager.down(); }},
+        {"manager_go"  , [this]() {
+                switch_panel.call_wrapper(
+                    manager_id,
+                    [this]() { manager.go(); }
+                );
+            }},
+        {"manager_back", [this]() {
+                switch_panel.call_wrapper(
+                    manager_id,
+                    [this]() { manager.back(); }
+                );
+            }},
+        {"manager_up"  , [this]() {
+                switch_panel.call_wrapper(
+                    manager_id,
+                    [this]() { manager.up(); }
+                );
+            }},
+        {"manager_down", [this]() {
+                switch_panel.call_wrapper(
+                    manager_id,
+                    [this]() { manager.down(); }
+                );
+            }},
         {"play_stop",    [this]() { player.play_or_stop(); }},
         {"play_inc",     [this]() { player.jump_rel(jump_val); }},
         {"play_dec",     [this]() { player.jump_rel(-jump_val); }},
         {"play_inc_vol", [this]() {  }},
         {"play_dec_vol", [this]() {  }},
-        {"glob_quit",    [this]() { is_time_to_exit = true; }},
+        {"glob_quit",    [this]() { is_it_time_to_exit = true; }},
+        {"panel_next",   [this]() { 
+            log.log_info("panel_next()");
+            switch_panel.inc(); }},
     };
 
     const had::Logger& log;
@@ -38,19 +64,26 @@ class App {
     had::Interface interface;
 
     EventQueue event_queue;
+    Player player;
+    FileManager manager;
+    Spectre spectre;
+
+    SwitchPanel switch_panel;
+    SwitchPanel::ComponentId manager_id;
+    SwitchPanel::ComponentId spectre_id;
 
     had::Drawer player_drawer;
-    Player player;
-
     had::Drawer manager_drawer;
-    FileManager manager;
+
 
     enum class Circle_res {
         success,
         exit,
     };
-    bool is_time_to_exit = false;
+    bool is_it_time_to_exit = false;
     Circle_res circle();
+
+    had::Res process_keypress();
 
     public:
         App(had::Interface& interface, Setup& setup,

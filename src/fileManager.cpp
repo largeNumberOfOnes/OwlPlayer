@@ -245,3 +245,15 @@ had::Res FileManager::draw() {
 
     return had::Res::success;
 }
+
+void FileManager::search_add_char(char ch) {
+    log.log_info("FileManager::search_add_char");
+}
+
+void FileManager::search_set_string(std::string str) {
+    log.log_info("FileManager::search_set_string");
+}
+
+void FileManager::search_clear_string() {
+    log.log_info("FileManager::search_clear_string");
+}

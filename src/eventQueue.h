@@ -59,5 +59,5 @@ class EventQueue {
             std::function<bool(const Event&)> comp,
             std::function<void(const Event&)> observer
         );
-
+        void unwrap();
 };

@@ -12,10 +12,11 @@
 
 int main() {
 
-    // had::Logger log = had::blacklogger;
+    // had::Logger log = had::black_logger;
     std::string log_file_path =
         "/home/dt/Documents/audioPlayer/logs/log.txt";
-    std::ofstream log_file(log_file_path);
+    std::ofstream log_file(log_file_path, std::ios::app);
+    log_file << "----------------------------- start new log" << std::endl;
     if (!log_file.is_open()) {
         std::cerr << "Error cannot open log file" << std::endl;
         return -1;
@@ -41,7 +42,6 @@ int main() {
 
     App app{interface, setup, log};
 
-    // while (true) {}
     app.run();
 
     return 0;

@@ -38,3 +38,9 @@ void EventQueue::add_observer(
         >(comp, observer)
     );
 }
+
+void EventQueue::unwrap() {
+    while (!empty()) {
+        pop_event();
+    }
+}

@@ -58,4 +58,7 @@ class FileManager {
         had::Res draw_scrol_line();
         had::Res draw();
 
+        void search_add_char(char ch);
+        void search_set_string(std::string str);
+        void search_clear_string();
 };

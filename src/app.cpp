@@ -1,8 +1,10 @@
 #include "app.h"
 
 #include "had/had.h"
+#include "had/had_types.h"
 #include "player.h"
 #include "setup.h"
+#include "spectre.h"
 
 #include <chrono>
 #include <iostream>
@@ -21,7 +23,25 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
         setup.get_default_file_dir(),
         [&](std::string path) { player.load_and_play(path); },
         manager_drawer, setup, log)
+    , spectre(
+        manager_drawer,
+        [](Spectre::DataArray& data) {
+            data.clear();
+            for (int q = 0; q < 7; ++q) {
+                data.push_back(7);
+            }
+        },
+        log)
 {
+    manager_id = switch_panel.add_component(
+        [this]() -> had::Res { return manager.draw(); },
+        [this]() -> had::Res { return manager.resize(); }
+    );
+    spectre_id = switch_panel.add_component(
+        [this]() -> had::Res { return spectre.draw(); },
+        [this]() -> had::Res { return spectre.resize(); }
+    );
+
     event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::draw;
@@ -29,7 +49,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
         [&](const Event& event) -> void {
             // manager.resize(manager_drawer.get_heigth());
             // manager.reload();
-            manager.draw();
+            switch_panel.draw();
             player.draw();
         }
     );
@@ -48,84 +68,11 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             //     interface.get_height() - player.get_height()
             // );
             // manager.resize(manager_drawer.get_height());
-            manager.resize();
+            switch_panel.resize();
             player.resize();
             // manager.reload();
         }
     );
-    // event_queue.add_observer(
-    //     [](const Event& event) -> bool {
-    //         return event.type == Event::EventType::keypress
-    //             && event.seq == had::KeySequence{had::Key::q};
-    //     },
-    //     [&](const Event& event) -> void {
-    //         is_time_to_exit = true;
-    //     }
-    // );
-    // event_queue.add_observer(
-    //     [](const Event& event) -> bool {
-    //         return event.type == Event::EventType::keypress
-    //             && event.seq == had::KeySequence{had::Key::arrow_up};
-    //     },
-    //     [&](const Event& event) -> void {
-    //         manager.up();
-    //     }
-    // );
-    // event_queue.add_observer(
-    //     [](const Event& event) -> bool {
-    //         return event.type == Event::EventType::keypress
-    //             && event.seq == had::KeySequence{had::Key::arrow_down};
-    //     },
-    //     [&](const Event& event) -> void {
-    //         manager.down();
-    //     }
-    // );
-    // event_queue.add_observer(
-    //     [](const Event& event) -> bool {
-    //         return event.type == Event::EventType::keypress
-    //             && event.seq == had::KeySequence{had::Key::j}.add_ctrl(); // DEV [enter]
-    //     },
-    //     [&](const Event& event) -> void {
-    //         // manager_drawer.draw_text(7, 7, "go meth");
-    //         manager.go();
-    //     }
-    // );
-    // event_queue.add_observer(
-    //     [](const Event& event) -> bool {
-    //         return event.type == Event::EventType::keypress
-    //             && event.seq == had::KeySequence{had::Key::backspace};
-    //     },
-    //     [&](const Event& event) -> void {
-    //         manager.back();
-    //     }
-    // );
-    // event_queue.add_observer(
-    //     [](const Event& event) -> bool {
-    //         return event.type == Event::EventType::keypress
-    //             && event.seq == had::KeySequence{had::Key::space};
-    //     },
-    //     [&](const Event& event) -> void {
-    //         player.play_or_stop();
-    //     }
-    // );
-    // event_queue.add_observer(
-    //     [](const Event& event) -> bool {
-    //         return event.type == Event::EventType::keypress
-    //             && event.seq == had::KeySequence{had::Key::arrow_rigth};
-    //     },
-    //     [&](const Event& event) -> void {
-    //         player.jump_rel(5);
-    //     }
-    // );
-    // event_queue.add_observer(
-    //     [](const Event& event) -> bool {
-    //         return event.type == Event::EventType::keypress
-    //             && event.seq == had::KeySequence{had::Key::arrow_left};
-    //     },
-    //     [&](const Event& event) -> void {
-    //         player.jump_rel(-5);
-    //     }
-    // );
 
     for (const auto& it : setup.get_key_bindings()) {
         if (actions.contains(it.first)) {
@@ -145,6 +92,15 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
     }
 }
 
+had::Res App::process_keypress() {
+    had::KeySequence seq = interface.catch_key_seq();
+    if (!seq.is_empty()) {
+        event_queue.push_event(Event::create_keypress(seq));
+    }
+
+    return had::Res::success;
+}
+
 App::Circle_res App::circle() {
     interface.set_color(setup.colors.def);
 
@@ -158,21 +114,16 @@ App::Circle_res App::circle() {
         interface.get_height() - player.get_height()
     );
 
-    had::KeySequence seq = interface.catch_key_seq();
-    if (!seq.is_empty()) {
-        event_queue.push_event(Event::create_keypress(seq));
-    }
+    process_keypress();
     if (interface.is_resized()) {
         event_queue.push_event(Event::create_resize());
     }
     event_queue.push_event(Event::create_draw());
-    while (!event_queue.empty()) {
-        event_queue.pop_event();
-    }
 
+    event_queue.unwrap();
     interface.update();
 
-    if (is_time_to_exit) {
+    if (is_it_time_to_exit) {
         return Circle_res::exit;
     }
     return Circle_res::success;
