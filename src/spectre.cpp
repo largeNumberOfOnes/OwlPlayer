@@ -25,26 +25,18 @@ had::Res Spectre::prepare_data(had::Dem w, had::Dem h) {
         return had::Res::success;
     }
     FourierTransformer{}.transform(input_data, output_data);
-    // output_data.clear();
-    // for (const auto& it : input_data) {
-    //     output_data.push_back(it);
-    // }
 
     sp_data.clear();
-    float max = std::abs(*std::max_element(
-        output_data.cbegin(),
-        output_data.cend(),
-        [](const auto& a, const auto& b) {
-            return std::abs(a) < std::abs(b);
-        }
-    ));
     for (int q = 0; q < std::min<had::Dem>(w, output_data.size()); ++q) {
         sp_data.push_back(
             static_cast<int>(
                 std::abs(output_data[output_data.size() / w * q])
-                    / max * h * had::SPECTRE_SYMBOLS_COUNT / 2
             )
         );
+    }
+    float max = *std::max_element(sp_data.cbegin(), sp_data.cend());
+    for (auto& it : sp_data) {
+        it *= 1 / max * h * had::SPECTRE_SYMBOLS_COUNT * 3 / 4;
     }
 
     return had::Res::success;
@@ -54,9 +46,15 @@ had::Res Spectre::draw() {
     get_data(input_data);
     prepare_data(drawer.get_width(), drawer.get_height());
     drawer.cls();
+    int rrr = 3;
+    int ttt = 1;
     for (int q = 0; q < sp_data.size(); ++q) {
-        int w = sp_data[q] / had::SPECTRE_SYMBOLS_COUNT;
-        int reminder = sp_data[q] % had::SPECTRE_SYMBOLS_COUNT;
+        int ind = q - q % rrr;
+        if (q - ind < ttt) {
+            continue;
+        }
+        int w = sp_data[ind] / had::SPECTRE_SYMBOLS_COUNT;
+        int reminder = sp_data[ind] % had::SPECTRE_SYMBOLS_COUNT;
         drawer.draw_sp_symbol(
             q, drawer.get_height() - 1 - w,
             had::get_spectre_symbol_by_number(reminder)

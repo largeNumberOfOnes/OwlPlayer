@@ -224,7 +224,7 @@ namespace had {
 
         for (int q = 0; q < size; ++q) {
             // buf[q] = static_cast<int>(ref_buf[q]);
-            if (q % 100 == 0) {
+            if (q % 300 == 0) {
                 buf.push_back(static_cast<int>(ref_buf[q]));
             }
         }
