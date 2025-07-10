@@ -60,6 +60,8 @@ namespace had {
         scrol_up_symbol,
         scrol_middle_symbol,
         scrol_bottom_symbol,
+        back_arrow_symbol,
+        
         spectre_0_symbol,
         spectre_1_symbol,
         spectre_2_symbol,

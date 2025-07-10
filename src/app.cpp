@@ -39,10 +39,6 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
         [this]() -> had::Res { return spectre.draw(); },
         [this]() -> had::Res { return spectre.resize(); }
     );
-    manager.go();
-    manager.go();
-    manager.go();
-    switch_panel.inc();
 
     event_queue.add_observer(
         [](const Event& event) -> bool {

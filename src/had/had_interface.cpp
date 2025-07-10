@@ -235,6 +235,7 @@ namespace had {
             case SpSymbol::scrol_up_symbol    : ch_ = L'▲'; break;
             case SpSymbol::scrol_middle_symbol: ch_ = L'║'; break;
             case SpSymbol::scrol_bottom_symbol: ch_ = L'▼'; break;
+            case SpSymbol::back_arrow_symbol  : ch_ = L'↪'; break;
 
             case SpSymbol::spectre_0_symbol: ch_ = L' '; break;
             case SpSymbol::spectre_1_symbol: ch_ = L'▁'; break;

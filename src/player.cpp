@@ -1,5 +1,6 @@
 #include "player.h"
 #include "had/had.h"
+#include "had/had_interface.h"
 #include "had/had_types.h"
 
 #include <cstring>
@@ -148,6 +149,18 @@ had::Res Player::draw_timeline() {
     return had::Res::success;
 }
 
+had::Res Player::draw_composition_name() {
+    if (false
+        || drawer.draw_sp_symbol(0, 0, had::SpSymbol::back_arrow_symbol)
+        || drawer.draw_text(3, 0, cur_composition_path.c_str())
+    ) {
+        log.log_err("Cannot draw timeline");
+        return had::Res::error;
+    }
+
+    return had::Res::success;
+}
+
 had::Res Player::draw() {
 
     Grid grid;
@@ -162,14 +175,17 @@ had::Res Player::draw() {
     }
 
     if (false
+        || drawer.cls()
         || draw_volume()
         || draw_timeline()
+        || draw_composition_name()
     ) {
         log.log_err("Cannot draw player");
         return had::Res::error;
     }
 
     if (audio.was_finalized()) {
+        cur_composition_path = DEFAULT_COMPOSITION_PATH;
         call_on_play_end();
     }
 
@@ -202,6 +218,7 @@ had::Res Player::load_and_play(std::string path) {
     if (audio.load(path) == had::Audio::res_code::success
         && audio.play() == had::Audio::res_code::success
     ) {
+        cur_composition_path = path;
         return had::Res::success;
     } else {
         return had::Res::error;

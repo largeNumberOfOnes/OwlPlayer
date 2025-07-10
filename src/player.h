@@ -14,6 +14,8 @@ class Player {
     had::Audio audio;
     const had::Logger& log;
     had::Drawer& drawer;
+    std::string DEFAULT_COMPOSITION_PATH = "******";
+    std::string cur_composition_path = DEFAULT_COMPOSITION_PATH;
 
     struct Grid {
         had::Dem vol_x = 0;
@@ -28,6 +30,7 @@ class Player {
 
     had::Res draw_volume();
     had::Res draw_timeline();
+    had::Res draw_composition_name();
 
     std::function<void(void)> call_on_play_end = []() {};
 
