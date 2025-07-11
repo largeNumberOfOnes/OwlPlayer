@@ -1,4 +1,6 @@
-
+/**
+ * Base types.
+ */
 
 #pragma once
 
@@ -13,4 +15,16 @@ namespace had {
         success = 0,
         error   = 1,
     };
+    // class Res {
+    //     bool val;
+    //     public:
+    //         static const bool success = true;
+    //         static const bool error = false;
+    //         Res() : val(false) {}
+    //         Res(bool val) : val(val) {}
+    //         Res(const Res& other) : val(other.val) {}
+    //         operator bool() {
+    //             return val;
+    //         }
+    // };
 };

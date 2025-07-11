@@ -1,4 +1,7 @@
-
+/**
+ * This module defines the keys and key combinations entered by the user,
+ *    as well as the functions for interacting with them.
+ */
 
 #pragma once
 
@@ -9,7 +12,6 @@
 
 
 namespace had {
-
     enum struct Key {
         a, b, c, d, e, f, g, h, i, j, k, l, m,
         n, o, p, q, r, s, t, u, v, w, x, y, z,
@@ -21,9 +23,11 @@ namespace had {
         enter,
         backspace,
     };
+
     inline Key char_to_key(char ch) { // Only for a, b, ..., z
         return static_cast<Key>(ch - 'a');
     }
+
     inline std::string key_to_str(Key key) {
         int num = static_cast<int>(key);
         if (0 <= num && num <= 25) {
@@ -40,7 +44,7 @@ namespace had {
             case Key::arrow_down : return "arrow_down";
             case Key::arrow_left : return "arrow_left";
             case Key::arrow_rigth: return "arrow_rigth";
-            default:         return "unknown";
+            default              : return "unknown";
         }
     }
     
