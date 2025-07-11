@@ -48,13 +48,14 @@ class App {
                     [this]() { manager.down(); }
                 );
             }},
-        {"play_stop",    [this]() { player.play_or_stop(); }},
-        {"play_inc",     [this]() { player.jump_rel(jump_val); }},
-        {"play_dec",     [this]() { player.jump_rel(-jump_val); }},
-        {"play_inc_vol", [this]() {  }},
-        {"play_dec_vol", [this]() {  }},
-        {"glob_quit",    [this]() { is_it_time_to_exit = true; }},
-        {"panel_next",   [this]() { 
+        {"play_stop",      [this]() { player.play_or_stop(); }},
+        {"play_inc",       [this]() { player.jump_rel(jump_val); }},
+        {"play_dec",       [this]() { player.jump_rel(-jump_val); }},
+        {"play_inc_vol",   [this]() {  }},
+        {"play_dec_vol",   [this]() {  }},
+        {"play_hide_name", [this]() { player.hide_comp_name(); }},
+        {"glob_quit",      [this]() { is_it_time_to_exit = true; }},
+        {"panel_next",     [this]() { 
             log.log_info("panel_next()");
             switch_panel.inc(); }},
     };

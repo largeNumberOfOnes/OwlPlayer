@@ -32,6 +32,8 @@ class Player {
     had::Res draw_timeline();
     had::Res draw_composition_name();
 
+    bool is_comp_name_hidden = false;
+
     std::function<void(void)> call_on_play_end = []() {};
 
     public:
@@ -52,6 +54,8 @@ class Player {
         had::Res play_or_stop();
         had::Res jump(had::seconds pos_rel);
         had::Res jump_rel(had::seconds pos_rel);
+
+        void hide_comp_name();
 
         void get_cur_samples(std::vector<std::complex<float>>& ret);
 };

@@ -150,9 +150,12 @@ had::Res Player::draw_timeline() {
 }
 
 had::Res Player::draw_composition_name() {
+    const std::string& printed_comp_name =
+        is_comp_name_hidden ? DEFAULT_COMPOSITION_PATH
+                            : cur_composition_path;
     if (false
         || drawer.draw_sp_symbol(0, 0, had::SpSymbol::back_arrow_symbol)
-        || drawer.draw_text(3, 0, cur_composition_path.c_str())
+        || drawer.draw_text(3, 0, printed_comp_name.c_str())
     ) {
         log.log_err("Cannot draw timeline");
         return had::Res::error;
@@ -260,4 +263,8 @@ had::Res Player::jump_rel(had::seconds pos_rel) {
 
 void Player::get_cur_samples(std::vector<std::complex<float>>& ret) {
     audio.get_samples(ret);
+}
+
+void Player::hide_comp_name() {
+    is_comp_name_hidden = !is_comp_name_hidden;
 }
