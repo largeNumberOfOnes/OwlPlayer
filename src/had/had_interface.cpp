@@ -5,6 +5,7 @@
 #include <ncurses.h>
 #include <locale.h>
 #include <assert.h>
+#include <string_view>
 
 
 
@@ -250,8 +251,15 @@ namespace had {
         return draw_wide_symbol(x, y, ch_);
     }
 
-    Res Drawer::draw_text(Dem x, Dem y, std::string str) {
-        if (mvprintw(this->y + y, this->x + x, "%s", str.c_str()) == OK)
+    Res Drawer::draw_text(Dem x, Dem y, std::string_view str) {
+        if (mvaddstr(this->y + y, this->x + x, str.data()) == OK)
+            return Res::success;
+        else
+            return Res::error;
+    }
+
+    Res Drawer::draw_text_n(Dem x, Dem y, std::string_view str, int n) {
+        if (mvaddnstr(this->y + y, this->x + x, str.data(), n) == OK)
             return Res::success;
         else
             return Res::error;

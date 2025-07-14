@@ -7,6 +7,7 @@
 #include "had_logger.h"
 #include "had_types.h"
 #include <curses.h>
+#include <string_view>
 
 
 namespace had {
@@ -108,7 +109,8 @@ namespace had {
             Res draw_symbol(Dem x, Dem y, char ch);
             Res draw_wide_symbol(Dem x, Dem y, wchar_t ch);
             Res draw_sp_symbol(Dem x, Dem y, SpSymbol ch);
-            Res draw_text(Dem x, Dem y, std::string str);
+            Res draw_text(Dem x, Dem y, std::string_view str);
+            Res draw_text_n(Dem x, Dem y, std::string_view str, int n);
             Res draw_slider(Dem x, Dem y, Dem len, Dem val);
             Res cls();
 

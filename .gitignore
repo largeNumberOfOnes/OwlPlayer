@@ -1,8 +1,10 @@
 .gitignore
 
 bin/
+binary/
 execs/
 logs/
 test_data/
 objects/
 .clangd
+

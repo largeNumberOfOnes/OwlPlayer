@@ -57,6 +57,11 @@ test_had_audio:
 		$(LIBS) -o ../../execs/test_had_audio.out
 	../../execs/test_had_audio.out
 
+test_had_unicode:
+	$(CC) $(DFLAGS) had_unicode.cpp had_unicode.test.cpp \
+		$(LIBS) -o ../../execs/test_had_unicode.out
+	../../execs/test_had_unicode.out
+
 test_had_keys:
 	$(CC) $(DFLAGS) had_interface.cpp had_keys.test.cpp \
 		$(LIBS) -o ../../execs/test_had_keys.out

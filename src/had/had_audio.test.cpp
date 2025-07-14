@@ -14,7 +14,7 @@ int main() {
 
 
     had::Res result;
-    had::Audio audio{result, had::stdlogger};
+    had::Audio audio{result, had::std_logger};
 
     // audio.load("/home/dt/Documents/audioPlayer/data/alyans_na_zare.mp3");
     // audio.load("/home/dt/Documents/audioPlayer/data/Korn - Lost In The Grandeur.mp3");

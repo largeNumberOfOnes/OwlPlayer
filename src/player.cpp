@@ -5,6 +5,7 @@
 
 #include <cstring>
 #include <string>
+#include <string_view>
 
 
 
@@ -212,7 +213,7 @@ had::Dem Player::get_height() {
     return min_height;
 }
 
-had::Res Player::load_and_play(std::string path) {
+had::Res Player::load_and_play(std::string_view path) {
     if (audio.is_playing()) {
         if (audio.stop() != had::Audio::res_code::success) {
             return had::Res::error;

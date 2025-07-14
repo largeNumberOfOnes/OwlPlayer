@@ -68,7 +68,7 @@ namespace had {
             Audio(Res& result, const Logger& log);
             ~Audio();
 
-            res_code load(std::string path);
+            res_code load(std::string_view path);
             res_code drop();
             res_code stop();
             res_code play();

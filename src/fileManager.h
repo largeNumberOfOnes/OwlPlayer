@@ -1,23 +1,27 @@
+/**
+ * Graphical file manager.
+ */
+
 #pragma once
 
 #include "had/had.h"
-#include <cstddef>
-#include <vector>
-#include <filesystem>
-
-#include "had/had_interface.h"
-#include "had/had_logger.h"
 #include "setup.h"
+
+#include <filesystem>
+#include <cstddef>
+#include <string_view>
+#include <vector>
 
 
 
 class FileManager {
-    static had::Dem const min_w = 14;
-    static had::Dem const line_offset = 4;
-    static had::Dem const free_space = 5;
+    static constexpr had::Dem line_offset      = 4;
+    static constexpr had::Dem line_free_space  = 5;
+    static constexpr had::Dem min_w = line_offset + line_free_space + 5;
+    static constexpr had::Dem min_h = 3;
 
     static had::Dem const draw_line_buf_size = 1024;
-    char* draw_line_buf = nullptr;
+    // char* draw_line_buf = nullptr;
     // static inline had::dem heigth_to_size(had::dem h) { return h - 2; }
 
     had::Drawer& drawer;
@@ -30,21 +34,31 @@ class FileManager {
     had::Dem top = 0;
     had::Dem size = 0;
     had::Dem list_size = 0;
-    std::vector<std::filesystem::directory_entry> list;
 
-    FileManager& operator=(FileManager const&) = delete;
-    FileManager(FileManager const&) = delete;
+    struct File {
+        bool reduce;
+        std::size_t reduce_len;
+        std::filesystem::directory_entry file;
+    };
+    std::vector<File> list;
 
-    public:
-        static had::Dem const min_h = 3;
-        
+    had::Res draw_tree_symbol(int q);
+    had::Res draw_file_name(int q);
+    had::Res draw_scrol_line();
+
+    had::Res resize_width();
+    had::Res resize_height();
+
+    public:        
         FileManager(
             std::string dir, 
-            std::function<void(std::string)> call_on_file,
+            std::function<void(std::string_view)> call_on_file,
             had::Drawer& drawer,
             const Setup& setup,
             const had::Logger& log
         );
+        FileManager(FileManager const&) = delete;
+        FileManager& operator=(FileManager const&) = delete;
         ~FileManager();
 
         had::Res go();
@@ -55,10 +69,9 @@ class FileManager {
         had::Res resize();
 
         bool is_enougth_space(had::Dem w, had::Dem h);
-        had::Res draw_scrol_line();
         had::Res draw();
 
         void search_add_char(char ch);
-        void search_set_string(std::string str);
+        void search_set_string(std::string_view str);
         void search_clear_string();
 };

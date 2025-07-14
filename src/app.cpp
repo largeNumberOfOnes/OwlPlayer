@@ -1,13 +1,13 @@
 #include "app.h"
 
 #include "had/had.h"
-#include "had/had_types.h"
 #include "player.h"
 #include "setup.h"
 #include "spectre.h"
 
-#include <chrono>
+#include <string_view>
 #include <iostream>
+#include <chrono>
 #include <string>
 #include <thread>
 
@@ -22,7 +22,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
     , manager_drawer(interface, 0, 0, 0, 0, log)
     , manager(
         setup.get_default_file_dir(),
-        [this](std::string path) { player.load_and_play(path); },
+        [this](std::string_view path) { player.load_and_play(path); },
         manager_drawer, setup, log)
     , spectre(
         manager_drawer,

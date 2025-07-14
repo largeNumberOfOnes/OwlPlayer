@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <mpg123.h>
 #include <sndfile.h>
+#include <string_view>
 #include <unistd.h>
 
 #include "had_logger.h"
@@ -145,7 +146,7 @@ namespace had {
             return ret;
     }
 
-    AudioFile::res_code AudioFile::load(const std::string& path) {
+    AudioFile::res_code AudioFile::load(std::string_view path) {
         log.log_info("init() file");
 
         if (is_inited) {
@@ -168,7 +169,7 @@ namespace had {
         //     return Res::error;
         // }
         // err = read_wav(path.c_str());
-        err = read_mp3(path.c_str());
+        err = read_mp3(path.data());
         if (err == Res::error) {
             log.log_err("Cannot conver file to pcm");
             return res_code::other_error;

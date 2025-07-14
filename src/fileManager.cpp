@@ -2,18 +2,22 @@
 
 #include "had/had.h"
 #include "had/had_interface.h"
+#include "had/had_types.h"
+#include "had/had_unicode.h"
 
 #include <algorithm>
 
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <string>
+#include <string_view>
 
 
 
 FileManager::FileManager(
     std::string dir, 
-    std::function<void(std::string)> call_on_file,
+    std::function<void(std::string_view)> call_on_file,
     had::Drawer& drawer,
     const Setup& setup,
     const had::Logger& log
@@ -24,12 +28,6 @@ FileManager::FileManager(
     , setup(setup)
     , log(log)
 {
-    draw_line_buf = new char[draw_line_buf_size];
-    if (!draw_line_buf)
-        log.log_err("draw_line_buf is not allocated");
-    for (had::Dem q = 0; q < draw_line_buf_size; ++q)
-        draw_line_buf[q] = ' ';
-
     if (!this->dir.ends_with('/')) {
         this->dir += '/';
     }
@@ -37,16 +35,16 @@ FileManager::FileManager(
 }
 
 FileManager::~FileManager() {
-    delete [] draw_line_buf;
+
 }
 
 had::Res FileManager::go() {
-    if (list[pointer].is_directory()) {
-        dir = list[pointer].path();
+    if (list[pointer].file.is_directory()) {
+        dir = list[pointer].file.path();
         dir += '/';
         reload();
-    } else if (list[pointer].is_regular_file()) {
-        std::string path = list[pointer].path();
+    } else if (list[pointer].file.is_regular_file()) {
+        std::string path = list[pointer].file.path();
         if (path.ends_with(".mp3")) {
             call_on_file(path);
         } // DEV [for temporary safety]
@@ -107,17 +105,21 @@ had::Res FileManager::reload() {
 
     // DEV [maybe there should be placed try-catch block]
     for (const auto& entry : fs::directory_iterator(dir)) {
-        list.push_back(entry);
+        list.push_back(File{
+            .reduce     = false,
+            .reduce_len = 0,
+            .file       = entry
+        });
     }
 
     std::sort(
         list.begin(), list.end(),
         [](auto a, auto b) {
-            if (a.is_directory() and b.is_directory()
-                || a.is_regular_file() and b.is_regular_file()
+            if (a.file.is_directory() and b.file.is_directory()
+                || a.file.is_regular_file() and b.file.is_regular_file()
             ) {
-                return a.path() < b.path();
-            } else if (a.is_directory()) {
+                return a.file.path() < b.file.path();
+            } else if (a.file.is_directory()) {
                 return true;
             } else {
                 return false;
@@ -140,7 +142,27 @@ had::Res FileManager::reload() {
     return had::Res::success;
 }
 
-had::Res FileManager::resize() {
+had::Res FileManager::resize_width() {
+    static had::Dem old_w = drawer.get_width();
+    had::Dem w = drawer.get_width();
+    if (old_w != w) {
+        for (auto& it : list) {
+            had::UnicodeStringView uni_str{
+                it.file.path().filename().c_str()
+            };
+            std::size_t char_len = uni_str.get_char_len();
+            it.reduce = (w < char_len + line_offset + line_free_space);
+            if (it.reduce) {
+                it.reduce_len = uni_str.get_substr_byte_len(
+                    w - line_offset - line_free_space
+                );
+            }
+        }
+    } 
+    return had::Res::success;
+}
+
+had::Res FileManager::resize_height() {
     size = drawer.get_height() - 2;
     if (pointer >= top + size) {
         if (size < list_size)
@@ -154,7 +176,14 @@ had::Res FileManager::resize() {
         else
             top = 0;
     }
-    if (!drawer.cls() && !draw()) {
+    return had::Res::success;
+}
+
+had::Res FileManager::resize() {
+    if (false
+        || resize_width()
+        || resize_height()
+    ) {
         return had::Res::success;
     } else {
         return had::Res::error;
@@ -163,6 +192,48 @@ had::Res FileManager::resize() {
 
 bool FileManager::is_enougth_space(had::Dem w, had::Dem h) {
     return w >= min_w && h >= min_h;
+}
+
+had::Res FileManager::draw_tree_symbol(int q) {
+    had::SpSymbol list_symbol = (top + q + 1 == list_size)
+                              ? had::SpSymbol::list_end_symbol
+                              : had::SpSymbol::list_symbol;
+    if (false
+        || drawer.draw_sp_symbol(1, q + 1, list_symbol)
+        || drawer.draw_sp_symbol(2, q + 1, had::SpSymbol::list_line_symbol)
+    ) {
+        log.log_info("Cannot draw_tree_symbol");
+        return had::Res::error;
+    }
+    return had::Res::success;
+}
+
+had::Res FileManager::draw_file_name(int q) {
+    const File& list_elem = list[top+q];
+    bool is_selected  = (top + q == pointer);
+    bool is_directory = list_elem.file.is_directory();
+    had::Color file_color =
+          ( is_selected &&  is_directory) ? setup.colors.dir_selected
+        : ( is_selected && !is_directory) ? setup.colors.file_selected
+        : (!is_selected &&  is_directory) ? setup.colors.dir
+        : (!is_selected && !is_directory) ? setup.colors.file
+        : setup.colors.def;
+    drawer.set_color(file_color);
+    if (list_elem.reduce) {
+        had::Dem w = drawer.get_width();
+        drawer.draw_text_n(
+            line_offset, q + 1,
+            list_elem.file.path().filename().c_str(),
+            list_elem.reduce_len
+        );
+        drawer.draw_text(w - line_free_space, q + 1, "... ");
+    } else {
+        drawer.draw_text(
+            line_offset, q + 1, list_elem.file.path().filename().c_str()
+        );
+    }
+    drawer.set_color(setup.colors.def);
+    return had::Res::success;
 }
 
 had::Res FileManager::draw_scrol_line() {
@@ -191,58 +262,15 @@ had::Res FileManager::draw() {
         log.log_err("bad sizes");
         return had::Res::error;
     }
-
-    for (had::Dem q = 0; q < w; ++q)
-        draw_line_buf[q] = ' ';
-    for (std::size_t q = 0; q < h; ++q)
-        drawer.draw_text(0, q, draw_line_buf);
-        
+    drawer.cls();   
     drawer.draw_text(0, 0, dir.c_str());
     std::size_t files_count = (size > list_size) ? list_size : size;
-
     for (std::size_t q = 0; q < files_count; ++q) {
-        std::strncpy(
-            draw_line_buf + line_offset,
-            list[top+q].path().filename().c_str(),
-            draw_line_buf_size - line_offset
-        );
-
-        std::size_t str_len = std::strlen(draw_line_buf + line_offset);
-
-        if (str_len + free_space > w)
-            std::strcpy(draw_line_buf + w - free_space, "...  ");
-
-        // draw_line_buf[1] = (top + q == pointer) ? '>' : ' ';
-
-        if (top + q == pointer) {
-            // if (list[top+q].is_directory()) intf::setcol_dir_selected();
-            if (list[top+q].is_directory()) {
-                drawer.set_color(setup.colors.dir_selected);
-            } else {
-                drawer.set_color(setup.colors.file_selected);
-            }
-            // draw_line_buf[1] = '>';
-        } else {
-            if (list[top+q].is_directory()) {
-                drawer.set_color(setup.colors.dir);
-            } else {
-                drawer.set_color(setup.colors.file);
-            }
-            // draw_line_buf[1] = ' ';
-        }
-        drawer.draw_text(0, q + 1, draw_line_buf);
-        drawer.set_color(setup.colors.def);
-        if (top + q + 1 == list_size) {
-            drawer.draw_sp_symbol(1, q + 1, had::SpSymbol::list_end_symbol);
-        } else {
-            drawer.draw_sp_symbol(1, q + 1, had::SpSymbol::list_symbol);
-        }
-        drawer.draw_sp_symbol(2, q + 1, had::SpSymbol::list_line_symbol);
+        draw_tree_symbol(q);
+        draw_file_name(q);
     }
-
     drawer.draw_symbol(0, h-1, ':');
     draw_scrol_line();
-
     return had::Res::success;
 }
 
@@ -250,7 +278,7 @@ void FileManager::search_add_char(char ch) {
     log.log_info("FileManager::search_add_char");
 }
 
-void FileManager::search_set_string(std::string str) {
+void FileManager::search_set_string(std::string_view str) {
     log.log_info("FileManager::search_set_string");
 }
 

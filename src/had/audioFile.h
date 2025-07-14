@@ -8,6 +8,7 @@
 #include <functional>
 #include <string>
 #include <cstddef>
+#include <string_view>
 #include <vector>
 
 #include "had_logger.h"
@@ -42,7 +43,7 @@ namespace had {
                 other_error,
             };
 
-            res_code load(const std::string& path);
+            res_code load(std::string_view path);
             res_code erase();
             AudioFile(const Logger& log);
             ~AudioFile();

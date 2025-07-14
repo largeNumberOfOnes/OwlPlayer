@@ -19,6 +19,7 @@
 #include <spa/param/props.h>
 
 #include <mutex>
+#include <string_view>
 
 namespace had {
 
@@ -132,7 +133,7 @@ namespace had {
         return res_code::success;
     }
 
-    Audio::res_code Audio::load(std::string path) {
+    Audio::res_code Audio::load(std::string_view path) {
         std::lock_guard<std::mutex> lock{mutex};
         audio_file.load(path);
         pw_thread_loop_lock(data.loop);

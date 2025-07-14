@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
+#include <string_view>
 
 int main() {
 
@@ -22,11 +23,11 @@ int main() {
         return -1;
     }
     had::Logger log = {
-        [&log_file](std::string mes)
+        [&log_file](std::string_view mes)
             { log_file << "Error: " << mes << std::endl; },
-        [&log_file](std::string mes)
+        [&log_file](std::string_view mes)
             { log_file << "Warn : " << mes << std::endl; },
-        [&log_file](std::string mes)
+        [&log_file](std::string_view mes)
             { log_file << "Info : " << mes << std::endl; },
     };
 

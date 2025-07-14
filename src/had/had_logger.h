@@ -6,26 +6,27 @@
 #include <functional>
 #include <iostream>
 #include <string>
+#include <string_view>
 
 
 
 namespace had {
     class Logger {
         public:
-            std::function<void(std::string)> log_err;
-            std::function<void(std::string)> log_warn;
-            std::function<void(std::string)> log_info;
+            std::function<void(std::string_view)> log_err;
+            std::function<void(std::string_view)> log_warn;
+            std::function<void(std::string_view)> log_info;
     };
 
-    static had::Logger stdlogger = {
-        [](std::string mes){ std::cerr << "Error: " << mes << std::endl; },
-        [](std::string mes){ std::cerr << "Warn : " << mes << std::endl; },
-        [](std::string mes){ std::cerr << "Info : " << mes << std::endl; },
+    static had::Logger std_slogger = {
+        [](std::string_view mes){ std::cerr << "Error: " << mes << std::endl; },
+        [](std::string_view mes){ std::cerr << "Warn : " << mes << std::endl; },
+        [](std::string_view mes){ std::cerr << "Info : " << mes << std::endl; },
     };
     
     static had::Logger black_logger = {
-        [](std::string mes){},
-        [](std::string mes){},
-        [](std::string mes){},
+        [](std::string_view mes){},
+        [](std::string_view mes){},
+        [](std::string_view mes){},
     };
 };

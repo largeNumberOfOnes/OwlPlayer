@@ -50,7 +50,7 @@ class Player {
         had::Res draw();
         had::Res resize();
 
-        had::Res load_and_play(std::string path);
+        had::Res load_and_play(std::string_view path);
         had::Res play_or_stop();
         had::Res jump(had::seconds pos_rel);
         had::Res jump_rel(had::seconds pos_rel);
