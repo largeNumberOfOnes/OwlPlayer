@@ -99,6 +99,32 @@ had::Res FileManager::down() {
     return had::Res::success;
 }
 
+had::Res FileManager::select(had::Dem new_pointer) {
+    if (list_size == 0) {
+        return had::Res::success;
+    }
+    if (list_size <= new_pointer) {
+        return had::Res::error;
+    }
+    if (list_size <= size) {
+        pointer = new_pointer;
+        return had::Res::success;
+    }
+    if (top <= new_pointer && new_pointer < top + size) {
+        pointer = new_pointer;
+        return had::Res::success;
+    }
+    if (new_pointer < size / 2) {
+        top = 0;
+        pointer = new_pointer;
+    } else {
+        top = new_pointer - size / 2;
+        pointer = new_pointer;
+        return had::Res::success;
+    }
+    return had::Res::error;
+}
+
 had::Res FileManager::reload() {
     list.clear();
     namespace fs = std::filesystem;

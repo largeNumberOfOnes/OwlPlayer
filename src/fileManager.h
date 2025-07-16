@@ -62,9 +62,10 @@ class FileManager {
         had::Res back();
         had::Res up();
         had::Res down();
-        // had::Res select();
+        had::Res select(had::Dem new_pointer);
         had::Res reload();
         had::Res resize();
+        had::Res draw();
 
         // bool is_mp3_file(had::Dem elem_number);
         // bool is_cur_mp3_file();
@@ -72,7 +73,6 @@ class FileManager {
         // had::Dem get_files_count_in_dir();
 
         bool is_enougth_space(had::Dem w, had::Dem h);
-        had::Res draw();
 
         void search_add_char(char ch);
         void search_set_string(std::string_view str);
