@@ -8,12 +8,15 @@
 
 #include "had/had.h"
 #include "fileManager.h"
+#include "switchPanel.h"
+#include "queuePanel.h"
 #include "eventQueue.h"
 #include "player.h"
 #include "spectre.h"
 #include "setup.h"
-#include "switchPanel.h"
 
+#include <optional>
+#include <string_view>
 #include <unordered_map>
 
 
@@ -68,14 +71,34 @@ class App {
     Player player;
     FileManager manager;
     Spectre spectre;
+    QueuePanel queue;
 
     SwitchPanel switch_panel;
     SwitchPanel::ComponentId manager_id;
     SwitchPanel::ComponentId spectre_id;
 
     had::Drawer player_drawer;
-    had::Drawer manager_drawer;
+    had::Drawer switch_panel_drawer;
 
+    class Shuffler {
+        enum class Mode {
+            none,
+            shuffle,
+            queue,
+            sequential,
+        } mode = Mode::sequential;
+        FileManager& manager;
+        QueuePanel& queue;
+        std::string_view get_sequential();
+        std::string_view get_shuffle();
+        public:
+            Shuffler(
+                FileManager& manager,
+                QueuePanel& queue
+            ) : manager(manager), queue(queue) {}
+
+            std::optional<std::string_view> get_composition();
+    } Shuffler{manager, queue};
 
     enum class Circle_res {
         success,

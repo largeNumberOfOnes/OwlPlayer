@@ -1,10 +1,9 @@
 #include "app.h"
 
 #include "had/had.h"
-#include "player.h"
-#include "setup.h"
-#include "spectre.h"
+#include "had/had_types.h"
 
+#include <optional>
 #include <string_view>
 #include <iostream>
 #include <chrono>
@@ -19,17 +18,18 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
     , log(log)
     , player_drawer(interface, 0, 0, 0, 0, log)
     , player(player_drawer, log)
-    , manager_drawer(interface, 0, 0, 0, 0, log)
+    , switch_panel_drawer(interface, 0, 0, 0, 0, log)
     , manager(
         setup.get_default_file_dir(),
         [this](std::string_view path) { player.load_and_play(path); },
-        manager_drawer, setup, log)
+        switch_panel_drawer, setup, log)
     , spectre(
-        manager_drawer,
+        switch_panel_drawer,
         [this](Spectre::DataArray& data) {
             player.get_cur_samples(data);
         },
         log)
+    , queue(switch_panel_drawer, log)
 {
     manager_id = switch_panel.add_component(
         [this]() -> had::Res { return manager.draw(); },
@@ -39,14 +39,16 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
         [this]() -> had::Res { return spectre.draw(); },
         [this]() -> had::Res { return spectre.resize(); }
     );
+    spectre_id = switch_panel.add_component(
+        [this]() -> had::Res { return queue.draw(); },
+        [this]() -> had::Res { return queue.resize(); }
+    );
 
     event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::draw;
         },
         [&](const Event& event) -> void {
-            // manager.resize(manager_drawer.get_heigth());
-            // manager.reload();
             switch_panel.draw();
             player.draw();
         }
@@ -106,7 +108,7 @@ App::Circle_res App::circle() {
         0, interface.get_height() - player.get_height(),
         interface.get_width(), player.get_height()
     );
-    manager_drawer.set(
+    switch_panel_drawer.set(
         0, 0,
         interface.get_width(),
         interface.get_height() - player.get_height()
@@ -139,4 +141,26 @@ void App::run() {
         std::this_thread::sleep_until(time_start + time_period);
     }
 
+}
+
+std::string_view App::Shuffler::get_sequential() {
+    // had::Dem cur = manager.get_cur_elem();
+    // manager.down();
+    // std::size_t q_max = manager.get_files_count_in_dir();
+    // for (int q = 0; !manager.is_cur_mp3_file() && q < q_max; ++q) {}
+    
+    return "NONE"; // DEV
+}
+
+std::string_view App::Shuffler::get_shuffle() {
+    return "NONE"; // DEV
+}
+
+std::optional<std::string_view> App::Shuffler::get_composition() {
+    switch(mode) {
+        case Mode::none : return std::nullopt;
+        case Mode::queue: return queue.pop();
+        case Mode::sequential: return get_sequential();
+        case Mode::shuffle: return get_shuffle();
+    }
 }

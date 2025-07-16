@@ -285,3 +285,21 @@ void FileManager::search_set_string(std::string_view str) {
 void FileManager::search_clear_string() {
     log.log_info("FileManager::search_clear_string");
 }
+
+// bool FileManager::is_mp3_file(had::Dem elem_number) {
+//     const std::filesystem::directory_entry& file = list[elem_number].file;
+//     return file.is_regular_file()
+//         && file.path().extension().compare("mp3"); // DEV [not strictly]
+// }
+
+// bool FileManager::is_cur_mp3_file() {
+//     return is_mp3_file(pointer);
+// }
+
+// had::Dem FileManager::get_cur_elem() {
+//     return pointer;
+// }
+
+// had::Dem FileManager::get_files_count_in_dir() {
+//     return list_size;
+// }

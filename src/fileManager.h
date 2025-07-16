@@ -5,6 +5,7 @@
 #pragma once
 
 #include "had/had.h"
+#include "had/had_types.h"
 #include "setup.h"
 
 #include <filesystem>
@@ -19,10 +20,6 @@ class FileManager {
     static constexpr had::Dem line_free_space  = 5;
     static constexpr had::Dem min_w = line_offset + line_free_space + 5;
     static constexpr had::Dem min_h = 3;
-
-    static had::Dem const draw_line_buf_size = 1024;
-    // char* draw_line_buf = nullptr;
-    // static inline had::dem heigth_to_size(had::dem h) { return h - 2; }
 
     had::Drawer& drawer;
     const had::Logger& log;
@@ -65,8 +62,14 @@ class FileManager {
         had::Res back();
         had::Res up();
         had::Res down();
+        // had::Res select();
         had::Res reload();
         had::Res resize();
+
+        // bool is_mp3_file(had::Dem elem_number);
+        // bool is_cur_mp3_file();
+        // had::Dem get_cur_elem();
+        // had::Dem get_files_count_in_dir();
 
         bool is_enougth_space(had::Dem w, had::Dem h);
         had::Res draw();
