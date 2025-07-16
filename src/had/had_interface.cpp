@@ -277,7 +277,10 @@ namespace had {
     }
 
     Res Drawer::cls() {
-        for (int q = 0; q < w; ++q) {
+        for (int q = 0; q < h; ++q) {
+            // for (int e = 0; e < w; ++e) {
+            //     draw_symbol(x + e, y + q, ' ');
+            // }
             mvhline(y + q, x, ' ', w);
         } // DEV [Ret code]
         return Res::success;

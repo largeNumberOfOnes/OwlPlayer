@@ -72,8 +72,5 @@ had::Res Spectre::draw() {
 }
 
 had::Res Spectre::resize() {
-
-    drawer.cls();
-
     return had::Res::success;
 }

@@ -47,6 +47,7 @@ class Setup {
             had::Color file;
             had::Color dir_selected;
             had::Color file_selected;
+            had::Color error_str;
         } colors;
 
         int get_fps() const;

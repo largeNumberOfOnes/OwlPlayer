@@ -193,15 +193,16 @@ had::Res Player::draw() {
         call_on_play_end();
     }
 
+    drawer.draw_text(0, drawer.get_height() - 1, "-----");
+
     return had::Res::success;
 }
 
 had::Res Player::resize() {
-    if (!drawer.cls() && !draw()) {
-        return had::Res::success;
-    } else {
+    if (drawer.cls()) {
         return had::Res::error;
     }
+    return had::Res::success;
 }
 
 bool Player::is_enougth_space() {

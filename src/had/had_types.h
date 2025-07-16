@@ -18,6 +18,11 @@ namespace had {
     // class Res {
     //     bool val;
     //     public:
+    //         Res() : val(false);
+    // }
+    // class Res {
+    //     bool val;
+    //     public:
     //         static const bool success = true;
     //         static const bool error = false;
     //         Res() : val(false) {}

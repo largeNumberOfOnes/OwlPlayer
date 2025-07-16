@@ -16,7 +16,9 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
     : interface(interface)
     , setup(setup)
     , log(log)
+    , error_drawer(interface, 0, 0, 0, 0, log)
     , player_drawer(interface, 0, 0, 0, 0, log)
+    , error_bar(error_drawer, setup, log)
     , player(player_drawer, log)
     , switch_panel_drawer(interface, 0, 0, 0, 0, log)
     , manager(
@@ -49,8 +51,9 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             return event.type == Event::EventType::draw;
         },
         [&](const Event& event) -> void {
-            switch_panel.draw();
+            error_bar.draw();
             player.draw();
+            switch_panel.draw();
         }
     );
     event_queue.add_observer(
@@ -68,6 +71,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             //     interface.get_height() - player.get_height()
             // );
             // manager.resize(manager_drawer.get_height());
+            error_bar.resize();
             switch_panel.resize();
             player.resize();
             // manager.reload();
@@ -104,14 +108,19 @@ had::Res App::process_keypress() {
 App::Circle_res App::circle() {
     interface.set_color(setup.colors.def);
 
+    error_drawer.set(
+        0, interface.get_height() - 1,
+        interface.get_width(), 1
+    );
     player_drawer.set(
-        0, interface.get_height() - player.get_height(),
+        0, interface.get_height() - player.get_height() - 1,
         interface.get_width(), player.get_height()
     );
     switch_panel_drawer.set(
         0, 0,
         interface.get_width(),
-        interface.get_height() - player.get_height()
+        // interface.get_height() - player.get_height() - 1
+        5
     );
 
     process_keypress();

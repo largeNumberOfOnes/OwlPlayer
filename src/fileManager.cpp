@@ -288,7 +288,7 @@ had::Res FileManager::draw() {
         log.log_err("bad sizes");
         return had::Res::error;
     }
-    drawer.cls();   
+    drawer.cls();
     drawer.draw_text(0, 0, dir.c_str());
     std::size_t files_count = (size > list_size) ? list_size : size;
     for (std::size_t q = 0; q < files_count; ++q) {

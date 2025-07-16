@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "errorBar.h"
 #include "had/had.h"
 #include "fileManager.h"
 #include "switchPanel.h"
@@ -68,6 +69,7 @@ class App {
     had::Interface interface;
 
     EventQueue event_queue;
+    ErrorBar error_bar;
     Player player;
     FileManager manager;
     Spectre spectre;
@@ -77,6 +79,7 @@ class App {
     SwitchPanel::ComponentId manager_id;
     SwitchPanel::ComponentId spectre_id;
 
+    had::Drawer error_drawer;
     had::Drawer player_drawer;
     had::Drawer switch_panel_drawer;
 
