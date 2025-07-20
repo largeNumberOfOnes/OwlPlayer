@@ -25,6 +25,12 @@ Player::Player(had::Drawer& drawer, const had::Logger& log)
     , log(log)
 {}
 
+// Player::Player(had::Drawer& drawer, call_on_play_end_t call_on_play_end,
+//                                                     const had::Logger& log)
+//     : Player(drawer, log)
+//     , call_on_play_end(call_on_play_end)
+// {}
+
 Player::~Player() {
     if (audio.is_playing()) {
         audio.stop();

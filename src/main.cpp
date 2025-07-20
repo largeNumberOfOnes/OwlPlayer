@@ -10,6 +10,8 @@
 #include <iomanip>
 #include <string>
 #include <string_view>
+#include <thread>
+#include <unistd.h>
 
 int main() {
 
@@ -42,6 +44,9 @@ int main() {
     // interface.create_text_color(setup.colors.error_str, 237, 55, 9);
     interface.create_color(setup.colors.error_str, 250, 250, 250, 168, 85, 64);
     
+    log.log_info(std::to_string(getpid()));
+    // bool cond = true;
+    // while (cond) {}
 
     App app{interface, setup, log};
 

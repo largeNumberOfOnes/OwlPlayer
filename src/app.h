@@ -12,6 +12,7 @@
 #include "switchPanel.h"
 #include "queuePanel.h"
 #include "eventQueue.h"
+#include "shuffler.h"
 #include "player.h"
 #include "spectre.h"
 #include "setup.h"
@@ -31,7 +32,13 @@ class App {
         {"manager_go"  , [this]() {
                 switch_panel.call_wrapper(
                     manager_id,
-                    [this]() { manager.go(); }
+                    [this]() {
+                        if (manager.go()) {
+                            log.log_err("Cannot exec manager.go()");
+                            error_bar.set_error(
+                                "Not playable file or directory");
+                        }
+                    }
                 );
             }},
         {"manager_back", [this]() {
@@ -83,25 +90,7 @@ class App {
     had::Drawer player_drawer;
     had::Drawer switch_panel_drawer;
 
-    class Shuffler {
-        enum class Mode {
-            none,
-            shuffle,
-            queue,
-            sequential,
-        } mode = Mode::sequential;
-        FileManager& manager;
-        QueuePanel& queue;
-        std::string_view get_sequential();
-        std::string_view get_shuffle();
-        public:
-            Shuffler(
-                FileManager& manager,
-                QueuePanel& queue
-            ) : manager(manager), queue(queue) {}
-
-            std::optional<std::string_view> get_composition();
-    } Shuffler{manager, queue};
+    Shuffler shuffler{manager, queue};
 
     enum class Circle_res {
         success,

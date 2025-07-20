@@ -344,4 +344,7 @@ namespace had {
         }
     }
 
+    bool Audio::can_be_played(std::string_view path) {
+        return path.ends_with(".mp3"); // DEV [should check file]
+    }
 }

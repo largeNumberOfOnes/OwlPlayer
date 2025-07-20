@@ -1,17 +1,18 @@
 #include "fileManager.h"
 
 #include "had/had.h"
-#include "had/had_interface.h"
+#include "had/had_audio.h"
 #include "had/had_types.h"
-#include "had/had_unicode.h"
 
 #include <algorithm>
-
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 
 
@@ -34,26 +35,36 @@ FileManager::FileManager(
     reload();    
 }
 
-FileManager::~FileManager() {
-
-}
+FileManager::~FileManager() = default;
 
 had::Res FileManager::go() {
-    if (list[pointer].file.is_directory()) {
-        dir = list[pointer].file.path();
+    const std::filesystem::path& path = list[selecter].file.path();
+    if (list[selecter].file.is_directory()) {
+        dir = path;
         dir += '/';
         reload();
-    } else if (list[pointer].file.is_regular_file()) {
-        std::string path = list[pointer].file.path();
-        if (path.ends_with(".mp3")) {
-            call_on_file(path);
-        } // DEV [for temporary safety]
+    } else if (list[selecter].file.is_regular_file()) {
+        if (had::Audio::can_be_played(path.c_str())) {
+            call_on_file(path.c_str());
+            playing_file = std::move(path.string());
+        } else {
+            log.log_err("File is not playable");
+            return had::Res::error;
+        }
+    } else {
+        log.log_err("bad file path: " + path.string());
+        return had::Res::error;
     }
     return had::Res::success;
 }
 
+had::Res FileManager::release() {
+    playing_file = std::nullopt;
+    playing_file_pointer = std::nullopt;
+    return had::Res::success;
+}
+
 had::Res FileManager::back() {
-    // int ind = dir.find_last_of('/');
     if (dir != "/") {
         dir.pop_back();
         while (!dir.ends_with('/')) {
@@ -68,15 +79,15 @@ had::Res FileManager::up() {
     if (list_size == 0)
         return had::Res::success;
 
-    if (pointer == 0) {
-        pointer = list_size - 1;
+    if (selecter == 0) {
+        selecter = list_size - 1;
         if (size < list_size)
             top = list_size - size;
         else
             top = 0;
     } else {
-        --pointer;
-        if (pointer + 1 == top)
+        --selecter;
+        if (selecter + 1 == top)
             --top;
     }
 
@@ -87,12 +98,12 @@ had::Res FileManager::down() {
     if (list_size == 0)
         return had::Res::success;
 
-    if (pointer + 1 == list_size) {
-        pointer = 0;
+    if (selecter + 1 == list_size) {
+        selecter = 0;
         top = 0;
     } else {
-        ++pointer;
-        if (pointer >= top + size)
+        ++selecter;
+        if (selecter >= top + size)
             ++top;
     }
 
@@ -107,19 +118,19 @@ had::Res FileManager::select(had::Dem new_pointer) {
         return had::Res::error;
     }
     if (list_size <= size) {
-        pointer = new_pointer;
+        selecter = new_pointer;
         return had::Res::success;
     }
     if (top <= new_pointer && new_pointer < top + size) {
-        pointer = new_pointer;
+        selecter = new_pointer;
         return had::Res::success;
     }
     if (new_pointer < size / 2) {
         top = 0;
-        pointer = new_pointer;
+        selecter = new_pointer;
     } else {
         top = new_pointer - size / 2;
-        pointer = new_pointer;
+        selecter = new_pointer;
         return had::Res::success;
     }
     return had::Res::error;
@@ -153,14 +164,22 @@ had::Res FileManager::reload() {
         }
     );
 
+    for (int q = 0; q < list_size; ++q) {
+        if (playing_file.has_value()
+            && list[q].file.path().compare(playing_file.value())
+        ) {
+            playing_file_pointer = q;
+        }
+    }
+
     list_size = list.size();
     if (list_size == 0) {
         top = 0;
-        pointer = 0;
-    } else if (pointer >= list_size) {
-        pointer = list_size - 1;
+        selecter = 0;
+    } else if (selecter >= list_size) {
+        selecter = list_size - 1;
         if (list_size > size)
-            top = pointer - size;
+            top = selecter - size;
         else
             top = 0;
     }
@@ -190,9 +209,9 @@ had::Res FileManager::resize_width() {
 
 had::Res FileManager::resize_height() {
     size = drawer.get_height() - 2;
-    if (pointer >= top + size) {
+    if (selecter >= top + size) {
         if (size < list_size)
-            top = pointer - size + 1;
+            top = selecter - size + 1;
         else
             top = 0;
     }
@@ -216,10 +235,6 @@ had::Res FileManager::resize() {
     }
 }
 
-bool FileManager::is_enougth_space(had::Dem w, had::Dem h) {
-    return w >= min_w && h >= min_h;
-}
-
 had::Res FileManager::draw_tree_symbol(int q) {
     had::SpSymbol list_symbol = (top + q + 1 == list_size)
                               ? had::SpSymbol::list_end_symbol
@@ -236,7 +251,7 @@ had::Res FileManager::draw_tree_symbol(int q) {
 
 had::Res FileManager::draw_file_name(int q) {
     const File& list_elem = list[top+q];
-    bool is_selected  = (top + q == pointer);
+    bool is_selected  = (top + q == selecter);
     bool is_directory = list_elem.file.is_directory();
     had::Color file_color =
           ( is_selected &&  is_directory) ? setup.colors.dir_selected
@@ -290,7 +305,8 @@ had::Res FileManager::draw() {
     }
     drawer.cls();
     drawer.draw_text(0, 0, dir.c_str());
-    std::size_t files_count = (size > list_size) ? list_size : size;
+    // std::size_t files_count = (size > list_size) ? list_size : size;
+    std::size_t files_count = std::min(list_size - top, size);
     for (std::size_t q = 0; q < files_count; ++q) {
         draw_tree_symbol(q);
         draw_file_name(q);
@@ -312,20 +328,28 @@ void FileManager::search_clear_string() {
     log.log_info("FileManager::search_clear_string");
 }
 
-// bool FileManager::is_mp3_file(had::Dem elem_number) {
-//     const std::filesystem::directory_entry& file = list[elem_number].file;
-//     return file.is_regular_file()
-//         && file.path().extension().compare("mp3"); // DEV [not strictly]
-// }
+std::vector<std::string> FileManager::get_dirs_files(
+                                                std::string_view path) {
+    std::vector<std::string> ret;
+    for (const auto& it : list) {
+        if (it.file.is_regular_file()
+            && had::Audio::can_be_played(it.file.path().c_str())
+        ) {
+            ret.push_back(it.file.path().c_str());
+        }
+    }
+    return ret;
+}
 
-// bool FileManager::is_cur_mp3_file() {
-//     return is_mp3_file(pointer);
-// }
-
-// had::Dem FileManager::get_cur_elem() {
-//     return pointer;
-// }
-
-// had::Dem FileManager::get_files_count_in_dir() {
-//     return list_size;
-// }
+had::Res FileManager::set_playing_file(std::string_view path) {
+    std::filesystem::path file_path(path);
+    dir = file_path.parent_path();
+    reload(); // DEV [ret code]
+    for (int q = 0; q < list_size; ++q) {
+        if (list[q].file.path() == file_path) {
+            selecter = q;
+            break;
+        }
+    }
+    return go();
+}

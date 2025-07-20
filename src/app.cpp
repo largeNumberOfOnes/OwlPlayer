@@ -1,9 +1,9 @@
+// clangd: no-unused-includes
 #include "app.h"
-
 #include "had/had.h"
-#include "had/had_types.h"
 
 #include <optional>
+#include <random>
 #include <string_view>
 #include <iostream>
 #include <chrono>
@@ -74,7 +74,20 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             error_bar.resize();
             switch_panel.resize();
             player.resize();
-            // manager.reload();
+        }
+    );
+    event_queue.add_observer(
+        [](const Event& event) -> bool {
+            return event.type == Event::EventType::keypress
+                && event.seq == had::KeySequence(had::Key::k);
+        },
+        [&](const Event& event) -> void {
+            static std::mt19937 gen(7);
+            // std::uniform_int_distribution<> dist(0, manager.get_files_count_in_dir() - 1);
+            // int new_pointer = dist(gen);
+            // int new_pointer = 21;
+            // log.log_info("new_pointer = " + std::to_string(new_pointer));
+            // manager.select(new_pointer);
         }
     );
 
@@ -119,8 +132,7 @@ App::Circle_res App::circle() {
     switch_panel_drawer.set(
         0, 0,
         interface.get_width(),
-        // interface.get_height() - player.get_height() - 1
-        5
+        interface.get_height() - player.get_height() - 1
     );
 
     process_keypress();
@@ -150,26 +162,4 @@ void App::run() {
         std::this_thread::sleep_until(time_start + time_period);
     }
 
-}
-
-std::string_view App::Shuffler::get_sequential() {
-    // had::Dem cur = manager.get_cur_elem();
-    // manager.down();
-    // std::size_t q_max = manager.get_files_count_in_dir();
-    // for (int q = 0; !manager.is_cur_mp3_file() && q < q_max; ++q) {}
-    
-    return "NONE"; // DEV
-}
-
-std::string_view App::Shuffler::get_shuffle() {
-    return "NONE"; // DEV
-}
-
-std::optional<std::string_view> App::Shuffler::get_composition() {
-    switch(mode) {
-        case Mode::none : return std::nullopt;
-        case Mode::queue: return queue.pop();
-        case Mode::sequential: return get_sequential();
-        case Mode::shuffle: return get_shuffle();
-    }
 }

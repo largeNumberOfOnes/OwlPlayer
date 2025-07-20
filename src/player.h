@@ -34,15 +34,18 @@ class Player {
 
     bool is_comp_name_hidden = false;
 
-    std::function<void(void)> call_on_play_end = []() {};
+    using call_on_play_end_t = std::function<void(void)>;
+    call_on_play_end_t call_on_play_end = []() {};
 
     public:
         Player(had::Drawer& drawer, const had::Logger& log);
+        // Player(had::Drawer& drawer, call_on_play_end_t call_on_play_end,
+        //                                         const had::Logger& log);
         ~Player();
 
         had::Dem get_height();
 
-        void set_on_play_end(std::function<void(void)> call_on_play_end) {
+        void set_on_play_end(call_on_play_end_t call_on_play_end) {
             this->call_on_play_end = call_on_play_end;
         } // DEV [Should be replaced in source file]
 

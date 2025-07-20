@@ -1,0 +1,25 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        // {
+        //     "type": "lldb",
+        //     "request": "launch",
+        //     "name": "Debug",
+        //     "program": "/home/dt/Documents/audioPlayer/execs/output.out",
+        //     // "program": "${workspaceFolder}/execs/output.out",
+        //     "args": [],
+        //     "cwd": "${workspaceFolder}"
+        // },
+        {
+            "type": "lldb",
+            "request": "attach",
+            "name": "Debug by pid",
+            "program": "/home/dt/Documents/audioPlayer/execs/output.out",
+            "pid": "${command:pickMyProcess}"
+            // "program": "${workspaceFolder}/execs/output.out",
+        }
+    ]
+}

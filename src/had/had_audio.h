@@ -14,6 +14,7 @@
 #include <mutex>
 #include <string>
 #include <complex>
+#include <string_view>
 
 
 
@@ -84,5 +85,7 @@ namespace had {
             Volume get_volume();
             res_code jump(seconds pos);
             res_code jump_rel(seconds pos_rel);
+
+            static bool can_be_played(std::string_view path);
     };
 };

@@ -4,13 +4,16 @@
  *    so it is compiled into an object file separately from the rest. No
  *    other files can be included in the main code.
  */
-
+// clangd: no-unused-includes
 #pragma once
 
 
 
 #include "had_interface.h"
+#include "had_unicode.h"
 #include "had_logger.h"
 #include "had_types.h"
 #include "had_audio.h"
 #include "had_keys.h"
+
+static int ____fake;
