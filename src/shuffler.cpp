@@ -15,7 +15,7 @@ std::string_view Shuffler::get_shuffle() {
     return "NONE"; // DEV
 }
 
-std::optional<std::string_view> Shuffler::get_composition() {
+std::optional<std::string_view> Shuffler::get_next_composition() {
     switch(mode) {
         case Mode::none : return std::nullopt;
         case Mode::queue: return queue.pop();

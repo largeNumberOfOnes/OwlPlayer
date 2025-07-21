@@ -6,9 +6,11 @@
 
 #include "had/had.h"
 
+#include <optional>
 #include <string_view>
 #include <string>
 #include <queue>
+#include <vector>
 
 
 
@@ -19,7 +21,8 @@ class QueuePanel {
     public:
         QueuePanel(had::Drawer& drawer, const had::Logger& log);
         void add(std::string_view file);
-        std::string_view pop();
+        void add_from_vector(const std::vector<std::string>& vec);
+        std::optional<std::string> pop();
         
         had::Res draw();
         had::Res resize();

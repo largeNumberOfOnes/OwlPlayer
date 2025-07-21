@@ -44,8 +44,10 @@ class Setup {
             had::Color def;
             had::Color dir;
             had::Color file;
+            had::Color playing;
             had::Color dir_selected;
             had::Color file_selected;
+            had::Color playing_selected;
             had::Color error_str;
         } colors;
 

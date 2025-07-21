@@ -39,8 +39,10 @@ int main() {
     interface.get_default_color(setup.colors.def);
     interface.create_text_color(setup.colors.dir ,           21, 118, 230);
     interface.create_text_color(setup.colors.file,          240, 240, 240);
+    interface.create_text_color(setup.colors.playing,       232,  30,  91);
     interface.create_color(setup.colors.dir_selected,   21, 118, 230, 100, 100, 100);
     interface.create_color(setup.colors.file_selected, 240, 240, 240, 100, 100, 100);
+    interface.create_color(setup.colors.playing_selected, 232,  30,  91, 100, 100, 100);
     // interface.create_text_color(setup.colors.error_str, 237, 55, 9);
     interface.create_color(setup.colors.error_str, 250, 250, 250, 168, 85, 64);
     

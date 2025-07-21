@@ -74,6 +74,9 @@ class App {
     const had::Logger& log;
     Setup& setup;
     had::Interface interface;
+    had::Drawer error_drawer;
+    had::Drawer player_drawer;
+    had::Drawer switch_panel_drawer;
 
     EventQueue event_queue;
     ErrorBar error_bar;
@@ -85,10 +88,6 @@ class App {
     SwitchPanel switch_panel;
     SwitchPanel::ComponentId manager_id;
     SwitchPanel::ComponentId spectre_id;
-
-    had::Drawer error_drawer;
-    had::Drawer player_drawer;
-    had::Drawer switch_panel_drawer;
 
     Shuffler shuffler{manager, queue};
 

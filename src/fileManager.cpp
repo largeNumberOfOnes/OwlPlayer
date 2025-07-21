@@ -12,6 +12,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 
@@ -47,6 +48,7 @@ had::Res FileManager::go() {
         if (had::Audio::can_be_played(path.c_str())) {
             call_on_file(path.c_str());
             playing_file = std::move(path.string());
+            reload();
         } else {
             log.log_err("File is not playable");
             return had::Res::error;
@@ -164,14 +166,6 @@ had::Res FileManager::reload() {
         }
     );
 
-    for (int q = 0; q < list_size; ++q) {
-        if (playing_file.has_value()
-            && list[q].file.path().compare(playing_file.value())
-        ) {
-            playing_file_pointer = q;
-        }
-    }
-
     list_size = list.size();
     if (list_size == 0) {
         top = 0;
@@ -182,6 +176,16 @@ had::Res FileManager::reload() {
             top = selecter - size;
         else
             top = 0;
+    }
+
+    playing_file_pointer = std::nullopt;
+    if (playing_file.has_value()) {
+        for (int q = 0; q < list_size; ++q) {
+            if (list[q].file.path().compare(playing_file.value()) == 0) {
+                playing_file_pointer = q;
+                break;
+            }
+        }
     }
 
     return had::Res::success;
@@ -252,13 +256,39 @@ had::Res FileManager::draw_tree_symbol(int q) {
 had::Res FileManager::draw_file_name(int q) {
     const File& list_elem = list[top+q];
     bool is_selected  = (top + q == selecter);
-    bool is_directory = list_elem.file.is_directory();
-    had::Color file_color =
-          ( is_selected &&  is_directory) ? setup.colors.dir_selected
-        : ( is_selected && !is_directory) ? setup.colors.file_selected
-        : (!is_selected &&  is_directory) ? setup.colors.dir
-        : (!is_selected && !is_directory) ? setup.colors.file
-        : setup.colors.def;
+    enum class Type {
+        directory,
+        file,
+        playing,
+    } type = [&]() {
+        if (list_elem.file.is_directory()) {
+            return Type::directory;
+        } else {
+            if (playing_file_pointer.has_value()
+                && top + q == playing_file_pointer.value()
+            ) {
+                return Type::playing;
+            } else {
+                return Type::file;
+            }
+        }
+    }();
+    had::Color file_color = [&]() {
+        if (is_selected) {
+            switch (type) {
+                case Type::directory: return setup.colors.dir_selected;
+                case Type::file     : return setup.colors.file_selected;
+                case Type::playing  : return setup.colors.playing_selected;
+            }
+        } else {
+            switch (type) {
+                case Type::directory: return setup.colors.dir;
+                case Type::file     : return setup.colors.file;
+                case Type::playing  : return setup.colors.playing;
+            }
+        }
+        return setup.colors.file;
+    }();
     drawer.set_color(file_color);
     if (list_elem.reduce) {
         had::Dem w = drawer.get_width();
@@ -328,8 +358,7 @@ void FileManager::search_clear_string() {
     log.log_info("FileManager::search_clear_string");
 }
 
-std::vector<std::string> FileManager::get_dirs_files(
-                                                std::string_view path) {
+std::vector<std::string> FileManager::get_dirs_files() {
     std::vector<std::string> ret;
     for (const auto& it : list) {
         if (it.file.is_regular_file()

@@ -27,5 +27,5 @@ class Shuffler {
             sequential,
         } mode = Mode::sequential;
 
-        std::optional<std::string_view> get_composition();
+        std::optional<std::string_view> get_next_composition();
 };

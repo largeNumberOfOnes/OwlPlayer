@@ -1,5 +1,9 @@
 #include "queuePanel.h"
 
+#include <string_view>
+#include <optional>
+#include <string>
+
 
 
 QueuePanel::QueuePanel(had::Drawer& drawer, const had::Logger& log)
@@ -15,6 +19,22 @@ had::Res QueuePanel::resize() {
     return had::Res::success;
 }
 
-std::string_view QueuePanel::pop() {
-    return "NONE"; // DEV
+void QueuePanel::add(std::string_view file) {
+    queue.push(std::string(file));
+}
+
+void QueuePanel::add_from_vector(const std::vector<std::string>& vec) {
+    for (const auto& it : vec) {
+        queue.push(it);
+    }
+}
+
+std::optional<std::string> QueuePanel::pop() {
+    if (!queue.empty()) {
+        std::string ret = queue.back();
+        queue.pop();
+        return ret;
+    } else {
+        return std::nullopt;
+    }
 }

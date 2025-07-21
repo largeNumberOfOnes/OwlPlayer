@@ -1,6 +1,7 @@
 // clangd: no-unused-includes
 #include "app.h"
 #include "had/had.h"
+#include "queuePanel.h"
 
 #include <optional>
 #include <random>
@@ -19,11 +20,25 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
     , error_drawer(interface, 0, 0, 0, 0, log)
     , player_drawer(interface, 0, 0, 0, 0, log)
     , error_bar(error_drawer, setup, log)
-    , player(player_drawer, log)
+    , player(
+            player_drawer,
+            [this]() {
+                std::optional<std::string> file = queue.pop();
+                if (file.has_value()) {
+                    manager.set_playing_file(file.value());
+                }
+            },
+            log
+        )
     , switch_panel_drawer(interface, 0, 0, 0, 0, log)
     , manager(
         setup.get_default_file_dir(),
-        [this](std::string_view path) { player.load_and_play(path); },
+        [this](std::string_view path) {
+            player.load_and_play(path);
+            queue.add_from_vector(
+                manager.get_dirs_files()
+            );
+        },
         switch_panel_drawer, setup, log)
     , spectre(
         switch_panel_drawer,
@@ -61,16 +76,6 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             return event.type == Event::EventType::resize;
         },
         [&](const Event& event) -> void {
-            // player_drawer.set(
-            //     0, interface.get_height() - player.get_height(),
-            //     interface.get_width(), player.get_height()
-            // );
-            // manager_drawer.set(
-            //     0, 0,
-            //     interface.get_width(),
-            //     interface.get_height() - player.get_height()
-            // );
-            // manager.resize(manager_drawer.get_height());
             error_bar.resize();
             switch_panel.resize();
             player.resize();
