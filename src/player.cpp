@@ -172,6 +172,20 @@ had::Res Player::draw_composition_name() {
     return had::Res::success;
 }
 
+had::Res Player::draw_source_str() {
+    std::string_view SOURCE = "Source: ";
+    // return drawer.draw_text(
+    //     drawer.get_width() - source_str_offset,
+    //     0,
+    //     source_str
+    // );
+    return drawer.draw_text(
+        drawer.get_width() - source_str_offset,
+        0,
+        source_str
+    );
+}
+
 had::Res Player::draw() {
 
     Grid grid;
@@ -190,6 +204,7 @@ had::Res Player::draw() {
         || draw_volume()
         || draw_timeline()
         || draw_composition_name()
+        || draw_source_str()
     ) {
         log.log_err("Cannot draw player");
         return had::Res::error;
@@ -276,4 +291,8 @@ void Player::get_cur_samples(std::vector<std::complex<float>>& ret) {
 
 void Player::hide_comp_name() {
     is_comp_name_hidden = !is_comp_name_hidden;
+}
+
+void Player::set_source_str(std::string_view str) {
+    source_str = str;
 }

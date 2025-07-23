@@ -8,6 +8,10 @@ std::string Setup::get_default_file_dir() {
     return default_file_dir;
 }
 
+Shuffler::Mode Setup::get_default_shuffler_mode() {
+    return default_shuffler_mode;
+}
+
 int Setup::get_fps() const {
     return fps;
 }

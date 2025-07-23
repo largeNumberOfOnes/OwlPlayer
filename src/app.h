@@ -20,6 +20,7 @@
 #include <optional>
 #include <string_view>
 #include <unordered_map>
+#include <vector>
 
 
 
@@ -38,6 +39,9 @@ class App {
                             error_bar.set_error(
                                 "Not playable file or directory");
                         }
+                        shuffler.set_sequential(
+                            manager.get_dirs_files()
+                        );
                     }
                 );
             }},
@@ -65,6 +69,22 @@ class App {
         {"play_inc_vol",   [this]() {  }},
         {"play_dec_vol",   [this]() {  }},
         {"play_hide_name", [this]() { player.hide_comp_name(); }},
+        {"queue_add", [this]() {
+                std::optional<std::string> comp =
+                                            manager.get_selected_comp();
+                if (comp.has_value()) {
+                    queue.add(comp.value());
+                } else {
+                    std::string_view err =
+                        "Cannot add not playable composition into queue";
+                    log.log_err(err);
+                    error_bar.set_error(err);
+                }
+            }},
+        {"shuf_rot_mode", [this]() {
+                shuffler.rotate_modes_cicle();
+                player.set_source_str(shuffler.get_mode_str());
+            }},
         {"glob_quit",      [this]() { is_it_time_to_exit = true; }},
         {"panel_next",     [this]() { 
             log.log_info("panel_next()");
@@ -73,7 +93,7 @@ class App {
 
     const had::Logger& log;
     Setup& setup;
-    had::Interface interface;
+    had::Interface& interface;
     had::Drawer error_drawer;
     had::Drawer player_drawer;
     had::Drawer switch_panel_drawer;
@@ -89,7 +109,7 @@ class App {
     SwitchPanel::ComponentId manager_id;
     SwitchPanel::ComponentId spectre_id;
 
-    Shuffler shuffler{manager, queue};
+    Shuffler shuffler{manager, queue, log};
 
     enum class Circle_res {
         success,

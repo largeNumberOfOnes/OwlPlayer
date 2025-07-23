@@ -17,27 +17,29 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
     : interface(interface)
     , setup(setup)
     , log(log)
-    , error_drawer(interface, 0, 0, 0, 0, log)
-    , player_drawer(interface, 0, 0, 0, 0, log)
+    , error_drawer(interface, log)
+    , player_drawer(interface, log)
+    , switch_panel_drawer(interface, log)
     , error_bar(error_drawer, setup, log)
     , player(
             player_drawer,
-            [this]() {
-                std::optional<std::string> file = queue.pop();
+            [this, &log]() {
+                manager.release();
+                std::optional<std::string> file =
+                                        shuffler.get_next_composition();
                 if (file.has_value()) {
                     manager.set_playing_file(file.value());
+                    log.log_info("comp " + file.value());
+                } else {
+                    log.log_info("no comp");
                 }
             },
             log
         )
-    , switch_panel_drawer(interface, 0, 0, 0, 0, log)
     , manager(
         setup.get_default_file_dir(),
         [this](std::string_view path) {
             player.load_and_play(path);
-            queue.add_from_vector(
-                manager.get_dirs_files()
-            );
         },
         switch_panel_drawer, setup, log)
     , spectre(
@@ -61,6 +63,9 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
         [this]() -> had::Res { return queue.resize(); }
     );
 
+    shuffler.set_mode(setup.get_default_shuffler_mode());
+    player.set_source_str(shuffler.get_mode_str());
+
     event_queue.add_observer(
         [](const Event& event) -> bool {
             return event.type == Event::EventType::draw;
@@ -79,20 +84,6 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
             error_bar.resize();
             switch_panel.resize();
             player.resize();
-        }
-    );
-    event_queue.add_observer(
-        [](const Event& event) -> bool {
-            return event.type == Event::EventType::keypress
-                && event.seq == had::KeySequence(had::Key::k);
-        },
-        [&](const Event& event) -> void {
-            static std::mt19937 gen(7);
-            // std::uniform_int_distribution<> dist(0, manager.get_files_count_in_dir() - 1);
-            // int new_pointer = dist(gen);
-            // int new_pointer = 21;
-            // log.log_info("new_pointer = " + std::to_string(new_pointer));
-            // manager.select(new_pointer);
         }
     );
 

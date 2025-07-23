@@ -72,6 +72,7 @@ class FileManager {
         had::Res draw();
 
         std::vector<std::string> get_dirs_files();
+        std::optional<std::string> get_selected_comp();
 
         void search_add_char(char ch);
         void search_set_string(std::string_view str);

@@ -8,20 +8,22 @@
 
 #include <optional>
 #include <string_view>
+#include <span>
 #include <string>
-#include <queue>
+#include <list>
 #include <vector>
 
 
 
 class QueuePanel {
-    std::queue<std::string> queue;
+    std::list<std::string> list;
+
     had::Drawer& drawer;
     const had::Logger& log;
+    
     public:
         QueuePanel(had::Drawer& drawer, const had::Logger& log);
         void add(std::string_view file);
-        void add_from_vector(const std::vector<std::string>& vec);
         std::optional<std::string> pop();
         
         had::Res draw();

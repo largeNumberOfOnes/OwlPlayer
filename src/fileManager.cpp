@@ -72,6 +72,8 @@ had::Res FileManager::back() {
         while (!dir.ends_with('/')) {
             dir.pop_back();
         }
+        top = 0;
+        selecter = 0;
         reload();
     }
     return had::Res::success;
@@ -360,7 +362,8 @@ void FileManager::search_clear_string() {
 
 std::vector<std::string> FileManager::get_dirs_files() {
     std::vector<std::string> ret;
-    for (const auto& it : list) {
+    for (int q = 0; q < list_size; ++q) {
+        const File& it = list[(selecter + q) % list_size];
         if (it.file.is_regular_file()
             && had::Audio::can_be_played(it.file.path().c_str())
         ) {
@@ -370,8 +373,18 @@ std::vector<std::string> FileManager::get_dirs_files() {
     return ret;
 }
 
+std::optional<std::string> FileManager::get_selected_comp() {
+    if (list[selecter].file.is_regular_file()
+        && had::Audio::can_be_played(list[selecter].file.path().c_str())
+    ) {
+        return list[selecter].file.path();
+    } else {
+        return std::nullopt;
+    }
+}
+
 had::Res FileManager::set_playing_file(std::string_view path) {
-    std::filesystem::path file_path(path);
+    std::filesystem::path file_path{path};
     dir = file_path.parent_path();
     reload(); // DEV [ret code]
     for (int q = 0; q < list_size; ++q) {

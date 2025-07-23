@@ -18,8 +18,20 @@
             "request": "attach",
             "name": "Debug by pid",
             "program": "/home/dt/Documents/audioPlayer/execs/output.out",
-            "pid": "${command:pickMyProcess}"
+            "pid": "${command:pickProcess}",
+            // "preLaunchTask": "get_pid"
             // "program": "${workspaceFolder}/execs/output.out",
         }
-    ]
+    ],
+    // "inputs": [
+    //     {
+    //         "id": "pickProcess",
+    //         "type": "command",
+    //         "command": "extension.pickProcess",
+    //         "args": {
+    //             "showAllProcesses": false,
+    //             "filter": "${workspaceFolderBasename}"
+    //         }
+    //     }
+    // ]
 }

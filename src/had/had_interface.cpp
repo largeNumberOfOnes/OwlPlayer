@@ -203,6 +203,15 @@ namespace had {
         , log(log)
     {}
 
+    Drawer::Drawer(
+        Interface& interface,
+        const had::Logger& log
+    )
+        : interface(interface)
+        , x(0), y(0), w(0), h(0)
+        , log(log)
+    {}
+
     void Drawer::set(Dem x, Dem y, Dem w, Dem h) {
         this->x = x;
         this->y = y;

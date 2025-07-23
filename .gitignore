@@ -4,5 +4,6 @@ execs/
 logs/
 test_data/
 objects/
+.vscode/
 .clangd
 

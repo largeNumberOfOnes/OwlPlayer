@@ -27,6 +27,7 @@ namespace had {
         Res set_default_color();
         public:
             Interface(const Logger& log);
+            Interface(const Interface&) = delete;
             ~Interface();
 
 
@@ -103,6 +104,13 @@ namespace had {
                 Dem x, Dem y, Dem w, Dem h,
                 const had::Logger&
             );
+            Drawer(
+                Interface& interface,
+                const had::Logger&
+            );
+            Drawer(const Drawer&) = default;
+            Drawer(Drawer&&)      = default;
+            ~Drawer()             = default;
 
             void set(Dem x, Dem y, Dem w, Dem h);
 

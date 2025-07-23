@@ -17,6 +17,9 @@ class Player {
     std::string DEFAULT_COMPOSITION_PATH = "******";
     std::string cur_composition_path = DEFAULT_COMPOSITION_PATH;
 
+    static constexpr had::Dem source_str_offset = 10;
+    std::string source_str = "---";
+
     struct Grid {
         had::Dem vol_x = 0;
         had::Dem vol_y = 0;
@@ -31,6 +34,7 @@ class Player {
     had::Res draw_volume();
     had::Res draw_timeline();
     had::Res draw_composition_name();
+    had::Res draw_source_str();
 
     bool is_comp_name_hidden = false;
 
@@ -59,6 +63,8 @@ class Player {
         had::Res jump_rel(had::seconds pos_rel);
 
         void hide_comp_name();
+
+        void set_source_str(std::string_view str);
 
         void get_cur_samples(std::vector<std::complex<float>>& ret);
 };

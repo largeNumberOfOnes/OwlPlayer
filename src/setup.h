@@ -4,6 +4,7 @@
 #pragma once
 
 #include "had/had.h"
+#include "shuffler.h"
 
 #include <string>
 // #include <unordered_map>
@@ -19,6 +20,7 @@ class Setup {
 
     private:
         std::string default_file_dir = "/home/dt/Desktop/mus";
+        Shuffler::Mode default_shuffler_mode = Shuffler::Mode::none;
 
         int fps = 60; // DEV [This may seem like a lot, but it's only
                       // DEV      needed to properly capture keystrokes,
@@ -36,6 +38,8 @@ class Setup {
             {"glob_quit",      had::KeySequence{had::Key::q}},
             {"panel_next",     had::KeySequence{had::Key::s}},
             {"play_hide_name", had::KeySequence{had::Key::h}},
+            {"queue_add",      had::KeySequence{had::Key::l}},
+            {"shuf_rot_mode",  had::KeySequence{had::Key::r}},
         };
 
     public:
@@ -55,5 +59,6 @@ class Setup {
         const BindingsList& get_key_bindings() const;
 
         std::string get_default_file_dir();
+        Shuffler::Mode get_default_shuffler_mode();
 
 };
