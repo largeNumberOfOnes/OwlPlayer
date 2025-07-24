@@ -1,26 +1,33 @@
 /**
-    This class represent interface to load and play audio files
+ * This class represent interface to load and play audio files.
+ *
+ * This class must exist in a single instance.
+ *
+ * This class interacts with another thread, so many of its methods use
+ *    synchronization primitives. However, the external interface of this
+ *    class is not thread-safe.
  */
 
 #pragma once
 
-#include "audioFile.h"
-#include "had_types.h"
 #include "had_logger.h"
+#include "had_types.h"
+#include "audioFile.h"
 
 #include "pipewire/pipewire.h"
 
-#include <functional>
-#include <mutex>
-#include <string>
-#include <complex>
 #include <string_view>
+#include <functional>
+#include <complex>
+#include <string>
+#include <mutex>
 
 
 
 namespace had {
     class Audio {
         AudioFile audio_file;
+        const Logger& log;
         mutable std::mutex mutex;
 
         Volume vol = 100;
@@ -29,8 +36,8 @@ namespace had {
         bool was_finalized_val = false;
         enum class State {
             inited,
-            stop,
-            play,
+            stoped,
+            playing,
         } state;
         
         struct Data_pw {

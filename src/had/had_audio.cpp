@@ -1,30 +1,25 @@
-
-
-
-
-
 #include "audioFile.h"
+
+#include "had_logger.h"
 #include "had_types.h"
 #include "had_audio.h"
-#include "had_logger.h"
 
+#include <spa/param/audio/format-utils.h>
 #include "pipewire/pipewire.h"
 #include "pipewire/stream.h"
-#include "spa/param/audio/raw.h"
-#include <cmath>
-#include <complex>
-#include <cstddef>
-#include <curses.h>
-#include <spa/param/audio/format-utils.h>
 #include <spa/param/props.h>
 
-#include <mutex>
 #include <string_view>
+#include <complex>
+#include <mutex>
+#include <cmath>
+
+
 
 namespace had {
-
     Audio::Audio(Res& result, const Logger& log)
         : audio_file(log)
+        , log(log)
     {
         data.audio_file = &audio_file;
         data.mutex = &mutex;
@@ -84,7 +79,7 @@ namespace had {
         AudioFile::res_code ret;
         std::lock_guard<std::mutex> lock{*data.mutex};
         pw_thread_loop_lock(data.loop);
-        if (*data.state != State::play) {
+        if (*data.state != State::playing) {
             pw_thread_loop_unlock(data.loop);
             return;
         }
@@ -184,7 +179,7 @@ namespace had {
         }
         is_stream_connected = true;
         pw_stream_set_active(data.stream, false);
-        state = State::stop;
+        state = State::stoped;
         
         set_volume_unsafe();
 
@@ -196,7 +191,7 @@ namespace had {
     // res Audio::drop();
     // res Audio::run();
     Audio::res_code Audio::stop() {
-        if (state != State::play) {
+        if (state != State::playing) {
             return res_code::bad_state;
         }
         std::lock_guard<std::mutex> lock{mutex};
@@ -204,11 +199,11 @@ namespace had {
         pw_stream_flush(data.stream, true);
         pw_stream_set_active(data.stream, false);
         pw_thread_loop_unlock(data.loop);
-        state = State::stop;
+        state = State::stoped;
         return res_code::success;
     }
     Audio::res_code Audio::play() {
-        if (state != State::stop) {
+        if (state != State::stoped) {
             return res_code::bad_state;
         }
         std::lock_guard<std::mutex> lock{mutex};
@@ -216,7 +211,7 @@ namespace had {
         pw_stream_set_active(data.stream, true);
         was_finalized_val = false;
         pw_thread_loop_unlock(data.loop);
-        state = State::play;
+        state = State::playing;
         return res_code::success;
     }
 
@@ -257,7 +252,7 @@ namespace had {
     }
 
     Audio::res_code Audio::jump(seconds pos) {
-        if (state != State::stop && state != State::play) {
+        if (state != State::stoped && state != State::playing) {
             return res_code::bad_state;
         }
         std::lock_guard<std::mutex> lock{mutex};
@@ -278,7 +273,7 @@ namespace had {
     }
 
     Audio::res_code Audio::jump_rel(seconds pos_rel) {
-        if (state != State::stop && state != State::play) {
+        if (state != State::stoped && state != State::playing) {
             return res_code::bad_state;
         }
         std::lock_guard<std::mutex> lock{mutex};
@@ -305,15 +300,15 @@ namespace had {
     }
 
     bool Audio::is_playing() {
-        return state == State::play;
+        return state == State::playing;
     }
 
     bool Audio::is_stoped() {
-        return state == State::stop;
+        return state == State::stoped;
     }
 
     had::seconds Audio::get_cur_time() {
-        if (state != State::play && state != State::stop) {
+        if (state != State::playing && state != State::stoped) {
             return 0;
         }
         return audio_file.get_cur_pos() / audio_file.get_rate()
@@ -321,7 +316,7 @@ namespace had {
     }
 
     had::seconds Audio::get_duration() {
-        if (state != State::play && state != State::stop) {
+        if (state != State::playing && state != State::stoped) {
             return 0;
         }
         return audio_file.get_samples() / audio_file.get_rate();
