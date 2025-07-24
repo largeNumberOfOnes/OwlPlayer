@@ -5,11 +5,13 @@
 #pragma once
 
 #include "fileManager.h"
-#include "had/had_logger.h"
-#include "had/had_types.h"
 #include "queuePanel.h"
+#include "had/had.h"
+
 #include <string_view>
 #include <vector>
+
+
 
 class Shuffler {
     std::vector<std::string> seq_vec;

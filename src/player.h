@@ -17,7 +17,6 @@ class Player {
     std::string DEFAULT_COMPOSITION_PATH = "******";
     std::string cur_composition_path = DEFAULT_COMPOSITION_PATH;
 
-    static constexpr had::Dem source_str_offset = 10;
     std::string source_str = "---";
 
     struct Grid {

@@ -1,11 +1,10 @@
 #include "player.h"
+
 #include "had/had.h"
-#include "had/had_interface.h"
 #include "had/had_types.h"
 
-#include <cstring>
-#include <string>
 #include <string_view>
+#include <string>
 
 
 
@@ -173,17 +172,23 @@ had::Res Player::draw_composition_name() {
 }
 
 had::Res Player::draw_source_str() {
-    std::string_view SOURCE = "Source: ";
-    // return drawer.draw_text(
-    //     drawer.get_width() - source_str_offset,
-    //     0,
-    //     source_str
-    // );
-    return drawer.draw_text(
-        drawer.get_width() - source_str_offset,
-        0,
-        source_str
-    );
+    constexpr std::string_view SOURCE = "Source: ";
+    if (false
+        || drawer.draw_text(
+                drawer.get_width() - source_str.length() - SOURCE.length(),
+                0,
+                SOURCE
+            )
+        || drawer.draw_text(
+                drawer.get_width() - source_str.length(),
+                0,
+                source_str
+            )
+    ) {
+        log.log_err("Cannot draw source string");
+        return had::Res::error;
+    }
+    return had::Res::success;
 }
 
 had::Res Player::draw() {

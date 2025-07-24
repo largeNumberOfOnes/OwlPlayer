@@ -5,13 +5,11 @@
 #pragma once
 
 #include "had/had.h"
-#include "had/had_types.h"
-#include "setup.h"
+class Setup; // DEV [Should include setup.h but this causes errors]
 
-#include <filesystem>
-#include <cstddef>
-#include <optional>
 #include <string_view>
+#include <filesystem>
+#include <optional>
 #include <vector>
 
 

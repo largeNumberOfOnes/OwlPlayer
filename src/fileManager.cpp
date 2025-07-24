@@ -1,8 +1,7 @@
 #include "fileManager.h"
 
 #include "had/had.h"
-#include "had/had_audio.h"
-#include "had/had_types.h"
+#include "setup.h"
 
 #include <algorithm>
 #include <cstddef>

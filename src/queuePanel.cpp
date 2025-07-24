@@ -16,7 +16,9 @@ QueuePanel::QueuePanel(had::Drawer& drawer, const had::Logger& log)
 
 had::Res QueuePanel::draw() {
     drawer.cls();
-    drawer.draw_text(0, 0, "queue");
+    if (list.empty()) {
+        return drawer.draw_text(0, 0, "Queue is empty");
+    }
 
     auto it = list.cbegin();
     for (int q = 0; q < drawer.get_height() && it != list.cend(); ++q,
