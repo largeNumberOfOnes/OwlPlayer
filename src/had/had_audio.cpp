@@ -100,8 +100,8 @@ namespace had {
             return;
         }
 
-        size_t bytes_read;
-        ret = data.audio_file->read_file(dst, spa_buf->datas[0].maxsize, bytes_read);
+        size_t samples_read;
+        ret = data.audio_file->read_file(dst, data.audio_file->byte_to_samples(spa_buf->datas[0].maxsize), samples_read);
         if (ret == AudioFile::res_code::end_of_file) {
             *data.state = State::inited;
             *data.was_finalized_val = true;
@@ -111,7 +111,7 @@ namespace had {
             pw_thread_loop_unlock(data.loop);
             return;
         }
-        spa_buf->datas[0].chunk->size = bytes_read;
+        spa_buf->datas[0].chunk->size = data.audio_file->samples_to_byte(samples_read);
 
         pw_stream_queue_buffer(data.stream, buffer);
 
@@ -246,11 +246,6 @@ namespace had {
         return vol;
     }
 
-    std::size_t Audio::pos_to_byte(seconds pos) {
-        return pos * audio_file.get_rate() * audio_file.get_channels() * 2;
-        // DEV [if sndfile is used the mult is 4]
-    }
-
     Audio::res_code Audio::jump(seconds pos) {
         if (state != State::stoped && state != State::playing) {
             return res_code::bad_state;
@@ -258,7 +253,7 @@ namespace had {
         std::lock_guard<std::mutex> lock{mutex};
         pw_thread_loop_lock(data.loop);
         pw_stream_flush(data.stream, false);
-        std::size_t samples_pos = pos_to_byte(pos);
+        std::size_t samples_pos = audio_file.seconds_to_samples(pos);
         samples_pos = std::min(
             samples_pos,
             audio_file.get_max_pos()
@@ -272,15 +267,15 @@ namespace had {
         }
     }
 
-    Audio::res_code Audio::jump_rel(seconds pos_rel) {
+    Audio::res_code Audio::jump_rel(seconds time_shift) {
         if (state != State::stoped && state != State::playing) {
             return res_code::bad_state;
         }
         std::lock_guard<std::mutex> lock{mutex};
         pw_thread_loop_lock(data.loop);
         pw_stream_flush(data.stream, false);
-        bool is_positive = pos_rel > 0;
-        std::size_t samples_pos = pos_to_byte(std::abs(pos_rel));
+        bool is_positive = time_shift > 0;
+        std::size_t samples_pos = audio_file.seconds_to_samples(std::abs(time_shift));
         if (is_positive) {
             samples_pos = audio_file.get_cur_pos() + samples_pos;
         } else {

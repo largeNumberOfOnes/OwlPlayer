@@ -31,19 +31,23 @@ namespace had {
     //         static const ResType success;
     //         static const ResType error;
 
-    //         operator bool() {
-    //             return val;
+    //         bool was_success() {
+    //             return val == val_success;
     //         }
+
+    //         // operator bool() {
+    //         //     return val;
+    //         // }
     //         bool operator ==(Res other) {
     //             return val == other.val;
     //         }
-    //         // Res operator ||(Res other) {
-    //         //     if (val == val_success && other.val == val_success) {
-    //         //         return success;
-    //         //     } else {
-    //         //         return error;
-    //         //     }
-    //         // }
+    //         Res operator &(Res other) {
+    //             if (val == val_success && other.val == val_success) {
+    //                 return success;
+    //             } else {
+    //                 return error;
+    //             }
+    //         }
     // };
 
     // inline const Res::ResType Res::success{Res::val_success};

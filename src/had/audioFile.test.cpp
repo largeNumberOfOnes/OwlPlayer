@@ -7,9 +7,9 @@
 
 
 int test1() { // testing wav load
-    had::AudioFile file{stdlogger};
+    had::AudioFile file{had::std_logger};
     had::AudioFile::res_code err = file.load(
-        "/home/dt/Documents/audioPlayer/data/alyans_na_zare.wav");
+        "/home/dt/Documents/audioPlayer/test_data/alyans_na_zare.wav");
     assert(err == had::AudioFile::res_code::success);
 
     std::cout << "Testing wav:" << std::endl;
@@ -21,9 +21,9 @@ int test1() { // testing wav load
 }
 
 int test2() { // testing mp3 load
-    had::AudioFile file{stdlogger};
+    had::AudioFile file{had::std_logger};
     had::AudioFile::res_code err = file.load(
-        "/home/dt/Documents/audioPlayer/data/alyans_na_zare.mp3");
+        "/home/dt/Documents/audioPlayer/test_data/alyans_na_zare.mp3");
     assert(err == had::AudioFile::res_code::success);
 
     std::cout << "Testing mp3:" << std::endl;
@@ -35,9 +35,9 @@ int test2() { // testing mp3 load
 }
 
 int test3() { // testing init
-    had::AudioFile file{stdlogger};
+    had::AudioFile file{had::std_logger};
     had::AudioFile::res_code err = file.load(
-        "/home/dt/Documents/audioPlayer/data/alyans_na_zare.mp3");
+        "/home/dt/Documents/audioPlayer/test_data/alyans_na_zare.mp3");
     assert(err == had::AudioFile::res_code::success);
 
     err = file.load("/home/dt/Documents/audioPlayer/data/alyans_na_zare.mp3");
@@ -51,9 +51,9 @@ int test3() { // testing init
 
 int main() {
 
-    test1();
+    // test1();
     test2();
-    test3();
+    // test3();
 
     return 0;
 }

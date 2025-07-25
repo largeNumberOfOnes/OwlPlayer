@@ -18,7 +18,7 @@ namespace had {
             std::function<void(std::string_view)> log_info;
     };
 
-    static had::Logger std_slogger = {
+    static had::Logger std_logger = {
         [](std::string_view mes){ std::cerr << "Error: " << mes << std::endl; },
         [](std::string_view mes){ std::cerr << "Warn : " << mes << std::endl; },
         [](std::string_view mes){ std::cerr << "Info : " << mes << std::endl; },

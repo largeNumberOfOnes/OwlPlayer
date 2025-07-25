@@ -10,7 +10,8 @@ WARNINGS := -Wall -Wextra -Werror -fsanitize=address \
 DFLAGS := -g -DBUILD_DEB -std=c++20 $(WARNINGS)
 OUTPUT_NAME := had.o
 
-LIBS := -lsndfile -lmpg123 -lasound -lncursesw \
+# LIBS := -lsndfile -lmpg123 -lasound -lncursesw
+LIBS := -lavformat -lavcodec -lswresample -lavutil -lncursesw \
 		 $(shell pkg-config --cflags --libs libpipewire-0.3)
 
 INCLUDES := $(shell pkg-config --cflags libpipewire-0.3)

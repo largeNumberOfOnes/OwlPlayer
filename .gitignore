@@ -4,6 +4,7 @@ execs/
 logs/
 test_data/
 objects/
+audio_decoders/
 .vscode/
 .clangd
 

@@ -1,184 +1,287 @@
 #include "audioFile.h"
 
-#include <cassert>
-#include <cstddef>
-#include <cstdio>
-#include <curses.h>
-#include <string>
-#include <cstring>
-#include <fcntl.h>
-#include <mpg123.h>
-#include <sndfile.h>
-#include <string_view>
-#include <unistd.h>
-
 #include "had_logger.h"
 #include "had_types.h"
+
+#include <fcntl.h>
+
+#include <string_view>
+#include <string>
+#include <vector>
+#include <mutex>
+
+extern "C" {
+    #include <libavcodec/avcodec.h>
+    #include <libavformat/avformat.h>
+    #include <libswresample/swresample.h>
+    #include <libavutil/log.h>
+}
+
 
 
 static char const* file_path_pcm = "/tmp/audplay_77777.pcm";
 
 namespace had {
-    Res AudioFile::read_mp3(char const* path) {
-        log.log_info("Loading mp3 file");
 
-        mpg123_handle *mh = nullptr;
-        unsigned char *buffer = nullptr;
-        FILE *outfile = nullptr;
-        size_t buffer_size = 0;
-        size_t done = 0;
-        long int lrate = 0;
-        int err = -1;
-        int encoding = 0;
-        Res ret = Res::success;
+    struct FfmpegData {
+        AVFormatContext* fmt_ctx        = nullptr;
+        int audio_stream_idx            = -1;
+        AVStream* audio_stream          = nullptr;
+        AVCodecParameters* codec_params = nullptr;
+        AVCodecContext* codec_ctx       = nullptr;
+        SwrContext* swr_ctx             = nullptr;
+    };
 
-        if (mpg123_init() != MPG123_OK) {
-            goto label_error;
+    static Res ff_init_context(
+        FfmpegData& data,
+        const char* input_file,
+        const Logger& log
+    ) {
+        if (avformat_open_input(
+                &data.fmt_ctx,
+                input_file,
+                nullptr,
+                nullptr
+            ) < 0
+        ) {
+            log.log_err("Cannot open file");
+            return Res::error;
         }
-        mh = mpg123_new(NULL, &err);
-        if (err != MPG123_OK) {
-            goto label_error;
+        if (avformat_find_stream_info(data.fmt_ctx, nullptr) < 0) {
+            log.log_err("Cannot find stream info");
+            avformat_close_input(&data.fmt_ctx);
+            return Res::error;
         }
-
-        buffer_size = mpg123_outblock(mh);
-        buffer = new unsigned char[buffer_size];
-        if (buffer == nullptr) {
-            log.log_err("Cannot allocate buffer");
-            goto label_error;   
-        }
-
-        err = mpg123_open(mh, path);
-        if (err != MPG123_OK) {
-            log.log_err("Cannot open input file");
-            goto label_error;   
-        }
-
-        if (mpg123_getformat(mh, &lrate, &channels, &encoding) !=
-                                                            MPG123_OK) {
-            log.log_err(std::string("Cannot get file format: ") +
-                                                    mpg123_strerror(mh));
-            goto label_error;
-        }
-        rate = static_cast<int>(lrate);
-        samples = mpg123_length(mh);
-        if (samples == MPG123_ERR) {
-            log.log_err(std::string("Cannot get length in samples: ") + 
-                                                    mpg123_strerror(mh));
-            goto label_error;
-        }
-
-        outfile = fopen(file_path_pcm, "wb");
-        if (!outfile) {
-            log.log_err(std::string("Cannot open output file: ") +
-                                                        strerror(errno));
-            goto label_error;
-        }
-
-        while (mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK) {
-            fwrite(buffer, 1, done, outfile);
-        }
-
-        goto label_success;
-        label_error:
-            ret = Res::error;
-        label_success:
-            if (outfile != nullptr) {
-                fclose(outfile);
-            }
-            delete [] buffer;
-            if (mh != nullptr) {
-                mpg123_close(mh);
-                mpg123_delete(mh);
-            }
-            mpg123_exit(); // tribute to the past
-
-            return ret;
+        return Res::success;
     }
 
-    Res AudioFile::read_wav(char const* path) { // Whis is also works for mp3 files...
-        log.log_info("Loading wav file");
-
-        SNDFILE *infile = nullptr;
-        FILE *outfile = nullptr;
-        SF_INFO sfinfo;
-        Res ret = Res::success;
-
-        constexpr std::size_t buffer_size = 1024;
-        // short buffer[buffer_size];
-        int buffer[buffer_size];
-
-        infile = sf_open(path, SFM_READ, &sfinfo);
-        if (!infile) {
-            char err_str[100];
-            sf_error_str(infile, err_str, 100);
-            log.log_err(std::string("Cannot open input file: ") + err_str);
-            goto label_error;
+    static Res ff_init_stream(
+        FfmpegData& data,
+        const Logger& log
+    ) {
+        data.audio_stream_idx = av_find_best_stream(
+            data.fmt_ctx, AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0
+        );
+        if (data.audio_stream_idx < 0) {
+            log.log_err("No audio stream found");
+            avformat_close_input(&data.fmt_ctx);
+            return Res::error;
         }
+        data.audio_stream = data.fmt_ctx->streams[data.audio_stream_idx];
+        return Res::success;
+    }
 
-        rate     = sfinfo.samplerate;
-        channels = sfinfo.channels;
-        samples  = sfinfo.frames;
-
-        outfile = fopen(file_path_pcm, "wb");
-        if (!outfile) {
-            log.log_err(std::string("Cannot open output file: ")
-                                                        + strerror(errno));
-            goto label_error;
+    static Res ff_init_codec(
+        FfmpegData& data,
+        const Logger& log
+    ) {
+        data.codec_params = data.audio_stream->codecpar;
+        const AVCodec* codec =
+                        avcodec_find_decoder(data.codec_params->codec_id);
+        if (!codec) {
+            log.log_err("Cannot find decoder");
+            avformat_close_input(&data.fmt_ctx);
+            return Res::error;
         }
-
-        sf_count_t count;
-        // while ((count = sf_read_short(infile, buffer, buffer_size))) {
-        while ((count = sf_read_int(infile, buffer, buffer_size))) {
-            // fwrite(buffer, sizeof(short), count, outfile);
-            fwrite(buffer, sizeof(int), count, outfile);
+        data.codec_ctx = avcodec_alloc_context3(codec);
+        if (avcodec_parameters_to_context(
+                data.codec_ctx,
+                data.audio_stream->codecpar
+            ) < 0
+        ) {
+            log.log_err("Cannot setcodec parameters to stream");
+            avcodec_free_context(&data.codec_ctx);
+            avformat_close_input(&data.fmt_ctx);
+            return Res::error;
         }
+        if (avcodec_open2(data.codec_ctx, codec, nullptr) < 0) {
+            log.log_err("Error opening codec");
+            avcodec_free_context(&data.codec_ctx);
+            avformat_close_input(&data.fmt_ctx);
+            return Res::error;
+        }
+        return Res::success;
+    }
 
-        goto label_success;
-        label_error:
-            ret = Res::error;
-        label_success:
-            if (infile != nullptr) {
-                sf_close(infile);
+    static Res ff_init_swr(
+        FfmpegData& data,
+        const Logger& log
+    ) {
+        data.swr_ctx = swr_alloc();
+        swr_alloc_set_opts2(
+            &data.swr_ctx,
+            &data.codec_ctx->ch_layout,          // Output layout (stereo)
+            AV_SAMPLE_FMT_S16,                   // 16-bit signed PCM
+            data.codec_ctx->sample_rate,         // Output sample rate
+            &data.codec_ctx->ch_layout,          // Input layout
+            data.codec_ctx->sample_fmt,          // Input format
+            data.codec_ctx->sample_rate,         // Input sample rate
+            0, nullptr
+        );
+        swr_init(data.swr_ctx);
+
+        return Res::success;
+    }
+    
+    static Res write_to_file(
+        FfmpegData& data,
+        AVFrame* frame,
+        SampleDem& samples,
+        FILE* pcm_out,
+        const Logger& log
+    ) {
+        uint8_t* pcm_data = nullptr;
+        av_samples_alloc(
+            &pcm_data, nullptr, data.codec_ctx->ch_layout.nb_channels,
+            frame->nb_samples, AV_SAMPLE_FMT_S16, 0
+        );
+        samples += frame->nb_samples;
+
+        swr_convert(data.swr_ctx, &pcm_data, frame->nb_samples,
+                (const uint8_t**)frame->data, frame->nb_samples);
+
+        fwrite(
+            pcm_data,
+            1,
+            frame->nb_samples * data.codec_ctx->ch_layout.nb_channels * 2,
+            pcm_out
+        );
+        av_freep(&pcm_data);
+
+        return Res::success;
+    }
+
+    static Res ff_convert(
+        FfmpegData& data,
+        const char* output_file,
+        SampleDem& samples,
+        const Logger& log
+    ) {
+        FILE* pcm_out  = fopen(output_file, "wb");
+        AVPacket* pkt  = av_packet_alloc();
+        AVFrame* frame = av_frame_alloc();
+
+        samples = 0;
+        while (av_read_frame(data.fmt_ctx, pkt) >= 0) {
+            if (pkt->stream_index != data.audio_stream_idx) {
+                av_packet_unref(pkt);
+                continue;
             }
-            if (outfile != nullptr) {
-                fclose(outfile);
+            if (avcodec_send_packet(data.codec_ctx, pkt) < 0) {
+                av_packet_unref(pkt);
+                continue;
             }
-            return ret;
+            while (avcodec_receive_frame(data.codec_ctx, frame) == 0) {
+                if (write_to_file(
+                        data, 
+                        frame, 
+                        samples, 
+                        pcm_out, 
+                        log
+                    )
+                ) {
+                    log.log_info("cannot convert received frame");
+                }
+            }
+            av_packet_unref(pkt);
+        }
+
+        fclose(pcm_out);
+        av_frame_free(&frame);
+        av_packet_free(&pkt);
+
+        return Res::success;
+    }
+
+    class FfErrors {
+        public:
+            char* help_str = nullptr;
+            std::vector<std::pair<int, std::string>> errors_list;
+            FfErrors() {
+                constexpr std::size_t ERROR_BUFFER_SIZE = 1024;
+                help_str = new char[ERROR_BUFFER_SIZE];
+            }
+            ~FfErrors() {
+                delete [] help_str;
+            }
+    };
+
+    static FfErrors& ff_set_error_processor() {
+        static FfErrors ff_errors;
+        auto ff_custom_log = +[](
+            void* ptr, int level, const char* fmt, va_list vl
+        ) {
+            static std::mutex mut;
+            std::lock_guard<std::mutex> lock{mut};
+            vsprintf(ff_errors.help_str, fmt, vl);
+            std::string str{ff_errors.help_str};
+            str.pop_back();
+            ff_errors.errors_list.emplace_back(level, std::move(str));
+        };
+        av_log_set_callback(ff_custom_log);
+        return ff_errors;
+    }
+
+    static Res ff_check_errors(FfErrors& ff_errors, const Logger& log) { 
+        av_log_set_callback(av_log_default_callback);
+        Res res = Res::success;
+        for (const auto& it : ff_errors.errors_list) {
+            if (it.first == AV_LOG_ERROR) {
+                log.log_err(it.second);
+                res = Res::error;
+            } else if constexpr (PRINT_FFMPEG_WARNINGS) {
+                log.log_warn(it.second);
+            }
+        }
+        return res;
+    }
+
+    Res AudioFile::convert_to_pcm(
+        const char* input_file,
+        const char* output_file
+    ) {
+        FfmpegData ffmpeg_data;
+        FfErrors& ff_errors = ff_set_error_processor();
+
+        if (false
+            || ff_init_context(ffmpeg_data, input_file, log)
+            || ff_init_stream (ffmpeg_data, log)
+            || ff_init_codec  (ffmpeg_data, log)
+            || ff_init_swr    (ffmpeg_data, log)
+            || ff_convert     (ffmpeg_data, output_file, samples, log)
+        ) {
+            log.log_err("Cannot convert file to pcm");
+            return Res::error;
+        }
+
+        rate     = ffmpeg_data.codec_params->sample_rate;
+        channels = ffmpeg_data.codec_params->ch_layout.nb_channels;
+
+        swr_free            (&ffmpeg_data.swr_ctx);
+        avcodec_free_context(&ffmpeg_data.codec_ctx);
+        avformat_close_input(&ffmpeg_data.fmt_ctx);
+
+        if (ff_check_errors(ff_errors, log)) {
+            log.log_err("Internal ffmpeg error");
+            return Res::error;
+        }
+
+        return Res::success;
     }
 
     AudioFile::res_code AudioFile::load(std::string_view path) {
         log.log_info("init() file");
-
-        if (is_inited) {
-            erase();
-        }
-
-
-        // if (path.length() < 4) {
-        //     log.log_err("Cannot init: path has no proper extension");
-        //     return Res::error;
-        // }
+        erase();
         
-        Res err;
-        // if (!strncmp(path + len - 4, ".wav", 4)) {
-        //     err = read_wav(path);
-        // } else if (!strncmp(path + len - 4, ".mp3", 4)) {
-        //     err = read_mp3(path);
-        // } else {
-        //     log.log_err("Unknown file type");
-        //     return Res::error;
-        // }
-        // err = read_wav(path.c_str());
-        err = read_mp3(path.data());
-        if (err == Res::error) {
+        if (convert_to_pcm(path.data(), file_path_pcm)) {
             log.log_err("Cannot conver file to pcm");
             return res_code::other_error;
         }
 
         file = fopen(file_path_pcm, "rb");
         if (!file) {
-            log.log_err(std::string("Cannot open file: %s") +
-                                                        strerror(errno));
+            log.log_err(
+                    std::string("Cannot open file: ") + strerror(errno));
             remove(file_path_pcm);
             return res_code::other_error;
         }
@@ -186,6 +289,7 @@ namespace had {
         cur_pos = 0;
         is_end_reached = false;
         is_inited = true;
+
         return res_code::success;
     }
 
@@ -203,12 +307,6 @@ namespace had {
         is_inited = false;
         is_end_reached = false;
 
-        // delete [] buf;
-        // delete [] buf2;
-        // buf = nullptr;
-        // buf2 = nullptr;
-        // buf_size = 0;
-
         return res_code::success;
     }
 
@@ -217,22 +315,22 @@ namespace had {
     }
 
     void AudioFile::copy_to_buf(short* ref_buf, int size) {
-        // if (!buf || buf_size != size) {
-        //     buf = new short[size];
-        //     buf_size = size;
-        // }
-        buf.clear();
+        // // if (!buf || buf_size != size) {
+        // //     buf = new short[size];
+        // //     buf_size = size;
+        // // }
+        // buf.clear();
 
-        for (int q = 0; q < size; ++q) {
-            // buf[q] = static_cast<int>(ref_buf[q]);
-            if (q % 300 == 0) {
-                buf.push_back(static_cast<int>(ref_buf[q]));
-            }
-        }
+        // for (int q = 0; q < size; ++q) {
+        //     // buf[q] = static_cast<int>(ref_buf[q]);
+        //     if (q % 300 == 0) {
+        //         buf.push_back(static_cast<int>(ref_buf[q]));
+        //     }
+        // }
     }
 
-    AudioFile::res_code AudioFile::read_file(void* buf, size_t byte_count,
-                                                        size_t& retcount) {
+    AudioFile::res_code AudioFile::read_file(void* buf, SampleDem samples,
+                                                    SampleDem& retcount) {
         if (!is_inited) {
             log.log_err("File is not initialized");
             return res_code::other_error;
@@ -242,36 +340,32 @@ namespace had {
             return res_code::other_error;
         }
 
-        // std::cout << "get_max_pos() " << get_max_pos() << std::endl;
-        // std::cout << "cur_pos " << cur_pos << std::endl;
-        // if (cur_pos == get_max_pos()) {
         if (is_end_reached) {
             retcount = 0;
             return res_code::end_of_file;
         }
-        std::size_t size = fread(buf, 1, byte_count, file);
+        std::size_t size = fread(buf, 1, samples_to_byte(samples), file);
+
         if (size == 0) {
             retcount = 0;
             is_end_reached = true;
             return res_code::success;
-            // log.log_err(std::string("Cannot read file: ") +
-            //                                             strerror(errno));
         }
-        cur_pos += size;
-        retcount = size;
+        cur_pos += byte_to_samples(size);
+        retcount = byte_to_samples(size);
 
-        copy_to_buf(reinterpret_cast<short*>(buf), byte_count / 2);
+        // copy_to_buf(reinterpret_cast<short*>(buf), byte_count / 2);
 
         return res_code::success;
     }
 
-    AudioFile::res_code AudioFile::set_position(std::size_t position) {
+    AudioFile::res_code AudioFile::set_position(SampleDem position) {
         if (!is_inited) {
             log.log_err("File is not initialized");
             return res_code::not_initialized;
         }
 
-        int err = fseek(file, position, SEEK_SET);
+        int err = fseek(file, samples_to_byte(position), SEEK_SET);
         if (err) {
             // log.log_warn("Cannot seek file");
             is_end_reached = true;
@@ -291,7 +385,7 @@ namespace had {
         }
     }
 
-    std::size_t AudioFile::get_cur_pos() {
+    SampleDem AudioFile::get_cur_pos() {
         return cur_pos;
     }
 
@@ -313,5 +407,19 @@ namespace had {
 
     const std::vector<int>& AudioFile::get_buf() {
         return buf;
+    }
+
+    DataFrame get_frame() {
+
+    }
+
+    SampleDem AudioFile::byte_to_samples(std::size_t bytes) {
+        return bytes / sizeof(Value) / channels;
+    }
+    std::size_t AudioFile::samples_to_byte(SampleDem pos) {
+        return pos * sizeof(Value) * channels;
+    }
+    SampleDem AudioFile::seconds_to_samples(seconds time) {
+        return time * rate;
     }
 }

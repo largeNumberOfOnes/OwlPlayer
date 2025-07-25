@@ -63,7 +63,6 @@ namespace had {
 
         Res set_params(const AudioProperties& props);
 
-        std::size_t pos_to_byte(seconds pos);
         Res set_volume_unsafe();
 
         public:
