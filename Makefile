@@ -3,7 +3,9 @@
 objects/app.o: src/app.cpp src/app.h src/errorBar.h src/had/had.h \
   src/had/had_interface.h src/had/had_keys.h src/had/had_logger.h \
   src/had/had_types.h src/had/had_unicode.h src/had/had_audio.h \
-  src/had/audioFile.h /usr/include/pipewire-0.3/pipewire/pipewire.h \
+  src/had/audioFile.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h \
+  /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
   /usr/include/spa-0.2/spa/utils/defs.h \
   /usr/include/spa-0.2/spa/utils/dict.h \
@@ -58,8 +60,8 @@ objects/app.o: src/app.cpp src/app.h src/errorBar.h src/had/had.h \
   /usr/include/spa-0.2/spa/support/thread.h \
   /usr/include/pipewire-0.3/pipewire/type.h \
   /usr/include/pipewire-0.3/pipewire/version.h src/setup.h \
-  src/fileManager.h src/switchPanel.h src/queuePanel.h src/eventQueue.h \
-  src/shuffler.h src/player.h src/spectre.h
+  src/shuffler.h src/fileManager.h src/queuePanel.h src/switchPanel.h \
+  src/eventQueue.h src/player.h src/spectre.h
 	clang++-14 -g -std=c++20 -c src/app.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/app.o
 
 objects/config.o: src/config.cpp src/config.h
@@ -68,7 +70,9 @@ objects/config.o: src/config.cpp src/config.h
 objects/errorBar.o: src/errorBar.cpp src/errorBar.h src/had/had.h \
   src/had/had_interface.h src/had/had_keys.h src/had/had_logger.h \
   src/had/had_types.h src/had/had_unicode.h src/had/had_audio.h \
-  src/had/audioFile.h /usr/include/pipewire-0.3/pipewire/pipewire.h \
+  src/had/audioFile.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h \
+  /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
   /usr/include/spa-0.2/spa/utils/defs.h \
   /usr/include/spa-0.2/spa/utils/dict.h \
@@ -122,13 +126,16 @@ objects/errorBar.o: src/errorBar.cpp src/errorBar.h src/had/had.h \
   /usr/include/pipewire-0.3/pipewire/data-loop.h \
   /usr/include/spa-0.2/spa/support/thread.h \
   /usr/include/pipewire-0.3/pipewire/type.h \
-  /usr/include/pipewire-0.3/pipewire/version.h src/setup.h
+  /usr/include/pipewire-0.3/pipewire/version.h src/setup.h \
+  src/shuffler.h src/fileManager.h src/queuePanel.h
 	clang++-14 -g -std=c++20 -c src/errorBar.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/errorBar.o
 
 objects/eventQueue.o: src/eventQueue.cpp src/eventQueue.h src/had/had.h \
   src/had/had_interface.h src/had/had_keys.h src/had/had_logger.h \
   src/had/had_types.h src/had/had_unicode.h src/had/had_audio.h \
-  src/had/audioFile.h /usr/include/pipewire-0.3/pipewire/pipewire.h \
+  src/had/audioFile.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h \
+  /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
   /usr/include/spa-0.2/spa/utils/defs.h \
   /usr/include/spa-0.2/spa/utils/dict.h \
@@ -188,69 +195,8 @@ objects/eventQueue.o: src/eventQueue.cpp src/eventQueue.h src/had/had.h \
 objects/fileManager.o: src/fileManager.cpp src/fileManager.h src/had/had.h \
   src/had/had_interface.h src/had/had_keys.h src/had/had_logger.h \
   src/had/had_types.h src/had/had_unicode.h src/had/had_audio.h \
-  src/had/audioFile.h /usr/include/pipewire-0.3/pipewire/pipewire.h \
-  /usr/include/spa-0.2/spa/support/plugin.h \
-  /usr/include/spa-0.2/spa/utils/defs.h \
-  /usr/include/spa-0.2/spa/utils/dict.h \
-  /usr/include/pipewire-0.3/pipewire/array.h \
-  /usr/include/pipewire-0.3/pipewire/client.h \
-  /usr/include/spa-0.2/spa/param/param.h \
-  /usr/include/spa-0.2/spa/param/buffers.h \
-  /usr/include/spa-0.2/spa/param/profile.h \
-  /usr/include/spa-0.2/spa/param/port-config.h \
-  /usr/include/spa-0.2/spa/param/route.h \
-  /usr/include/pipewire-0.3/pipewire/proxy.h \
-  /usr/include/spa-0.2/spa/utils/hook.h \
-  /usr/include/spa-0.2/spa/utils/list.h \
-  /usr/include/pipewire-0.3/pipewire/protocol.h \
-  /usr/include/pipewire-0.3/pipewire/context.h \
-  /usr/include/pipewire-0.3/pipewire/core.h \
-  /usr/include/pipewire-0.3/pipewire/properties.h \
-  /usr/include/spa-0.2/spa/utils/string.h \
-  /usr/include/pipewire-0.3/pipewire/loop.h \
-  /usr/include/spa-0.2/spa/support/loop.h \
-  /usr/include/spa-0.2/spa/support/system.h \
-  /usr/include/pipewire-0.3/pipewire/utils.h \
-  /usr/include/spa-0.2/spa/pod/pod.h \
-  /usr/include/spa-0.2/spa/utils/type.h \
-  /usr/include/pipewire-0.3/pipewire/permission.h \
-  /usr/include/pipewire-0.3/pipewire/conf.h \
-  /usr/include/pipewire-0.3/pipewire/device.h \
-  /usr/include/pipewire-0.3/pipewire/buffers.h \
-  /usr/include/spa-0.2/spa/node/node.h \
-  /usr/include/spa-0.2/spa/buffer/buffer.h \
-  /usr/include/spa-0.2/spa/buffer/meta.h \
-  /usr/include/spa-0.2/spa/node/event.h \
-  /usr/include/spa-0.2/spa/pod/event.h \
-  /usr/include/spa-0.2/spa/node/command.h \
-  /usr/include/spa-0.2/spa/pod/command.h \
-  /usr/include/pipewire-0.3/pipewire/mem.h \
-  /usr/include/pipewire-0.3/pipewire/factory.h \
-  /usr/include/pipewire-0.3/pipewire/keys.h \
-  /usr/include/pipewire-0.3/pipewire/log.h \
-  /usr/include/spa-0.2/spa/support/log.h \
-  /usr/include/pipewire-0.3/pipewire/link.h \
-  /usr/include/pipewire-0.3/pipewire/main-loop.h \
-  /usr/include/pipewire-0.3/pipewire/map.h \
-  /usr/include/pipewire-0.3/pipewire/module.h \
-  /usr/include/pipewire-0.3/pipewire/node.h \
-  /usr/include/pipewire-0.3/pipewire/port.h \
-  /usr/include/pipewire-0.3/pipewire/stream.h \
-  /usr/include/pipewire-0.3/pipewire/filter.h \
-  /usr/include/spa-0.2/spa/node/io.h \
-  /usr/include/pipewire-0.3/pipewire/thread-loop.h \
-  /usr/include/pipewire-0.3/pipewire/data-loop.h \
-  /usr/include/spa-0.2/spa/support/thread.h \
-  /usr/include/pipewire-0.3/pipewire/type.h \
-  /usr/include/pipewire-0.3/pipewire/version.h src/setup.h
-	clang++-14 -g -std=c++20 -c src/fileManager.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/fileManager.o
-
-objects/Fourier_transform.o: src/Fourier_transform.cpp src/Fourier_transform.h
-	clang++-14 -g -std=c++20 -c src/Fourier_transform.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/Fourier_transform.o
-
-objects/main.o: src/main.cpp src/had/had.h src/had/had_interface.h \
-  src/had/had_keys.h src/had/had_logger.h src/had/had_types.h \
-  src/had/had_unicode.h src/had/had_audio.h src/had/audioFile.h \
+  src/had/audioFile.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h \
   /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
   /usr/include/spa-0.2/spa/utils/defs.h \
@@ -305,15 +251,83 @@ objects/main.o: src/main.cpp src/had/had.h src/had/had_interface.h \
   /usr/include/pipewire-0.3/pipewire/data-loop.h \
   /usr/include/spa-0.2/spa/support/thread.h \
   /usr/include/pipewire-0.3/pipewire/type.h \
-  /usr/include/pipewire-0.3/pipewire/version.h src/setup.h src/app.h \
-  src/errorBar.h src/fileManager.h src/switchPanel.h src/queuePanel.h \
-  src/eventQueue.h src/shuffler.h src/player.h src/spectre.h
+  /usr/include/pipewire-0.3/pipewire/version.h src/setup.h \
+  src/shuffler.h src/queuePanel.h
+	clang++-14 -g -std=c++20 -c src/fileManager.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/fileManager.o
+
+objects/Fourier_transform.o: src/Fourier_transform.cpp src/Fourier_transform.h
+	clang++-14 -g -std=c++20 -c src/Fourier_transform.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/Fourier_transform.o
+
+objects/main.o: src/main.cpp src/had/had.h src/had/had_interface.h \
+  src/had/had_keys.h src/had/had_logger.h src/had/had_types.h \
+  src/had/had_unicode.h src/had/had_audio.h src/had/audioFile.h \
+  src/had/had_dataFrame.h src/had/../../audio_decoders/dr_libs/dr_mp3.h \
+  /usr/include/pipewire-0.3/pipewire/pipewire.h \
+  /usr/include/spa-0.2/spa/support/plugin.h \
+  /usr/include/spa-0.2/spa/utils/defs.h \
+  /usr/include/spa-0.2/spa/utils/dict.h \
+  /usr/include/pipewire-0.3/pipewire/array.h \
+  /usr/include/pipewire-0.3/pipewire/client.h \
+  /usr/include/spa-0.2/spa/param/param.h \
+  /usr/include/spa-0.2/spa/param/buffers.h \
+  /usr/include/spa-0.2/spa/param/profile.h \
+  /usr/include/spa-0.2/spa/param/port-config.h \
+  /usr/include/spa-0.2/spa/param/route.h \
+  /usr/include/pipewire-0.3/pipewire/proxy.h \
+  /usr/include/spa-0.2/spa/utils/hook.h \
+  /usr/include/spa-0.2/spa/utils/list.h \
+  /usr/include/pipewire-0.3/pipewire/protocol.h \
+  /usr/include/pipewire-0.3/pipewire/context.h \
+  /usr/include/pipewire-0.3/pipewire/core.h \
+  /usr/include/pipewire-0.3/pipewire/properties.h \
+  /usr/include/spa-0.2/spa/utils/string.h \
+  /usr/include/pipewire-0.3/pipewire/loop.h \
+  /usr/include/spa-0.2/spa/support/loop.h \
+  /usr/include/spa-0.2/spa/support/system.h \
+  /usr/include/pipewire-0.3/pipewire/utils.h \
+  /usr/include/spa-0.2/spa/pod/pod.h \
+  /usr/include/spa-0.2/spa/utils/type.h \
+  /usr/include/pipewire-0.3/pipewire/permission.h \
+  /usr/include/pipewire-0.3/pipewire/conf.h \
+  /usr/include/pipewire-0.3/pipewire/device.h \
+  /usr/include/pipewire-0.3/pipewire/buffers.h \
+  /usr/include/spa-0.2/spa/node/node.h \
+  /usr/include/spa-0.2/spa/buffer/buffer.h \
+  /usr/include/spa-0.2/spa/buffer/meta.h \
+  /usr/include/spa-0.2/spa/node/event.h \
+  /usr/include/spa-0.2/spa/pod/event.h \
+  /usr/include/spa-0.2/spa/node/command.h \
+  /usr/include/spa-0.2/spa/pod/command.h \
+  /usr/include/pipewire-0.3/pipewire/mem.h \
+  /usr/include/pipewire-0.3/pipewire/factory.h \
+  /usr/include/pipewire-0.3/pipewire/keys.h \
+  /usr/include/pipewire-0.3/pipewire/log.h \
+  /usr/include/spa-0.2/spa/support/log.h \
+  /usr/include/pipewire-0.3/pipewire/link.h \
+  /usr/include/pipewire-0.3/pipewire/main-loop.h \
+  /usr/include/pipewire-0.3/pipewire/map.h \
+  /usr/include/pipewire-0.3/pipewire/module.h \
+  /usr/include/pipewire-0.3/pipewire/node.h \
+  /usr/include/pipewire-0.3/pipewire/port.h \
+  /usr/include/pipewire-0.3/pipewire/stream.h \
+  /usr/include/pipewire-0.3/pipewire/filter.h \
+  /usr/include/spa-0.2/spa/node/io.h \
+  /usr/include/pipewire-0.3/pipewire/thread-loop.h \
+  /usr/include/pipewire-0.3/pipewire/data-loop.h \
+  /usr/include/spa-0.2/spa/support/thread.h \
+  /usr/include/pipewire-0.3/pipewire/type.h \
+  /usr/include/pipewire-0.3/pipewire/version.h src/setup.h \
+  src/shuffler.h src/fileManager.h src/queuePanel.h src/app.h \
+  src/errorBar.h src/switchPanel.h src/eventQueue.h src/player.h \
+  src/spectre.h
 	clang++-14 -g -std=c++20 -c src/main.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/main.o
 
 objects/player.o: src/player.cpp src/player.h src/had/had.h \
   src/had/had_interface.h src/had/had_keys.h src/had/had_logger.h \
   src/had/had_types.h src/had/had_unicode.h src/had/had_audio.h \
-  src/had/audioFile.h /usr/include/pipewire-0.3/pipewire/pipewire.h \
+  src/had/audioFile.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h \
+  /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
   /usr/include/spa-0.2/spa/utils/defs.h \
   /usr/include/spa-0.2/spa/utils/dict.h \
@@ -373,7 +387,9 @@ objects/player.o: src/player.cpp src/player.h src/had/had.h \
 objects/queuePanel.o: src/queuePanel.cpp src/queuePanel.h src/had/had.h \
   src/had/had_interface.h src/had/had_keys.h src/had/had_logger.h \
   src/had/had_types.h src/had/had_unicode.h src/had/had_audio.h \
-  src/had/audioFile.h /usr/include/pipewire-0.3/pipewire/pipewire.h \
+  src/had/audioFile.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h \
+  /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
   /usr/include/spa-0.2/spa/utils/defs.h \
   /usr/include/spa-0.2/spa/utils/dict.h \
@@ -430,9 +446,11 @@ objects/queuePanel.o: src/queuePanel.cpp src/queuePanel.h src/had/had.h \
   /usr/include/pipewire-0.3/pipewire/version.h
 	clang++-14 -g -std=c++20 -c src/queuePanel.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/queuePanel.o
 
-objects/setup.o: src/setup.cpp src/setup.h src/had/had.h src/had/had_interface.h \
-  src/had/had_keys.h src/had/had_logger.h src/had/had_types.h \
-  src/had/had_unicode.h src/had/had_audio.h src/had/audioFile.h \
+objects/setup.o: src/setup.cpp src/setup.h src/shuffler.h src/fileManager.h \
+  src/had/had.h src/had/had_interface.h src/had/had_keys.h \
+  src/had/had_logger.h src/had/had_types.h src/had/had_unicode.h \
+  src/had/had_audio.h src/had/audioFile.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h \
   /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
   /usr/include/spa-0.2/spa/utils/defs.h \
@@ -487,13 +505,14 @@ objects/setup.o: src/setup.cpp src/setup.h src/had/had.h src/had/had_interface.h
   /usr/include/pipewire-0.3/pipewire/data-loop.h \
   /usr/include/spa-0.2/spa/support/thread.h \
   /usr/include/pipewire-0.3/pipewire/type.h \
-  /usr/include/pipewire-0.3/pipewire/version.h
+  /usr/include/pipewire-0.3/pipewire/version.h src/queuePanel.h
 	clang++-14 -g -std=c++20 -c src/setup.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/setup.o
 
 objects/shuffler.o: src/shuffler.cpp src/shuffler.h src/fileManager.h \
   src/had/had.h src/had/had_interface.h src/had/had_keys.h \
   src/had/had_logger.h src/had/had_types.h src/had/had_unicode.h \
-  src/had/had_audio.h src/had/audioFile.h \
+  src/had/had_audio.h src/had/audioFile.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h \
   /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
   /usr/include/spa-0.2/spa/utils/defs.h \
@@ -548,14 +567,15 @@ objects/shuffler.o: src/shuffler.cpp src/shuffler.h src/fileManager.h \
   /usr/include/pipewire-0.3/pipewire/data-loop.h \
   /usr/include/spa-0.2/spa/support/thread.h \
   /usr/include/pipewire-0.3/pipewire/type.h \
-  /usr/include/pipewire-0.3/pipewire/version.h src/setup.h \
-  src/queuePanel.h
+  /usr/include/pipewire-0.3/pipewire/version.h src/queuePanel.h
 	clang++-14 -g -std=c++20 -c src/shuffler.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/shuffler.o
 
 objects/spectre.o: src/spectre.cpp src/spectre.h src/had/had.h \
   src/had/had_interface.h src/had/had_keys.h src/had/had_logger.h \
   src/had/had_types.h src/had/had_unicode.h src/had/had_audio.h \
-  src/had/audioFile.h /usr/include/pipewire-0.3/pipewire/pipewire.h \
+  src/had/audioFile.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h \
+  /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
   /usr/include/spa-0.2/spa/utils/defs.h \
   /usr/include/spa-0.2/spa/utils/dict.h \
@@ -615,7 +635,9 @@ objects/spectre.o: src/spectre.cpp src/spectre.h src/had/had.h \
 objects/switchPanel.o: src/switchPanel.cpp src/switchPanel.h src/had/had.h \
   src/had/had_interface.h src/had/had_keys.h src/had/had_logger.h \
   src/had/had_types.h src/had/had_unicode.h src/had/had_audio.h \
-  src/had/audioFile.h /usr/include/pipewire-0.3/pipewire/pipewire.h \
+  src/had/audioFile.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h \
+  /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
   /usr/include/spa-0.2/spa/utils/defs.h \
   /usr/include/spa-0.2/spa/utils/dict.h \
@@ -673,11 +695,13 @@ objects/switchPanel.o: src/switchPanel.cpp src/switchPanel.h src/had/had.h \
 	clang++-14 -g -std=c++20 -c src/switchPanel.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/switchPanel.o
 
 objects/audioFile.o: src/had/audioFile.cpp src/had/audioFile.h \
-  src/had/had_logger.h src/had/had_types.h
+  src/had/had_logger.h src/had/had_types.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h
 	clang++-14 -g -std=c++20 -c src/had/audioFile.cpp -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -o objects/audioFile.o
 
 objects/had_audio.o: src/had/had_audio.cpp src/had/audioFile.h \
-  src/had/had_logger.h src/had/had_types.h src/had/had_audio.h \
+  src/had/had_logger.h src/had/had_types.h src/had/had_dataFrame.h \
+  src/had/../../audio_decoders/dr_libs/dr_mp3.h src/had/had_audio.h \
   /usr/include/pipewire-0.3/pipewire/pipewire.h \
   /usr/include/spa-0.2/spa/support/plugin.h \
   /usr/include/spa-0.2/spa/utils/defs.h \
@@ -733,7 +757,6 @@ objects/had_audio.o: src/had/had_audio.cpp src/had/audioFile.h \
   /usr/include/spa-0.2/spa/support/thread.h \
   /usr/include/pipewire-0.3/pipewire/type.h \
   /usr/include/pipewire-0.3/pipewire/version.h \
-  /usr/include/spa-0.2/spa/param/audio/raw.h \
   /usr/include/spa-0.2/spa/param/audio/format-utils.h \
   /usr/include/spa-0.2/spa/pod/parser.h \
   /usr/include/spa-0.2/spa/pod/iter.h \
@@ -741,6 +764,7 @@ objects/had_audio.o: src/had/had_audio.cpp src/had/audioFile.h \
   /usr/include/spa-0.2/spa/pod/builder.h \
   /usr/include/spa-0.2/spa/param/audio/format.h \
   /usr/include/spa-0.2/spa/param/format.h \
+  /usr/include/spa-0.2/spa/param/audio/raw.h \
   /usr/include/spa-0.2/spa/param/audio/dsp.h \
   /usr/include/spa-0.2/spa/param/audio/iec958.h \
   /usr/include/spa-0.2/spa/param/audio/dsd.h \
@@ -779,7 +803,7 @@ objects/had_unicode.o: src/had/had_unicode.cpp src/had/had_unicode.h
 
 
 comp: objects/app.o objects/config.o objects/errorBar.o objects/eventQueue.o objects/fileManager.o objects/Fourier_transform.o objects/main.o objects/player.o objects/queuePanel.o objects/setup.o objects/shuffler.o objects/spectre.o objects/switchPanel.o objects/audioFile.o objects/had_audio.o objects/had_interface.o objects/had_unicode.o
-	clang++-14 -g -std=c++20 objects/app.o objects/config.o objects/errorBar.o objects/eventQueue.o objects/fileManager.o objects/Fourier_transform.o objects/main.o objects/player.o objects/queuePanel.o objects/setup.o objects/shuffler.o objects/spectre.o objects/switchPanel.o objects/audioFile.o objects/had_audio.o objects/had_interface.o objects/had_unicode.o -lsndfile -lmpg123 -lasound -lncursesw -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -lpipewire-0.3 -o execs/output.out
+	clang++-14 -g -std=c++20 objects/app.o objects/config.o objects/errorBar.o objects/eventQueue.o objects/fileManager.o objects/Fourier_transform.o objects/main.o objects/player.o objects/queuePanel.o objects/setup.o objects/shuffler.o objects/spectre.o objects/switchPanel.o objects/audioFile.o objects/had_audio.o objects/had_interface.o objects/had_unicode.o -lavformat -lavcodec -lswresample -lavutil -lncursesw -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -D_REENTRANT -lpipewire-0.3 -o execs/output.out
 
 run:
 	alacritty -e execs/output.out

@@ -303,11 +303,10 @@ namespace had {
     }
 
     had::seconds Audio::get_cur_time() {
-        if (state != State::playing && state != State::stoped) {
+        if (state == State::inited) {
             return 0;
         }
-        return audio_file.get_cur_pos() / audio_file.get_rate()
-            / audio_file.get_channels() / 2; // DEV [mult depends on lib]
+        return audio_file.samples_to_seconds(audio_file.get_cur_pos());
     }
 
     had::seconds Audio::get_duration() {

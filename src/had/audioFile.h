@@ -56,15 +56,14 @@ namespace had {
             res_code load(std::string_view path);
             res_code erase();
 
-            std::size_t get_cur_pos();
-            std::size_t get_max_pos();
+            SampleDem get_cur_pos();
+            SampleDem get_max_pos();
             int get_rate();
             int get_channels();
             int get_samples();
 
-            res_code read_file(void* buf, std::size_t byte_count,
-                                                    std::size_t& retcount);
-            // res_code set_position(std::size_t position);
+            res_code read_file(void* buf, SampleDem samples,
+                                                    SampleDem& retcount);
             res_code set_position(SampleDem position);
 
             [[deprecated]] const std::vector<int>& get_buf();
@@ -73,5 +72,6 @@ namespace had {
             SampleDem byte_to_samples(std::size_t bytes);
             std::size_t samples_to_byte(SampleDem pos);
             SampleDem seconds_to_samples(seconds time);
+            seconds samples_to_seconds(SampleDem samples);
     };
 }

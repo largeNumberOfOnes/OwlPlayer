@@ -365,12 +365,9 @@ namespace had {
             return res_code::not_initialized;
         }
 
-        int err = fseek(file, samples_to_byte(position), SEEK_SET);
-        if (err) {
-            // log.log_warn("Cannot seek file");
+        if (fseek(file, samples_to_byte(position), SEEK_SET)) {
             is_end_reached = true;
             return res_code::success;
-            // return res_code::cannot_set_position;
         }
         cur_pos = position;
         is_end_reached = false;
@@ -389,8 +386,8 @@ namespace had {
         return cur_pos;
     }
 
-    std::size_t AudioFile::get_max_pos() {
-        return samples * channels * 2; // DEV [mult depends on lib]
+    SampleDem AudioFile::get_max_pos() {
+        return samples;
     }
 
     int AudioFile::get_rate() {
@@ -414,12 +411,24 @@ namespace had {
     }
 
     SampleDem AudioFile::byte_to_samples(std::size_t bytes) {
+        if (channels == 0) {
+            return 0;
+        }
         return bytes / sizeof(Value) / channels;
     }
+
     std::size_t AudioFile::samples_to_byte(SampleDem pos) {
         return pos * sizeof(Value) * channels;
     }
+
     SampleDem AudioFile::seconds_to_samples(seconds time) {
         return time * rate;
+    }
+
+    seconds AudioFile::samples_to_seconds(SampleDem samples) {
+        if (rate == 0) {
+            return 0;
+        }
+        return samples / rate;
     }
 }

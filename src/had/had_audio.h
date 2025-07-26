@@ -29,7 +29,6 @@ namespace had {
         AudioFile audio_file;
         const Logger& log;
         mutable std::mutex mutex;
-
         Volume vol = 100;
 
         bool is_stream_connected = false;
@@ -50,10 +49,8 @@ namespace had {
         } data;
 
         static void on_process(void* userdata);
-        // static void on_drain(void* userdata);
         struct pw_stream_events stream_events = {
             .process = on_process,
-            // .drained = on_drain,
         };
         struct AudioProperties {
             int rate;
@@ -81,7 +78,7 @@ namespace had {
             res_code play();
             bool is_playing();
             bool is_stoped();
-            bool was_finalized();
+            bool was_finalized(); // After returning true returns false
 
             had::seconds get_cur_time();
             had::seconds get_duration();
