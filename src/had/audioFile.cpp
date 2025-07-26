@@ -406,9 +406,9 @@ namespace had {
         return buf;
     }
 
-    DataFrame get_frame() {
-
-    }
+    // DataFrame get_frame() {
+    //     // pass
+    // }
 
     SampleDem AudioFile::byte_to_samples(std::size_t bytes) {
         if (channels == 0) {

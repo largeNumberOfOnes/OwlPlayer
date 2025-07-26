@@ -6,15 +6,16 @@
 
 #pragma once
 
-#include "errorBar.h"
-#include "had/had.h"
+#include "inputWrapper.h"
 #include "fileManager.h"
 #include "switchPanel.h"
 #include "queuePanel.h"
 #include "eventQueue.h"
 #include "shuffler.h"
-#include "player.h"
+#include "errorBar.h"
+#include "had/had.h"
 #include "spectre.h"
+#include "player.h"
 #include "setup.h"
 
 #include <optional>
@@ -63,6 +64,18 @@ class App {
                     [this]() { manager.down(); }
                 );
             }},
+        {"manager_search", [this]() {
+                switch_panel.call_wrapper(
+                    manager_id,
+                    [this]() {
+                        input_wrapepr.capture(
+                            [&manager = manager](std::string_view str, int curs_pos)
+                                { manager.search_set_string(str, curs_pos); },
+                            [](std::string&& str) {}
+                        );
+                    }
+                );
+            }},
         {"play_stop",      [this]() { player.play_or_stop(); }},
         {"play_inc",       [this]() { player.jump_rel(jump_val); }},
         {"play_dec",       [this]() { player.jump_rel(-jump_val); }},
@@ -91,9 +104,10 @@ class App {
             switch_panel.inc(); }},
     };
 
-    const had::Logger& log;
-    Setup& setup;
     had::Interface& interface;
+    Setup& setup;
+    const had::Logger& log;
+    InputWrapper input_wrapepr;
     had::Drawer error_drawer;
     had::Drawer player_drawer;
     had::Drawer switch_panel_drawer;

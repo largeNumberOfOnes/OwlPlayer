@@ -5,6 +5,7 @@
 #include <ncurses.h>
 #include <locale.h>
 #include <assert.h>
+#include <string>
 #include <string_view>
 
 
@@ -109,7 +110,7 @@ namespace had {
         }
     }
 
-    // If 'cb' is set to 'false' the the 'text color' will be changed,
+    // If 'cb' is set to 'false' the 'text color' will be changed,
     //                                       'background color' otherwise.
     Res Interface::change_color(Color& col, bool cb, int r, int g, int b) {
         int ret = init_color(
@@ -162,6 +163,9 @@ namespace had {
                 case KEY_BACKSPACE: return KeySequence{had::Key::backspace};
             }
         }
+        if (ch == 27) { // Esc key code
+            return KeySequence{had::Key::esc};
+        }
         if (1 <= ch && ch <= 26) {
             return KeySequence{char_to_key('a' + ch - 1)}.add_ctrl();
         }
@@ -170,9 +174,18 @@ namespace had {
 
     KeySequence Interface::catch_key_seq() {
         int ch = getch();
+        if (ch == -1) {
+            return KeySequence::create_empty();
+        }
         // KeySequence seq;
+        log.log_info(std::to_string(ch));
         if (ch == 27) {
-            return pre_catch_key_seq(getch()).add_alt();
+            ch = getch();
+            if (ch == -1) {
+                return KeySequence{Key::esc};
+            }
+            log.log_info(std::to_string(ch));
+            return pre_catch_key_seq(ch).add_alt();
         }
         return pre_catch_key_seq(ch);
     }

@@ -1,6 +1,7 @@
 #include "app.h"
 
 #include "had/had.h"
+#include "inputWrapper.h"
 #include "queuePanel.h"
 
 #include <optional>
@@ -17,6 +18,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
     : interface(interface)
     , setup(setup)
     , log(log)
+    , input_wrapepr(interface, setup.get_input_wrapper_exit_seq(), log)
     , error_drawer(interface, log)
     , player_drawer(interface, log)
     , switch_panel_drawer(interface, log)
@@ -106,7 +108,12 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
 }
 
 had::Res App::process_keypress() {
-    had::KeySequence seq = interface.catch_key_seq();
+    std::optional<had::KeySequence> opt = input_wrapepr.get_key();
+    if (!opt.has_value()) {
+        return had::Res::error;
+    }
+    
+    had::KeySequence seq = opt.value();
     if (!seq.is_empty()) {
         event_queue.push_event(Event::create_keypress(seq));
     }

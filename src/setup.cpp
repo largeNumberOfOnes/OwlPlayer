@@ -1,6 +1,7 @@
 #include "setup.h"
 
 #include "had/had.h"
+#include "had/had_keys.h"
 
 
 
@@ -10,6 +11,10 @@ std::string Setup::get_default_file_dir() {
 
 Shuffler::Mode Setup::get_default_shuffler_mode() {
     return default_shuffler_mode;
+}
+
+had::KeySequence Setup::get_input_wrapper_exit_seq() {
+    return input_wrapper_exit_seq;
 }
 
 int Setup::get_fps() const {

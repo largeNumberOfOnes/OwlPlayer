@@ -33,6 +33,9 @@ class FileManager {
     had::Dem size = 0;
     had::Dem list_size = 0;
 
+    std::string search_str;
+    int search_curs_pos = 0;
+
     struct File {
         bool reduce;
         std::size_t reduce_len;
@@ -72,7 +75,6 @@ class FileManager {
         std::vector<std::string> get_dirs_files();
         std::optional<std::string> get_selected_comp();
 
-        void search_add_char(char ch);
-        void search_set_string(std::string_view str);
+        void search_set_string(std::string_view str, int curs_pos);
         void search_clear_string();
 };

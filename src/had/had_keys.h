@@ -21,6 +21,7 @@ namespace had {
         arrow_down,
         space,
         enter,
+        esc,
         backspace,
     };
 
@@ -39,6 +40,7 @@ namespace had {
         switch(key) {
             case Key::space      : return "space";
             case Key::enter      : return "enter";
+            case Key::esc        : return "esc";
             case Key::backspace  : return "backspace";
             case Key::arrow_up   : return "arrow_up";
             case Key::arrow_down : return "arrow_down";
@@ -76,6 +78,9 @@ namespace had {
             }
 
             std::string to_str() const {
+                if (is_empty()) {
+                    return "";
+                }
                 std::string str = key_to_str(key);
                 if (is_ctrl)  { str = "ctrl "  + str; }
                 if (is_shift) { str = "shift " + str; }

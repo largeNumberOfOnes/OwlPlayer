@@ -189,6 +189,8 @@ had::Res FileManager::reload() {
         }
     }
 
+    resize();
+
     return had::Res::success;
 }
 
@@ -234,10 +236,9 @@ had::Res FileManager::resize() {
         || resize_width()
         || resize_height()
     ) {
-        return had::Res::success;
-    } else {
         return had::Res::error;
     }
+    return had::Res::success;
 }
 
 had::Res FileManager::draw_tree_symbol(int q) {
@@ -334,29 +335,24 @@ had::Res FileManager::draw() {
         log.log_err("bad sizes");
         return had::Res::error;
     }
+    static had::Dem w_old = 0;
+    static had::Dem h_old = 0;
+    if (w != w_old || h != h_old) {
+        w_old = w;
+        h_old = h;
+        resize();
+    }
     drawer.cls();
     drawer.draw_text(0, 0, dir.c_str());
-    // std::size_t files_count = (size > list_size) ? list_size : size;
     std::size_t files_count = std::min(list_size - top, size);
     for (std::size_t q = 0; q < files_count; ++q) {
         draw_tree_symbol(q);
         draw_file_name(q);
     }
     drawer.draw_symbol(0, h-1, ':');
+    drawer.draw_text(2, h-1, search_str.c_str());
     draw_scrol_line();
     return had::Res::success;
-}
-
-void FileManager::search_add_char(char ch) {
-    log.log_info("FileManager::search_add_char");
-}
-
-void FileManager::search_set_string(std::string_view str) {
-    log.log_info("FileManager::search_set_string");
-}
-
-void FileManager::search_clear_string() {
-    log.log_info("FileManager::search_clear_string");
 }
 
 std::vector<std::string> FileManager::get_dirs_files() {
@@ -393,4 +389,15 @@ had::Res FileManager::set_playing_file(std::string_view path) {
         }
     }
     return go();
+}
+
+void FileManager::search_set_string(std::string_view str, int curs_pos) {
+    search_str = str;
+    search_curs_pos = curs_pos;
+    reload();
+}
+
+void FileManager::search_clear_string() {
+    search_str.clear();
+    reload();
 }
