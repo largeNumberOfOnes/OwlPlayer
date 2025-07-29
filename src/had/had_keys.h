@@ -5,11 +5,10 @@
 
 #pragma once
 
+#include <optional>
 #include <unordered_map>
 #include <string>
 #include <vector>
-
-
 
 namespace had {
     enum struct Key {
@@ -23,10 +22,18 @@ namespace had {
         enter,
         esc,
         backspace,
+         r1,  r2,  r3,  r4,  t4,  r5,  r6,  r7,  r8,  r9, r10,
+        r11, r12, r13, r14, t14, r15, r16, r17, r18, r19, r20,
+        r21, r22, r23, r24, t24, r25, r26, r27, r28, r29, r30,
+        r31, r32, r33, // Cyrillic characters in alphabetical order
     };
 
     inline Key char_to_key(char ch) { // Only for a, b, ..., z
         return static_cast<Key>(ch - 'a');
+    }
+
+    inline char key_to_char(Key key) { // Only for a, b, ..., z
+        return 'a' + static_cast<char>(key);
     }
 
     inline std::string key_to_str(Key key) {
@@ -59,6 +66,7 @@ namespace had {
         KeySequence() {
             is_empty_val = true;
         }
+        
         public:
             KeySequence(Key key) {
                 this->key = key;
@@ -77,6 +85,18 @@ namespace had {
                 return *this;
             }
 
+            bool has_shift() const {
+                return is_shift;
+            }
+
+            char to_char() const {
+                char c = key_to_char(key);
+                if (is_shift) {
+                    return c - 'a' + 'A';
+                }
+                return c;
+            }
+
             std::string to_str() const {
                 if (is_empty()) {
                     return "";
@@ -88,6 +108,19 @@ namespace had {
                 return str;
             }
 
+            bool is_alpha() const {
+                if (is_empty()) {
+                    return false;
+                }
+                if (is_ctrl == true || is_alt == true) {
+                    return false;
+                }
+                if ('a' <= key_to_char(key) && key_to_char(key) <= 'z') {
+                    return true;
+                }
+                return false;
+            }
+
             static KeySequence create_empty() {
                 return KeySequence{};
             }
@@ -96,18 +129,23 @@ namespace had {
                 return is_empty_val;
             }
 
+            Key get_key() const {
+                return key;
+            }
+
             bool operator==(const KeySequence& other) const {
                 return key      == other.key
                     && is_alt   == other.is_alt
                     && is_ctrl  == other.is_ctrl
                     && is_shift == other.is_shift
+                    && !is_empty_val
+                    && !other.is_empty_val
                     ||
                     is_empty_val && other.is_empty_val
                 ;
             }
     };
 
-    // static std::unordered_map<std::string, Key> key_map {
-    //     std::pair("q", Key::q)
-    // };
+    std::optional<KeySequence> try_int_to_cyrillic_lower(char32_t ch);
+    std::optional<char32_t> try_cyrillic_to_int_lower(Key key);
 };
