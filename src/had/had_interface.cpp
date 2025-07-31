@@ -3,6 +3,7 @@
 #include "had_keys.h"
 #include "had_types.h"
 
+#include <cstddef>
 #include <ncurses.h>
 
 #include <string_view>
@@ -60,42 +61,91 @@ namespace had {
         }
     }
 
-static int color_count = 7;
-Res Interface::create_color(Color &col, int tr, int tg, int tb, int br, int bg,
-                            int bb) {
-  if (2 * color_count + 1 >= COLORS && color_count >= COLOR_PAIRS) {
-    log.log_err("Too many colors");
-    return Res::error;
-  }
-  int ret1 = init_color(2 * color_count, tr * 1000 / 256, tg * 1000 / 256,
-                        tb * 1000 / 256);
-  int ret2 = init_color(2 * color_count + 1, br * 1000 / 256, bg * 1000 / 256,
-                        bb * 1000 / 256);
-  int ret3 = init_pair(color_count, 2 * color_count, 2 * color_count + 1);
+    static int color_count = 7;
+    Res Interface::create_color(
+        Color &col,
+        int tr, int tg, int tb,
+        int br, int bg, int bb
+    ) {
+        if (COLORS <= 2 * color_count + 1 && COLOR_PAIRS <= color_count) {
+            log.log_err("Too many colors");
+            return Res::error;
+        }
+        int ret1 = init_color(
+            2 * color_count, 
+            tr * 1000 / 256,
+            tg * 1000 / 256,
+            tb * 1000 / 256
+        );
+        int ret2 = init_color(
+            2 * color_count + 1,
+            br * 1000 / 256,
+            bg * 1000 / 256,
+            bb * 1000 / 256
+        );
+        int ret3 = init_pair(
+            color_count,
+            2 * color_count,
+            2 * color_count + 1
+        );
 
-  if (ret1 == OK && ret2 == OK && ret3 == OK) {
-    col.color = color_count++;
-    return Res::success;
-  } else {
-    return Res::error;
-  }
-}
-Res Interface::create_text_color(Color &col, int tr, int tg, int tb) {
-  if (2 * color_count + 1 >= COLORS && color_count >= COLOR_PAIRS) {
-    log.log_err("Too many colors");
-    return Res::error;
-  }
-  int ret1 = init_color(2 * color_count, tr * 1000 / 256, tg * 1000 / 256,
-                        tb * 1000 / 256);
-  int ret2 = init_pair(color_count, 2 * color_count, COLOR_BLACK);
+        if (ret1 == OK && ret2 == OK && ret3 == OK) {
+            col.color = color_count++;
+            return Res::success;
+        } else {
+            return Res::error;
+        }
+    }
 
-  if (ret1 == OK && ret2 == OK) {
-    col.color = color_count++;
-    return Res::success;
-  } else {
-    return Res::error;
-  }
-}
+    Res Interface::create_text_color(Color &col, int tr, int tg, int tb) {
+        if (COLORS <= 2 * color_count + 1 && COLOR_PAIRS <= color_count) {
+            log.log_err("Too many colors");
+            return Res::error;
+        }
+        int ret1 = init_color(
+            2 * color_count,
+            tr * 1000 / 256,
+            tg * 1000 / 256,
+            tb * 1000 / 256
+        );
+        int ret2 = init_pair(
+            color_count,
+            2 * color_count,
+            COLOR_BLACK
+        );
+
+        if (ret1 == OK && ret2 == OK) {
+            col.color = color_count++;
+            return Res::success;
+        } else {
+            return Res::error;
+        }
+    }
+
+    Res Interface::create_background_color(Color &col, int br, int bg, int bb) {
+        if (COLORS <= 2 * color_count + 1 && COLOR_PAIRS <= color_count) {
+            log.log_err("Too many colors");
+            return Res::error;
+        }
+        int ret1 = init_color(
+            2 * color_count + 1,
+            br * 1000 / 256,
+            bg * 1000 / 256,
+            bb * 1000 / 256
+        );
+        int ret2 = init_pair(
+            color_count,
+            COLOR_WHITE,
+            2 * color_count + 1
+        );
+
+        if (ret1 == OK && ret2 == OK) {
+            col.color = color_count++;
+            return Res::success;
+        } else {
+            return Res::error;
+        }
+    }
 
 // If 'cb' is set to 'false' the 'text color' will be changed,
 //                                       'background color' otherwise.
@@ -349,12 +399,11 @@ Res Interface::set_color(const Color &col) {
                 case 13       : return KeySequence{had::Key::enter};
                 case IntBytes{74, 1, 0, 0}.to_char():
                                 return KeySequence{had::Key::del};
+                case IntBytes{27, 255, 0, 0}.to_char():
+                                return KeySequence{had::Key::esc};
                 case KEY_BACKSPACE:
                                 return KeySequence{had::Key::backspace};
             }
-        }
-        if (ch == 27) { // Esc key code
-            return KeySequence{had::Key::esc};
         }
         // if (1 <= ch && ch <= 26) {
         //     return KeySequence{char_to_key('a' + ch - 1)}.add_ctrl();
@@ -420,7 +469,7 @@ Res Interface::set_color(const Color &col) {
             arr[3] = getch();
         }
 
-        constexpr bool LOG_INPUT = true;
+        constexpr bool LOG_INPUT = false;
         if constexpr (LOG_INPUT) {
             if (ch != -1) {
                 std::string str = std::to_string(arr[0] & 0xFF) + " "
@@ -478,6 +527,16 @@ namespace had {
 
     Res Drawer::draw_symbol(Dem x, Dem y, char ch) {
         if (mvaddch(this->y + y, this->x + x, ch) == OK) {
+            return Res::success;
+        } else {
+            return Res::error;
+        }
+    }
+
+    Res Drawer::draw_symbol_char32(Dem x, Dem y, char32_t ch) {
+        const char* ch_ptr = reinterpret_cast<const char*>(&ch);
+        constexpr std::size_t siz  = sizeof(ch);
+        if (mvaddnstr(this->y + y, this->x + x, ch_ptr, siz) == OK) {
             return Res::success;
         } else {
             return Res::error;

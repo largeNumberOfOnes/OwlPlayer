@@ -17,7 +17,7 @@ namespace utils {
             using CursorPos = int;
 
         private:
-            UnicodeString str;
+            UnicodeString str{""};
             CursorPos pos = 0;
 
         public:

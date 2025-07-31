@@ -33,6 +33,7 @@ class FileManager {
     had::Dem size = 0;
     had::Dem list_size = 0;
 
+    bool is_in_search_mode = false;
     std::string search_str;
     int search_curs_pos = 0;
 
@@ -46,6 +47,9 @@ class FileManager {
     had::Res draw_tree_symbol(int q);
     had::Res draw_file_name(int q);
     had::Res draw_scrol_line();
+    had::Res draw_search_line();
+
+    bool search_comp(const char* ptr);
 
     had::Res reload();
     had::Res resize_width();
@@ -75,6 +79,8 @@ class FileManager {
         std::vector<std::string> get_dirs_files();
         std::optional<std::string> get_selected_comp();
 
+        void search_start();
+        void search_stop();
         void search_set_string(std::string_view str, int curs_pos);
         void search_clear_string();
 };

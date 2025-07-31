@@ -13,6 +13,8 @@
 namespace utils::unicode_support {
     std::size_t calc_byte_len(const char* ptr);
     std::size_t calc_char_len(const char* ptr);
+    std::size_t calc_char_len_by_byte_len(const char* ptr,
+                                                    std::size_t byte_len);
     std::size_t symbol_len(char32_t c);
     void paste_symbol(char* ptr, char32_t c);
     std::size_t calc_substr_byte_len(const char* ptr,
@@ -25,6 +27,29 @@ namespace utils::unicode_support {
 }
 
 namespace utils {
+    class ConstUnicodeStringIter {
+        const char* ptr;
+        std::size_t byte_len;
+        std::size_t byte_pos;
+        ConstUnicodeStringIter(
+            const char* ptr,
+            std::size_t byte_len,
+            std::size_t byte_pos
+        );
+
+        friend class UnicodeStringView;
+        public:
+            ConstUnicodeStringIter(const ConstUnicodeStringIter& other);
+            ConstUnicodeStringIter& operator=
+                                    (const ConstUnicodeStringIter& other);
+
+            std::size_t get_char_pos() const;
+
+            ConstUnicodeStringIter& operator++();
+            bool operator==(const ConstUnicodeStringIter& other) const;
+            char32_t operator*() const;
+    };
+
     class UnicodeStringView {
         protected:
             const char* ptr;
@@ -45,6 +70,11 @@ namespace utils {
             std::size_t get_char_len() const;
             char32_t get_char(std::size_t pos) const;
             const char* get_ptr() const;
+            ConstUnicodeStringIter cbegin() const;
+            ConstUnicodeStringIter cend() const;
+
+            std::optional<std::size_t> has_substr(
+                                                const char* substr) const;
 
             std::optional<std::size_t> find(char32_t ch) const;
 

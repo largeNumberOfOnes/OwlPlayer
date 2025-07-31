@@ -55,6 +55,7 @@ class Setup {
             had::Color dir_selected;
             had::Color file_selected;
             had::Color playing_selected;
+            had::Color manager_search_select;
             had::Color error_str;
         } colors;
 

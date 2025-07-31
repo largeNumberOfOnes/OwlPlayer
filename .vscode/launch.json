@@ -18,8 +18,8 @@
             "name": "Debug by pid",
             "type": "lldb",
             "request": "attach",
-            // "program": "/home/dt/Documents/audioPlayer/execs/output.out",
-            "program": "/home/dt/Documents/audioPlayer/execs/test_stringEditor.out",
+            "program": "/home/dt/Documents/audioPlayer/execs/output.out",
+            // "program": "/home/dt/Documents/audioPlayer/execs/test_stringEditor.out",
             "pid": "${command:pickProcess}",
             // "preLaunchTask": "get_pid"
             // "program": "${workspaceFolder}/execs/output.out",

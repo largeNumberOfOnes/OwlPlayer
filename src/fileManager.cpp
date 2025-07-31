@@ -1,6 +1,7 @@
 #include "fileManager.h"
 
 #include "had/had.h"
+#include "had/had_types.h"
 #include "setup.h"
 #include "utils/unicodeString.h"
 
@@ -146,6 +147,9 @@ had::Res FileManager::reload() {
 
     // DEV [maybe there should be placed try-catch block]
     for (const auto& entry : fs::directory_iterator(dir)) {
+        if (is_in_search_mode && !search_comp(entry.path().c_str())) {
+            continue;
+        }
         list.push_back(File{
             .reduce     = false,
             .reduce_len = 0,
@@ -331,6 +335,27 @@ had::Res FileManager::draw_scrol_line() {
     return had::Res::success;
 }
 
+had::Res FileManager::draw_search_line() {
+    had::Dem h = drawer.get_height();
+    const char* str_ptr = search_str.c_str();
+    utils::UnicodeStringView uni_str{str_ptr};
+    drawer.draw_symbol(0, h-1, ':');
+    if (is_in_search_mode) {
+        drawer.draw_text(2, h-1, str_ptr);
+        char32_t ch = (search_curs_pos < uni_str.get_char_len())
+            ? uni_str.get_char(search_curs_pos)
+            : ' ';
+        drawer.set_color(setup.colors.manager_search_select);
+        drawer.draw_symbol_char32(
+            2 + search_curs_pos,
+            h - 1,
+            ch
+        );
+        drawer.set_color(setup.colors.def);
+    }
+    return had::Res::success;
+}
+
 had::Res FileManager::draw() {
     had::Dem w = drawer.get_width();
     had::Dem h = drawer.get_height();
@@ -352,9 +377,8 @@ had::Res FileManager::draw() {
         draw_tree_symbol(q);
         draw_file_name(q);
     }
-    drawer.draw_symbol(0, h-1, ':');
-    drawer.draw_text(2, h-1, search_str.c_str());
     draw_scrol_line();
+    draw_search_line();
     return had::Res::success;
 }
 
@@ -394,13 +418,30 @@ had::Res FileManager::set_playing_file(std::string_view path) {
     return go();
 }
 
+bool FileManager::search_comp(const char* ptr) {
+    utils::UnicodeStringView uni_str{ptr};
+    return uni_str.has_substr(search_str.c_str());
+}
+
+void FileManager::search_start() {
+    is_in_search_mode = true;
+}
+
+void FileManager::search_stop() {
+    is_in_search_mode = false;
+}
+
 void FileManager::search_set_string(std::string_view str, int curs_pos) {
-    search_str = str;
-    search_curs_pos = curs_pos;
-    reload();
+    if (is_in_search_mode) {
+        search_str = str;
+        search_curs_pos = curs_pos;
+        reload();
+    }
 }
 
 void FileManager::search_clear_string() {
-    search_str.clear();
-    reload();
+    if (is_in_search_mode) {
+        search_str.clear();
+        reload();
+    }
 }

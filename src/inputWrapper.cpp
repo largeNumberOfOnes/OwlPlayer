@@ -57,21 +57,42 @@ had::Res InputWrapper::release(CaptureId id) {
     return had::Res::success;
 }
 
+void InputWrapper::editor_proc(had::KeySequence seq) {
+    if (seq == had::KeySequence{had::Key::arrow_rigth}) {
+        editor.move_cursor_right();
+    } else if (seq == had::KeySequence{had::Key::arrow_left}) {
+        editor.move_cursor_left();
+    } else if (seq == had::KeySequence{had::Key::arrow_rigth}.add_ctrl()) {
+        editor.move_on_word_right();
+    } else if (seq == had::KeySequence{had::Key::arrow_left}.add_ctrl()) {
+        editor.move_on_word_left();
+    } else if (seq == had::KeySequence{had::Key::backspace}) {
+        editor.delete_symbol_back();
+    } else if (seq == had::KeySequence{had::Key::del}) {
+        editor.delete_symbol_front();
+    } else if (seq.is_alpha()) {
+        editor.insert_symbol(seq.to_char());
+    }
+}
+
 std::optional<had::KeySequence> InputWrapper::get_key() {
     had::KeySequence seq = interface.catch_key_seq();
     
-    if (not seq.is_empty()) {
-        log.log_info(seq.to_str());
+    if (seq.is_empty()) {
+        return std::nullopt;
     }
+    log.log_info(seq.to_str());
 
     if (!is_captured) {
         return seq;
     }
 
     if (seq == exit_seq) {
-        instigator.value().last_call(std::string{editor.get_string()});
+        log.log_info(std::to_string(instigator.has_value()));
+        // instigator.value().last_call(std::string{editor.get_string()});
         release(instigator.value().id);
     } else {
+        editor_proc(seq);
         instigator.value().call(editor.get_string(), editor.get_cursor());
         // pass [process input to editor]
     }

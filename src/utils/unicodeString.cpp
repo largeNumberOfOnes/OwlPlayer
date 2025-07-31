@@ -69,6 +69,24 @@ namespace utils::unicode_support {
         return char_len;
     }
 
+    std::size_t calc_char_len_by_byte_len(const char* ptr,
+                                                    std::size_t byte_len) {
+        if (!ptr) {
+            return 0;
+        }
+        std::size_t char_len = 0;
+        for (std::size_t q = 0; q < byte_len; ++char_len) {
+            char32_t c = 0;
+            char* c_arr = reinterpret_cast<char*>(&c);
+            for (int w = 0; w < 4; ++w) {
+                c_arr[w] = (q + w < byte_len) ? ptr[q + w] : 0;
+            }
+            q += symbol_len(c);
+
+        }
+        return char_len;
+    }
+
     std::size_t symbol_len(char32_t c) {
         // return ((c & 0x80) == 0x00) ? 1 // 1 byte - symbol
         //      : ((c & 0xE0) == 0xC0) ? 2 // 2 byte - symbol
@@ -152,7 +170,61 @@ namespace utils::unicode_support {
     }
 }
 
-namespace utils {
+namespace utils { // ConstUnicodeStringIter
+    ConstUnicodeStringIter::ConstUnicodeStringIter(
+        const char* ptr,
+        std::size_t byte_len,
+        std::size_t byte_pos
+    )
+        : ptr(ptr)
+        , byte_len(byte_len)
+        , byte_pos(byte_pos)
+    {}
+
+    ConstUnicodeStringIter::ConstUnicodeStringIter(
+        const ConstUnicodeStringIter& other
+    ) : ConstUnicodeStringIter(other.ptr, other.byte_len, other.byte_pos)
+    {}
+
+    ConstUnicodeStringIter& ConstUnicodeStringIter::operator=
+                            (const ConstUnicodeStringIter& other) {
+        ptr = other.ptr;
+        byte_len = other.byte_len;
+        byte_pos = other.byte_pos;
+        return *this;
+    }
+
+    std::size_t ConstUnicodeStringIter::get_char_pos() const {
+        return unicode_support::calc_char_len_by_byte_len(ptr, byte_pos);
+    }
+
+    ConstUnicodeStringIter& ConstUnicodeStringIter::operator++() {
+        if (byte_pos == byte_len) {
+            return *this;
+        }
+        char32_t ch = unicode_support::get_symbol(ptr + byte_len);
+        byte_pos += unicode_support::symbol_len(ch);
+        return *this;
+    }
+
+    bool ConstUnicodeStringIter::operator==(
+        const ConstUnicodeStringIter& other
+    ) const {
+        return ptr == other.ptr
+            && byte_len == other.byte_len
+            && byte_pos == other.byte_pos;
+    }
+
+    char32_t ConstUnicodeStringIter::operator*() const {
+        if (!ptr) {
+            return 0;
+        }
+        return unicode_support::get_symbol(ptr + byte_pos);
+    }
+
+}
+
+namespace utils { // UnicodeStringView
     UnicodeStringView::UnicodeStringView()
         : ptr(nullptr)
         , byte_len(0)
@@ -297,6 +369,50 @@ namespace utils {
             return std::nullopt;
         }
     }
+
+    std::optional<std::size_t> UnicodeStringView::has_substr(
+        const char* substr
+    ) const {
+        if (!substr) {
+            return std::nullopt;
+        }
+        UnicodeStringView uni_substr{substr};
+        if (char_len == 1) {
+            if (uni_substr.get_char_len() == 1
+                && uni_substr.get_char(0) == get_char(0)
+            ) {
+                return 0;
+            } else {
+                return std::nullopt;
+            }
+        }
+        for (auto it = cbegin(); it != cend(); ++it) {
+            bool has_substr = true;
+            auto it_copy = it;
+            for (
+                auto substr_it = uni_substr.cbegin();
+                substr_it != uni_substr.cend() && it_copy != cend();
+                ++substr_it, ++it_copy
+            ) {
+                if (*substr_it != *it_copy) {
+                    has_substr = false;
+                    break;
+                }
+            }
+            if (has_substr) {
+                return it.get_char_pos();
+            }
+        }
+        return std::nullopt;
+    }
+
+    ConstUnicodeStringIter UnicodeStringView::cbegin() const {
+        return ConstUnicodeStringIter{ptr, byte_len, 0};
+    }
+
+    ConstUnicodeStringIter UnicodeStringView::cend() const {
+        return ConstUnicodeStringIter{ptr, byte_len, byte_len};
+    }
 }
 
 static inline void mem_copy_farward(const char* src,
@@ -313,7 +429,7 @@ static inline void mem_copy_backfarward(const char* src,
     }
 }
 
-namespace utils {
+namespace utils { // UnicodeString
     UnicodeString::UnicodeString()
         : UnicodeStringView()
         , buf_len(0)
@@ -414,6 +530,7 @@ namespace utils {
         }
         byte_len += symbol_len;
         char_len += 1;
+        deconst_ptr()[byte_len] = '\0';
     }
 
     void UnicodeString::delete_symbol_by_char_pos(std::size_t char_pos) {
@@ -433,7 +550,11 @@ namespace utils {
     }
 
     std::string_view UnicodeString::to_string_view() const {
-        return ptr;
+        if (ptr) {
+            return ptr;
+        } else {
+            return {};
+        }
     }
 
     // std::optional<std::size_t> UnicodeString::rfind() const {

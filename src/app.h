@@ -68,10 +68,13 @@ class App {
                 switch_panel.call_wrapper(
                     manager_id,
                     [this]() {
+                        manager.search_start();
                         input_wrapepr.capture(
                             [&manager = manager](std::string_view str, int curs_pos)
                                 { manager.search_set_string(str, curs_pos); },
-                            [](std::string&& str) {}
+                            [&manager = manager](std::string&& str) {
+                                manager.search_stop();
+                            }
                         );
                     }
                 );

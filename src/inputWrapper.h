@@ -22,6 +22,8 @@ class InputWrapper {
     utils::StringEditor editor;
     had::KeySequence exit_seq;
 
+    void editor_proc(had::KeySequence seq);
+
     public:
         using CaptureId = int;
         using InstigatorCall =

@@ -46,6 +46,10 @@ namespace had {
                 Color& col,
                 int tr, int tg, int tb
             );
+            Res create_background_color(
+                Color& col,
+                int br, int bg, int bb
+            );
             Res change_color(Color& col, bool cb, int r, int g, int b);
             Res set_color(const Color& col);
             Res get_default_color(Color& col);
@@ -115,6 +119,7 @@ namespace had {
             void set(Dem x, Dem y, Dem w, Dem h);
 
             Res draw_symbol(Dem x, Dem y, char ch);
+            Res draw_symbol_char32(Dem x, Dem y, char32_t ch);
             Res draw_wide_symbol(Dem x, Dem y, wchar_t ch);
             Res draw_sp_symbol(Dem x, Dem y, SpSymbol ch);
             Res draw_text(Dem x, Dem y, std::string_view str);
