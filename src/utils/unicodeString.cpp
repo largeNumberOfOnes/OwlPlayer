@@ -135,7 +135,6 @@ namespace utils::unicode_support {
         if (!ptr) {
             return std::nullopt;
         }
-        // calc_substr_byte_len(ptr, from_char);
         std::optional<std::size_t> find = std::nullopt;
         std::size_t pos = 0;
         for (;;) {
@@ -191,35 +190,46 @@ namespace utils {
         return char_len;
     }
 
+    char32_t UnicodeStringView::get_char(std::size_t pos) const {
+        return unicode_support::get_symbol(
+            ptr + unicode_support::calc_substr_byte_len(ptr, pos)
+        );
+    }
+
     void UnicodeStringView::set_new_ptr(const char* ptr) {
         this->ptr = ptr;
         byte_len = unicode_support::calc_byte_len(ptr);
         char_len = unicode_support::calc_char_len(ptr);
     }
 
-    std::optional<std::size_t> UnicodeStringView::find(char32_t ch) {
+    std::optional<std::size_t> UnicodeStringView::find(char32_t ch) const {
         return rfind(ch);
     }
 
     std::optional<std::size_t> UnicodeStringView::rfind(
         char32_t ch
-    ) {
+    ) const {
         return unicode_support::rfind_till(ptr, ch, char_len + 1);
     }
 
     std::optional<std::size_t> UnicodeStringView::rfind_from(
         char32_t ch, std::size_t from
-    ) {
-        return unicode_support::rfind_till(
+    ) const {
+        std::optional<std::size_t> opt = unicode_support::rfind_till(
             ptr + unicode_support::calc_substr_byte_len(ptr, from),
             ch,
-            char_len + 1
+            char_len - from + 1
         );
+        if (opt.has_value()) {
+            return from + opt.value();
+        } else {
+            return std::nullopt;
+        }
     }
 
     std::optional<std::size_t> UnicodeStringView::rfind_till(
         char32_t ch, std::size_t till
-    ) {
+    ) const {
         return unicode_support::rfind_till(
             ptr,
             ch,
@@ -229,44 +239,59 @@ namespace utils {
 
     std::optional<std::size_t> UnicodeStringView::rfind_bord(
         char32_t ch, std::size_t from, std::size_t till
-    ) {
-        return unicode_support::rfind_till(
+    ) const {
+        std::optional<std::size_t> opt = unicode_support::rfind_till(
             ptr + unicode_support::calc_substr_byte_len(ptr, from),
             ch,
-            till
+            till - from + 1
         );
+        if (opt.has_value()) {
+            return from + opt.value();
+        } else {
+            return std::nullopt;
+        }
     }
 
     std::optional<std::size_t> UnicodeStringView::lfind(
         char32_t ch
-    ) {
+    ) const {
         return unicode_support::lfind_from(ptr, ch, char_len);
     }
 
     std::optional<std::size_t> UnicodeStringView::lfind_from(
         char32_t ch, std::size_t from
-    ) {
+    ) const {
         return unicode_support::lfind_from(ptr, ch, from);
     }
 
     std::optional<std::size_t> UnicodeStringView::lfind_till(
         char32_t ch, std::size_t till
-    ) {
-        return unicode_support::lfind_from(
+    ) const {
+        std::optional<std::size_t> opt = unicode_support::lfind_from(
             ptr + unicode_support::calc_substr_byte_len(ptr, till),
             ch,
             char_len - till
         );
+        if (opt.has_value()) {
+            return till + opt.value();
+        } else {
+            return std::nullopt;
+        }
     }
 
     std::optional<std::size_t> UnicodeStringView::lfind_bord(
         char32_t ch, std::size_t from, std::size_t till
-    ) {
-        return unicode_support::lfind_from(
+    ) const {
+        std::optional<std::size_t> opt = unicode_support::lfind_from(
             ptr + unicode_support::calc_substr_byte_len(ptr, till),
             ch,
             from - till
         );
+        if (opt.has_value()) {
+            return till + opt.value();
+        } else {
+            return std::nullopt;
+        }
     }
 }
 
@@ -349,6 +374,13 @@ namespace utils {
         }
     }
 
+    inline void UnicodeString::mem_copy_backfarward(const char* src,
+                                            char* dst, std::size_t len) {
+        for (std::size_t q = 0; q < len; ++q) {
+            dst[q] = src[q]; // DEV [optimize?]
+        }
+    }
+
     void UnicodeString::insert_symbol_by_char_pos(std::size_t char_pos,
                                                         char32_t symbol) {
         std::size_t symbol_len = unicode_support::symbol_len(symbol);
@@ -378,6 +410,22 @@ namespace utils {
         }
         byte_len += symbol_len;
         char_len += 1;
+    }
+
+    void UnicodeString::delete_symbol_by_char_pos(std::size_t char_pos) {
+        std::size_t symbol_len = unicode_support::symbol_len(
+            get_char(char_pos)
+        );
+        std::size_t byte_pos =
+                    unicode_support::calc_substr_byte_len(ptr, char_pos);
+        mem_copy_backfarward(
+            ptr + byte_pos + symbol_len,
+            deconst_ptr() + byte_pos,
+            byte_len - byte_pos
+        );
+        byte_len -= symbol_len;
+        char_len -= 1;
+        deconst_ptr()[byte_len] = '\0';
     }
 
     std::string_view UnicodeString::to_string_view() const {

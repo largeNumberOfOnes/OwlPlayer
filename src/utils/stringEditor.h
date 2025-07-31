@@ -31,5 +31,7 @@ namespace utils {
             void move_on_word_right();
             void move_on_word_left();
             void insert_symbol(char32_t symbol);
+            void delete_symbol_back();
+            void delete_symbol_front();
     };
 }

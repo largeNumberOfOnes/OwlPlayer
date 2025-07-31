@@ -37,8 +37,29 @@ namespace utils {
         ++pos;
     }
 
+    void StringEditor::delete_symbol_back() {
+        if (pos == 0) {
+            return;
+        }
+        str.delete_symbol_by_char_pos(pos - 1);
+        --pos;
+    }
+
+    void StringEditor::delete_symbol_front() {
+        if (pos == str.get_char_len()) {
+            return;
+        }
+        str.delete_symbol_by_char_pos(pos);
+    }
+
     void StringEditor::move_on_word_right() {
-        std::optional<std::size_t> res = str.rfind_from(pos, ' ');
+        if (pos == str.get_char_len()) {
+            return;
+        }
+        while (str.get_char(pos) == ' ') {
+            ++pos;
+        }
+        std::optional<std::size_t> res = str.rfind_from(' ', pos);
         if (res.has_value()) {
             pos = res.value();
         } else {
@@ -47,11 +68,14 @@ namespace utils {
     }
 
     void StringEditor::move_on_word_left() {
-        std::optional<std::size_t> res = str.lfind_from(pos, ' ');
+        while (pos > 0 && str.get_char(pos - 1) == ' ') {
+            --pos;
+        }
+        std::optional<std::size_t> res = str.lfind_from(' ', pos);
         if (res.has_value()) {
-            pos = res.value();
+            pos = res.value() + 1;
         } else {
-            pos = str.get_char_len();
+            pos = 0;
         }
     }
 }

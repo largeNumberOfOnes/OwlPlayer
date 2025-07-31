@@ -43,34 +43,35 @@ namespace utils {
 
             std::size_t get_byte_len() const;
             std::size_t get_char_len() const;
+            char32_t get_char(std::size_t pos) const;
 
-            std::optional<std::size_t> find(char32_t ch);
+            std::optional<std::size_t> find(char32_t ch) const;
 
             std::optional<std::size_t> rfind(
                 char32_t ch
-            );
+            ) const;
             std::optional<std::size_t> rfind_from(
                 char32_t ch, std::size_t from
-            );
+            ) const;
             std::optional<std::size_t> rfind_till(
                 char32_t ch, std::size_t till
-            );    
+            ) const;
             std::optional<std::size_t> rfind_bord(
                 char32_t ch, std::size_t from, std::size_t till
-            );
+            ) const;
 
             std::optional<std::size_t> lfind(
                 char32_t ch
-            );
+            ) const;
             std::optional<std::size_t> lfind_from(
                 char32_t ch, std::size_t from
-            );
+            ) const;
             std::optional<std::size_t> lfind_till(
                 char32_t ch, std::size_t till
-            );    
+            ) const;
             std::optional<std::size_t> lfind_bord(
                 char32_t ch, std::size_t from, std::size_t till
-            );
+            ) const;
 
             void set_new_ptr(const char* ptr);
     }; 
@@ -83,6 +84,8 @@ namespace utils {
         }
 
         inline void mem_copy_farward(const char* src, char* dst,
+                                                        std::size_t len);
+        inline void mem_copy_backfarward(const char* src, char* dst,
                                                         std::size_t len);
 
         public:
@@ -107,6 +110,7 @@ namespace utils {
 
             void insert_symbol_by_char_pos(std::size_t char_pos,
                                                         char32_t symbol);
+            void delete_symbol_by_char_pos(std::size_t char_pos);
 
             std::string_view to_string_view() const;
 
