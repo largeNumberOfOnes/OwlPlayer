@@ -316,13 +316,36 @@ Res Interface::set_color(const Color &col) {
     }
 
     static KeySequence pre_catch_key_seq(char32_t ch) {
+        class IntBytes {
+            unsigned char byte1;
+            unsigned char byte2;
+            unsigned char byte3;
+            unsigned char byte4;
+
+            public:
+                constexpr IntBytes(
+                    unsigned char byte1,
+                    unsigned char byte2,
+                    unsigned char byte3,
+                    unsigned char byte4
+                ) {
+                    this->byte1 = byte1;
+                    this->byte2 = byte2;
+                    this->byte3 = byte3;
+                    this->byte4 = byte4;
+                }
+
+                constexpr char32_t to_char() const {
+                    return static_cast<char32_t>(byte1)
+                        + (static_cast<char32_t>(byte2) << 8)
+                        + (static_cast<char32_t>(byte3) << 16)
+                        + (static_cast<char32_t>(byte4) << 24)
+                    ;
+                }
+        };
         if (true) {
             switch (ch) {
                 case ' '      : return KeySequence{Key::space};
-                case KEY_UP   : return KeySequence{had::Key::arrow_up};
-                case KEY_DOWN : return KeySequence{had::Key::arrow_down};
-                case KEY_RIGHT: return KeySequence{had::Key::arrow_rigth};
-                case KEY_LEFT : return KeySequence{had::Key::arrow_left};
                 case 13       : return KeySequence{had::Key::enter};
                 case KEY_BACKSPACE:
                                 return KeySequence{had::Key::backspace};
@@ -334,6 +357,32 @@ Res Interface::set_color(const Color &col) {
         // if (1 <= ch && ch <= 26) {
         //     return KeySequence{char_to_key('a' + ch - 1)}.add_ctrl();
         // }
+        if (ch) {
+            switch (ch) {
+                case KEY_UP   : return KeySequence{had::Key::arrow_up};
+                case KEY_DOWN : return KeySequence{had::Key::arrow_down};
+                case KEY_RIGHT: return KeySequence{had::Key::arrow_rigth};
+                case KEY_LEFT : return KeySequence{had::Key::arrow_left};
+
+                case IntBytes{59, 2, 0, 0}.to_char():
+                    return KeySequence{had::Key::arrow_up}.add_ctrl();
+                case IntBytes{18, 2, 0, 0}.to_char():
+                    return KeySequence{had::Key::arrow_down}.add_ctrl();
+                case IntBytes{53, 2, 0, 0}.to_char():
+                    return KeySequence{had::Key::arrow_rigth}.add_ctrl();
+                case IntBytes{38, 2, 0, 0}.to_char():
+                    return KeySequence{had::Key::arrow_left}.add_ctrl();
+
+                case IntBytes{81, 1, 0, 0}.to_char():
+                    return KeySequence{had::Key::arrow_up}.add_shift();
+                case IntBytes{80, 1, 0, 0}.to_char():
+                    return KeySequence{had::Key::arrow_down}.add_shift();
+                case IntBytes{146, 1, 0, 0}.to_char():
+                    return KeySequence{had::Key::arrow_rigth}.add_shift();
+                case IntBytes{137, 1, 0, 0}.to_char():
+                    return KeySequence{had::Key::arrow_left}.add_shift();
+            }
+        }
         auto seq = try_catch_letter(ch);
         if (seq.has_value()) {
             return seq.value();
@@ -369,7 +418,7 @@ Res Interface::set_color(const Color &col) {
             arr[3] = getch();
         }
 
-        constexpr bool LOG_INPUT = false;
+        constexpr bool LOG_INPUT = true;
         if constexpr (LOG_INPUT) {
             if (ch != -1) {
                 std::string str = std::to_string(arr[0] & 0xFF) + " "
