@@ -34,5 +34,11 @@ namespace utils {
 
     void StringEditor::insert_symbol(char32_t symbol) {
         str.insert_symbol_by_char_pos(pos, symbol);
+        ++pos;
+    }
+
+    void StringEditor::move_on_word_right() {
+        str.rfind_from(pos, ' ');
+        // ++pos;
     }
 }

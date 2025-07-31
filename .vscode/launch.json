@@ -9,7 +9,7 @@
             "type": "lldb",
             "request": "launch",
             // "program": "/home/dt/Documents/audioPlayer/execs/output.out",
-            "program": "${cwd}/execs/test_had_audio.out",
+            "program": "${cwd}/execs/test_unicodeString.out",
             // "program": "${workspaceFolder}/execs/output.out",
             "args": [],
             "cwd": "${workspaceFolder}"

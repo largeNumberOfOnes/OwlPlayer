@@ -59,7 +59,7 @@ namespace had {
     
     class KeySequence {
         bool is_empty_val = false;
-        Key key;
+        Key key = Key::a;
         bool is_ctrl  = false;
         bool is_shift = false;
         bool is_alt   = false;
