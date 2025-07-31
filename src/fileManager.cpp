@@ -1,19 +1,15 @@
 #include "fileManager.h"
 
-#include "had/had.h"
 #include "had/had_types.h"
-#include "setup.h"
 #include "utils/unicodeString.h"
+#include "had/had.h"
+#include "setup.h"
 
-#include <algorithm>
-#include <cstddef>
-#include <cstdio>
-#include <cstring>
+#include <string_view>
 #include <filesystem>
 #include <optional>
-#include <string>
-#include <string_view>
 #include <utility>
+#include <string>
 #include <vector>
 
 
@@ -34,7 +30,7 @@ FileManager::FileManager(
     if (!this->dir.ends_with('/')) {
         this->dir += '/';
     }
-    reload();    
+    reload();
 }
 
 FileManager::~FileManager() = default;
@@ -147,7 +143,9 @@ had::Res FileManager::reload() {
 
     // DEV [maybe there should be placed try-catch block]
     for (const auto& entry : fs::directory_iterator(dir)) {
-        if (is_in_search_mode && !search_comp(entry.path().c_str())) {
+        if (is_in_search_mode
+            && !search_comp(entry.path().stem().c_str())
+        ) {
             continue;
         }
         list.push_back(File{
@@ -200,22 +198,19 @@ had::Res FileManager::reload() {
 }
 
 had::Res FileManager::resize_width() {
-    static had::Dem old_w = drawer.get_width();
     had::Dem w = drawer.get_width();
-    if (old_w != w) {
-        for (auto& it : list) {
-            utils::UnicodeStringView uni_str{
-                it.file.path().filename().c_str()
-            };
-            std::size_t char_len = uni_str.get_char_len();
-            it.reduce = (w < char_len + line_offset + line_free_space);
-            if (it.reduce) {
-                it.reduce_len =
-                    utils::unicode_support::calc_substr_byte_len(
-                        uni_str.get_ptr(),
-                        w - line_offset - line_free_space
-                    );
-            }
+    for (auto& it : list) {
+        utils::UnicodeStringView uni_str{
+            it.file.path().filename().c_str()
+        };
+        std::size_t char_len = uni_str.get_char_len();
+        it.reduce = (w < char_len + line_offset + line_free_space);
+        if (it.reduce) {
+            it.reduce_len =
+                utils::unicode_support::calc_substr_byte_len(
+                    uni_str.get_ptr(),
+                    w - line_offset - line_free_space
+                );
         }
     } 
     return had::Res::success;
@@ -239,6 +234,9 @@ had::Res FileManager::resize_height() {
 }
 
 had::Res FileManager::resize() {
+    if (drawer.get_width() < min_w || drawer.get_height() < min_h) {
+        return had::Res::error;
+    }
     if (false
         || resize_width()
         || resize_height()
@@ -420,7 +418,7 @@ had::Res FileManager::set_playing_file(std::string_view path) {
 
 bool FileManager::search_comp(const char* ptr) {
     utils::UnicodeStringView uni_str{ptr};
-    return uni_str.has_substr(search_str.c_str());
+    return uni_str.has_substr(search_str.c_str()).has_value();
 }
 
 void FileManager::search_start() {

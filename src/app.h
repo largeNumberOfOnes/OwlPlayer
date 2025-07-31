@@ -70,7 +70,7 @@ class App {
                     [this]() {
                         manager.search_start();
                         input_wrapepr.capture(
-                            [&manager = manager](std::string_view str, int curs_pos)
+                            [&manager = manager](std::string_view str, int curs_pos) // DEV [Refactoring is needed]
                                 { manager.search_set_string(str, curs_pos); },
                             [&manager = manager](std::string&& str) {
                                 manager.search_stop();

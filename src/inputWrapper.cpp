@@ -88,13 +88,11 @@ std::optional<had::KeySequence> InputWrapper::get_key() {
     }
 
     if (seq == exit_seq) {
-        log.log_info(std::to_string(instigator.has_value()));
-        // instigator.value().last_call(std::string{editor.get_string()});
+        instigator.value().last_call(std::string{editor.get_string()});
         release(instigator.value().id);
     } else {
         editor_proc(seq);
         instigator.value().call(editor.get_string(), editor.get_cursor());
-        // pass [process input to editor]
     }
 
     return std::nullopt;
