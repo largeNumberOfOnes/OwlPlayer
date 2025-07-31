@@ -10,7 +10,6 @@
 
 
 #include "had_interface.h"
-#include "had_unicode.h"
 #include "had_logger.h"
 #include "had_types.h"
 #include "had_audio.h"

@@ -69,7 +69,7 @@ std::optional<had::KeySequence> InputWrapper::get_key() {
     }
 
     if (seq == exit_seq) {
-        instigator.value().last_call(editor.drop());
+        instigator.value().last_call(std::string{editor.get_string()});
         release(instigator.value().id);
     } else {
         instigator.value().call(editor.get_string(), editor.get_cursor());

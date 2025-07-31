@@ -2,6 +2,7 @@
 
 #include "had/had.h"
 #include "setup.h"
+#include "utils/unicodeString.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -199,15 +200,17 @@ had::Res FileManager::resize_width() {
     had::Dem w = drawer.get_width();
     if (old_w != w) {
         for (auto& it : list) {
-            had::UnicodeStringView uni_str{
+            utils::UnicodeStringView uni_str{
                 it.file.path().filename().c_str()
             };
             std::size_t char_len = uni_str.get_char_len();
             it.reduce = (w < char_len + line_offset + line_free_space);
             if (it.reduce) {
-                it.reduce_len = uni_str.get_substr_byte_len(
-                    w - line_offset - line_free_space
-                );
+                it.reduce_len =
+                    utils::unicode_support::calc_substr_byte_len(
+                        uni_str.get_ptr(),
+                        w - line_offset - line_free_space
+                    );
             }
         }
     } 

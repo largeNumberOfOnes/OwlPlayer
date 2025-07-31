@@ -44,6 +44,7 @@ namespace utils {
             std::size_t get_byte_len() const;
             std::size_t get_char_len() const;
             char32_t get_char(std::size_t pos) const;
+            const char* get_ptr() const;
 
             std::optional<std::size_t> find(char32_t ch) const;
 
@@ -82,11 +83,6 @@ namespace utils {
         constexpr inline char* deconst_ptr() {
             return const_cast<char*>(ptr);
         }
-
-        inline void mem_copy_farward(const char* src, char* dst,
-                                                        std::size_t len);
-        inline void mem_copy_backfarward(const char* src, char* dst,
-                                                        std::size_t len);
 
         public:
             class Iter {

@@ -11,10 +11,9 @@ output_file_name = 'execs/output.out'
 message = '# THIS FILE IS AUTOGEN!!!'
 
 def convert_to_obj(file: str) -> str:
-    file = file.replace('had/', '')
+    if file.rfind('/') != -1:
+        file = file[file.rfind('/') + 1:]
     return f'objects/{file[:-4]}.o'
-def convert_to_src(file: str) -> str:
-    return f'src/{file}'
 
 def add_target_run(file) -> None:
     file.write(f'run:\n\talacritty -e {output_file_name}')
@@ -34,16 +33,29 @@ def main() -> None:
         libs = sp.check_output('make -s -C src/had get_libs_list',
                                                     shell=True, text=True)
         libs = libs[:-1]
-        had_files = sp.check_output('make -s -C src/had get_source_files',
-                                                    shell=True, text=True)
-        src_files = sp.check_output('ls src | grep cpp | grep -v test',
-                                                    shell=True, text=True)
-        files = (src_files + had_files).split()
+        had_files = sp.check_output(
+            'make -s -C src/had get_source_files', shell=True, text=True
+        )
+        src_files = list(
+            map(
+                lambda file: 'src/' + file,
+                sp.check_output('ls src | grep cpp | grep -v test',
+                                            shell=True, text=True).split()
+            )
+        )
+        utils_files = list(
+            map(
+                lambda file: 'src/utils/' + file,
+                sp.check_output('ls src/utils | grep cpp | grep -v test',
+                                            shell=True, text=True).split()
+            )
+        )
+        files = (had_files).split() + src_files + utils_files
         targets = []
         for file in files:
-            dep = sp.check_output(f'{compiler} -MM src/{file} {includes}',
+            dep = sp.check_output(f'{compiler} -MM {file} {includes}',
                                                     shell=True, text=True)
-            command = f'\t{compiler} {flags} -c src/{file} ' + \
+            command = f'\t{compiler} {flags} -c {file} ' + \
                                 f'{includes} -o {convert_to_obj(file)}\n'
             targets.append('objects/' + dep + command)
 

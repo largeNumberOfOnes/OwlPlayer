@@ -190,6 +190,10 @@ namespace utils {
         return char_len;
     }
 
+    const char* UnicodeStringView::get_ptr() const {
+        return ptr;
+    }
+
     char32_t UnicodeStringView::get_char(std::size_t pos) const {
         return unicode_support::get_symbol(
             ptr + unicode_support::calc_substr_byte_len(ptr, pos)
@@ -295,6 +299,20 @@ namespace utils {
     }
 }
 
+static inline void mem_copy_farward(const char* src,
+                                            char* dst, std::size_t len) {
+        for (std::size_t q = 0; q < len; ++q) {
+            dst[len - q - 1] = src[len - q - 1]; // DEV [optimize?]
+        }
+    }
+
+static inline void mem_copy_backfarward(const char* src,
+                                        char* dst, std::size_t len) {
+    for (std::size_t q = 0; q < len; ++q) {
+        dst[q] = src[q]; // DEV [optimize?]
+    }
+}
+
 namespace utils {
     UnicodeString::UnicodeString()
         : UnicodeStringView()
@@ -365,20 +383,6 @@ namespace utils {
     
     UnicodeString::~UnicodeString() {
         delete [] ptr;
-    }
-
-    inline void UnicodeString::mem_copy_farward(const char* src,
-                                            char* dst, std::size_t len) {
-        for (std::size_t q = 0; q < len; ++q) {
-            dst[len - q - 1] = src[len - q - 1]; // DEV [optimize?]
-        }
-    }
-
-    inline void UnicodeString::mem_copy_backfarward(const char* src,
-                                            char* dst, std::size_t len) {
-        for (std::size_t q = 0; q < len; ++q) {
-            dst[q] = src[q]; // DEV [optimize?]
-        }
     }
 
     void UnicodeString::insert_symbol_by_char_pos(std::size_t char_pos,

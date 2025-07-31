@@ -7,7 +7,7 @@
 #include "had/had.h"
 #include "had/had_interface.h"
 #include "had/had_keys.h"
-#include "stringEditor.h"
+#include "utils/stringEditor.h"
 
 #include <string_view>
 #include <functional>
@@ -19,7 +19,7 @@ class InputWrapper {
     had::Interface& interface;
     const had::Logger& log;
     bool is_captured = false;
-    StringEditor editor;
+    utils::StringEditor editor;
     had::KeySequence exit_seq;
 
     public:
