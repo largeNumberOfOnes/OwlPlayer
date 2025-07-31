@@ -22,6 +22,7 @@ namespace had {
         enter,
         esc,
         backspace,
+        del,
          r1,  r2,  r3,  r4,  t4,  r5,  r6,  r7,  r8,  r9, r10,
         r11, r12, r13, r14, t14, r15, r16, r17, r18, r19, r20,
         r21, r22, r23, r24, t24, r25, r26, r27, r28, r29, r30,
@@ -49,6 +50,7 @@ namespace had {
             case Key::enter      : return "enter";
             case Key::esc        : return "esc";
             case Key::backspace  : return "backspace";
+            case Key::del        : return "del";
             case Key::arrow_up   : return "arrow_up";
             case Key::arrow_down : return "arrow_down";
             case Key::arrow_left : return "arrow_left";

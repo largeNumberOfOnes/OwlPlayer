@@ -347,6 +347,8 @@ Res Interface::set_color(const Color &col) {
             switch (ch) {
                 case ' '      : return KeySequence{Key::space};
                 case 13       : return KeySequence{had::Key::enter};
+                case IntBytes{74, 1, 0, 0}.to_char():
+                                return KeySequence{had::Key::del};
                 case KEY_BACKSPACE:
                                 return KeySequence{had::Key::backspace};
             }
