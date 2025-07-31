@@ -28,6 +28,8 @@ namespace utils {
             void move_cursor(CursorPos pos);
             void move_cursor_right();
             void move_cursor_left();
+            void move_on_word_right();
+            void move_on_word_left();
             void insert_symbol(char32_t symbol);
     };
 }

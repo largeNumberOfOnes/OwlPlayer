@@ -11,6 +11,7 @@ test_had_unicodeString:
 test_stringEditor:
 	$(CC) $(DFLAGS) ../had/had_interface.cpp \
 		stringEditor.cpp stringEditor.test.cpp \
-		unicodeStringView.cpp unicodeString.cpp \
+		unicodeString.cpp \
 		-lncursesw -o ../../execs/test_stringEditor.out
-	alacritty -e valgrind --log-file=log.txt ./../../execs/test_stringEditor.out
+	# alacritty -e valgrind --log-file=log.txt ./../../execs/test_stringEditor.out
+	alacritty -e ./../../execs/test_stringEditor.out

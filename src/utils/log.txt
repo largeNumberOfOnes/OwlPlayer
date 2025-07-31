@@ -1,56 +1,23 @@
-==466601== Memcheck, a memory error detector
-==466601== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
-==466601== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
-==466601== Command: ./../../execs/test_stringEditor.out
-==466601== Parent PID: 466589
-==466601== 
-==466601== Mismatched free() / delete / delete []
-==466601==    at 0x484371B: operator delete(void*) (vg_replace_malloc.c:923)
-==466601==    by 0x11307B: utils::UnicodeString::insert_symbol_by_char_pos(unsigned long, char32_t) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x10FE5E: utils::StringEditor::insert_symbol(char32_t) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x1103C6: draw(utils::StringEditor&, had::Interface&, had::Drawer&) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x11048F: main (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==  Address 0x4df8c80 is 0 bytes inside a block of size 44 alloc'd
-==466601==    at 0x484220F: operator new[](unsigned long) (vg_replace_malloc.c:640)
-==466601==    by 0x112C01: utils::UnicodeString::UnicodeString(char const*) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x112CA0: utils::UnicodeString::UnicodeString(std::basic_string_view<char, std::char_traits<char> >) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x10FCCB: utils::StringEditor::set(std::basic_string_view<char, std::char_traits<char> >, int) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x110442: main (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601== 
-==466601== Conditional jump or move depends on uninitialised value(s)
-==466601==    at 0x4846798: strlen (vg_replace_strmem.c:494)
-==466601==    by 0x10F614: std::char_traits<char>::length(char const*) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x10F414: std::basic_string_view<char, std::char_traits<char> >::basic_string_view(char const*) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x1130CB: utils::UnicodeString::to_string_view() const (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x10FD34: utils::StringEditor::get_string() (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x110283: draw(utils::StringEditor&, had::Interface&, had::Drawer&) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x11048F: main (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601== 
-==466601== Conditional jump or move depends on uninitialised value(s)
-==466601==    at 0x4886855: waddnstr (in /usr/lib/x86_64-linux-gnu/libncursesw.so.6.4)
-==466601==    by 0x10C4B6: had::Drawer::draw_text(int, int, std::basic_string_view<char, std::char_traits<char> >) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x1102A3: draw(utils::StringEditor&, had::Interface&, had::Drawer&) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x11048F: main (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601== 
-==466601== 
-==466601== Process terminating with default action of signal 1 (SIGHUP)
-==466601==    at 0x4CD14C3: clock_nanosleep@@GLIBC_2.17 (clock_nanosleep.c:71)
-==466601==    by 0x4CD5E12: nanosleep (nanosleep.c:25)
-==466601==    by 0x1121A5: void std::this_thread::sleep_for<long, std::ratio<1l, 1000l> >(std::chrono::duration<long, std::ratio<1l, 1000l> > const&) (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601==    by 0x110507: main (in /home/dt/Documents/audioPlayer/execs/test_stringEditor.out)
-==466601== 
-==466601== HEAP SUMMARY:
-==466601==     in use at exit: 304,774 bytes in 429 blocks
-==466601==   total heap usage: 443 allocs, 14 frees, 313,865 bytes allocated
-==466601== 
-==466601== LEAK SUMMARY:
-==466601==    definitely lost: 0 bytes in 0 blocks
-==466601==    indirectly lost: 0 bytes in 0 blocks
-==466601==      possibly lost: 712 bytes in 9 blocks
-==466601==    still reachable: 304,062 bytes in 420 blocks
-==466601==         suppressed: 0 bytes in 0 blocks
-==466601== Rerun with --leak-check=full to see details of leaked memory
-==466601== 
-==466601== Use --track-origins=yes to see where uninitialised values come from
-==466601== For lists of detected and suppressed errors, rerun with: -s
-==466601== ERROR SUMMARY: 805 errors from 3 contexts (suppressed: 0 from 0)
+==506387== Memcheck, a memory error detector
+==506387== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==506387== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==506387== Command: ./../../execs/test_stringEditor.out
+==506387== Parent PID: 506376
+==506387== 
+### unhandled dwarf2 abbrev form code 0x25
+### unhandled dwarf2 abbrev form code 0x25
+### unhandled dwarf2 abbrev form code 0x25
+### unhandled dwarf2 abbrev form code 0x23
+### unhandled dwarf2 abbrev form code 0x25
+### unhandled dwarf2 abbrev form code 0x25
+### unhandled dwarf2 abbrev form code 0x25
+### unhandled dwarf2 abbrev form code 0x23
+==506387== Valgrind: debuginfo reader: ensure_valid failed:
+==506387== Valgrind:   during call to ML_(img_get)
+==506387== Valgrind:   request for range [686128383, +4) exceeds
+==506387== Valgrind:   valid image size of 314152 for image:
+==506387== Valgrind:   "/home/dt/Documents/audioPlayer/execs/test_stringEditor.out"
+==506387== 
+==506387== Valgrind: debuginfo reader: Possibly corrupted debuginfo file.
+==506387== Valgrind: I can't recover.  Giving up.  Sorry.
+==506387== 

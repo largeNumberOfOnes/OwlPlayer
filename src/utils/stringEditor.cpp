@@ -38,7 +38,20 @@ namespace utils {
     }
 
     void StringEditor::move_on_word_right() {
-        str.rfind_from(pos, ' ');
-        // ++pos;
+        std::optional<std::size_t> res = str.rfind_from(pos, ' ');
+        if (res.has_value()) {
+            pos = res.value();
+        } else {
+            pos = str.get_char_len();
+        }
+    }
+
+    void StringEditor::move_on_word_left() {
+        std::optional<std::size_t> res = str.lfind_from(pos, ' ');
+        if (res.has_value()) {
+            pos = res.value();
+        } else {
+            pos = str.get_char_len();
+        }
     }
 }

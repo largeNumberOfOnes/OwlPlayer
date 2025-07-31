@@ -23,6 +23,8 @@ int draw(utils::StringEditor& editor, had::Interface& interface,
         editor.move_cursor_right();
     } else if (seq == had::KeySequence{had::Key::arrow_left}) {
         editor.move_cursor_left();
+    } else if (seq == had::KeySequence{had::Key::arrow_left}.add_ctrl()) {
+        editor.move_on_word_left();
     } else if (seq.is_alpha()) {
         editor.insert_symbol(seq.to_char());
     }
