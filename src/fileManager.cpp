@@ -5,6 +5,7 @@
 #include "had/had.h"
 #include "setup.h"
 
+#include <cstddef>
 #include <string_view>
 #include <filesystem>
 #include <optional>
@@ -143,14 +144,14 @@ had::Res FileManager::reload() {
 
     // DEV [maybe there should be placed try-catch block]
     for (const auto& entry : fs::directory_iterator(dir)) {
-        if (is_in_search_mode
-            && !search_comp(entry.path().stem().c_str())
-        ) {
+        std::optional<Selection> selection =
+                                search_comp(entry.path().stem().c_str());
+        if (is_in_search_mode && !selection.has_value()) {
             continue;
         }
         list.push_back(File{
-            .reduce     = false,
-            .reduce_len = 0,
+            .reduce_len = std::nullopt,
+            .selection  = selection,
             .file       = entry
         });
     }
@@ -170,6 +171,7 @@ had::Res FileManager::reload() {
         }
     );
 
+    // move list if necessary
     list_size = list.size();
     if (list_size == 0) {
         top = 0;
@@ -182,6 +184,7 @@ had::Res FileManager::reload() {
             top = 0;
     }
 
+    // set if file is playing
     playing_file_pointer = std::nullopt;
     if (playing_file.has_value()) {
         for (int q = 0; q < list_size; ++q) {
@@ -200,17 +203,20 @@ had::Res FileManager::reload() {
 had::Res FileManager::resize_width() {
     had::Dem w = drawer.get_width();
     for (auto& it : list) {
-        utils::UnicodeStringView uni_str{
+        utils::UnicodeString uni_str{
             it.file.path().filename().c_str()
         };
         std::size_t char_len = uni_str.get_char_len();
-        it.reduce = (w < char_len + line_offset + line_free_space);
-        if (it.reduce) {
-            it.reduce_len =
-                utils::unicode_support::calc_substr_byte_len(
-                    uni_str.get_ptr(),
-                    w - line_offset - line_free_space
-                );
+        bool is_reduced = (w < char_len + line_offset + line_free_space);
+        if (is_reduced) {
+            it.reduce_len = utils::unicode_support::calc_substr_byte_len(
+                uni_str.get_ptr(),
+                w - line_offset - line_free_space
+            );
+            log.log_info(std::to_string(it.reduce_len.value()));
+            log.log_info(it.file.path().c_str());
+        } else {
+            it.reduce_len = std::nullopt;
         }
     } 
     return had::Res::success;
@@ -297,18 +303,44 @@ had::Res FileManager::draw_file_name(int q) {
         return setup.colors.file;
     }();
     drawer.set_color(file_color);
-    if (list_elem.reduce) {
+    if (list_elem.reduce_len.has_value()) {
         had::Dem w = drawer.get_width();
         drawer.draw_text_n(
-            line_offset, q + 1,
+            line_offset,
+            q + 1,
             list_elem.file.path().filename().c_str(),
-            list_elem.reduce_len
+            list_elem.reduce_len.value()
         );
         drawer.draw_text(w - line_free_space, q + 1, "... ");
     } else {
         drawer.draw_text(
             line_offset, q + 1, list_elem.file.path().filename().c_str()
         );
+    }
+    drawer.set_color(setup.colors.manager_search_select);
+    if (list_elem.selection.has_value()) {
+        const auto& selection = list_elem.selection.value();
+        std::size_t selection_byte_len =
+                                selection.till_byte - selection.from_byte;
+        if (list_elem.reduce_len.has_value()) {
+            if (selection.from_byte < list_elem.reduce_len.value()) {
+                selection_byte_len = std::min(
+                    selection_byte_len,
+                    list_elem.reduce_len.value() - selection.from_byte
+                );
+            } else {
+                selection_byte_len = 0;
+            }
+        }
+        if (0 < selection_byte_len) {
+            drawer.draw_text_n(
+                line_offset + selection.from_char,
+                q + 1,
+                list_elem.file.path().filename().c_str()
+                                                    + selection.from_byte,
+                selection_byte_len
+            );
+        }
     }
     drawer.set_color(setup.colors.def);
     return had::Res::success;
@@ -416,9 +448,29 @@ had::Res FileManager::set_playing_file(std::string_view path) {
     return go();
 }
 
-bool FileManager::search_comp(const char* ptr) {
+std::optional<FileManager::Selection> FileManager::search_comp(
+    const char* ptr
+) {
     utils::UnicodeStringView uni_str{ptr};
-    return uni_str.has_substr(search_str.c_str()).has_value();
+    utils::UnicodeStringView uni_search_str{search_str};
+    std::optional<std::size_t> selection_start =
+                                uni_str.has_substr(search_str.c_str());
+    if (selection_start.has_value()) {
+        std::size_t from_char = selection_start.value();
+        std::size_t from_byte =
+            utils::unicode_support::calc_substr_byte_len(
+                ptr,
+                selection_start.value()
+            );
+        return Selection {
+            from_char,
+            from_byte,
+            from_char + uni_search_str.get_char_len(),
+            from_byte + uni_search_str.get_byte_len()
+        };
+    } else {
+        return std::nullopt;
+    }
 }
 
 void FileManager::search_start() {

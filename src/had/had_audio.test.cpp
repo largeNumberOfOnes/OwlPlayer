@@ -16,15 +16,9 @@ int main() {
     had::Res result;
     had::Audio audio{result, had::std_logger};
 
-    // audio.load("/home/dt/Documents/audioPlayer/test_data/alyans_na_zare.mp3");
-    // audio.load("/home/dt/Documents/audioPlayer/test_data/Korn - Lost In The Grandeur.mp3");
-    // audio.load("/home/dt/Desktop/mus/nnn/TOOL - Pneuma (Audio).mp3");
-    // audio.load("/home/dt/Desktop/mus/alpha/TOOL - Schism.mp3");
-    // audio.load("/home/dt/Desktop/mus/alpha/BAD OMENS x POPPY - V_A_N.mp3");
-    // audio.load("/home/dt/Desktop/mus/mus2/Falling In Reverse - Ronald (feat. Tech N9ne & Alex Terrible).mp3");
-    // audio.load("/home/dt/Desktop/mus/Disturbed - Decadence [Official Audio].mp3");
-    had::Audio::res_code ret = 
-        audio.load("/home/dt/Desktop/mus/nnn/Applause From Below.mp3");
+    had::Audio::res_code ret = audio.load(
+        "/home/dt/Documents/audioPlayer/test_data/alyans_na_zare.mp3"
+    );
     assert(ret == had::Audio::res_code::success);
     audio.play();
 
@@ -102,10 +96,7 @@ int main() {
     audio.jump(3*60 + 55);
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
-    std::cout << "playing other" << std::endl;
-    ret = audio.load("/home/dt/Desktop/mus/nnn/Disturbed - Decadence [Official Audio].mp3");
-    assert(ret == had::Audio::res_code::success);
-    audio.play();
+    audio.jump(0);
 
     std::this_thread::sleep_for(std::chrono::seconds(60*5));
 

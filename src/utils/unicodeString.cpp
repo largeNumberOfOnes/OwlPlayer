@@ -168,6 +168,52 @@ namespace utils::unicode_support {
         }
         return find;
     }
+
+    static char32_t cyrillic_symbol_to_lower(char32_t ch) {
+        switch (ch) {
+            case 0xb0d0: return 0x90d0; // а
+            case 0xb1d0: return 0x91d0; // б
+            case 0xb2d0: return 0x92d0; // в
+            case 0xb3d0: return 0x93d0; // г
+            case 0xb4d0: return 0x94d0; // д
+            case 0xb5d0: return 0x95d0; // е
+            case 0x91d1: return 0x81d0; // ё
+            case 0xb6d0: return 0x96d0; // ж
+            case 0xb7d0: return 0x97d0; // з
+            case 0xb8d0: return 0x98d0; // и
+            case 0xb9d0: return 0x99d0; // й
+            case 0xbad0: return 0x9ad0; // к
+            case 0xbbd0: return 0x9bd0; // л
+            case 0xbcd0: return 0x9cd0; // м
+            case 0xbdd0: return 0x9dd0; // н
+            case 0xbed0: return 0x9ed0; // о
+            case 0xbfd0: return 0x9fd0; // п
+            case 0x80d1: return 0xa0d0; // р
+            case 0x81d1: return 0xa1d0; // с
+            case 0x82d1: return 0xa2d0; // т
+            case 0x83d1: return 0xa3d0; // у
+            case 0x84d1: return 0xa4d0; // ф
+            case 0x85d1: return 0xa5d0; // х
+            case 0x86d1: return 0xa6d0; // ц
+            case 0x87d1: return 0xa7d0; // ч
+            case 0x88d1: return 0xa8d0; // ш
+            case 0x89d1: return 0xa9d0; // щ
+            case 0x8ad1: return 0xaad0; // ъ
+            case 0x8bd1: return 0xabd0; // ы
+            case 0x8cd1: return 0xacd0; // ь
+            case 0x8dd1: return 0xadd0; // э
+            case 0x8ed1: return 0xaed0; // ю
+            case 0x8fd1: return 0xafd0; // я
+        };
+        return ch;
+    }
+
+    char32_t symbol_to_lower(char32_t ch) {
+        if ('A' <= ch && ch <= 'Z') {
+            return ch - 'A' + 'a';
+        }
+        return cyrillic_symbol_to_lower(ch);
+    }
 }
 
 namespace utils { // ConstUnicodeStringIter
@@ -272,12 +318,6 @@ namespace utils { // UnicodeStringView
         );
     }
 
-    void UnicodeStringView::set_new_ptr(const char* ptr) {
-        this->ptr = ptr;
-        byte_len = unicode_support::calc_byte_len(ptr);
-        char_len = unicode_support::calc_char_len(ptr);
-    }
-
     std::optional<std::size_t> UnicodeStringView::find(char32_t ch) const {
         return rfind(ch);
     }
@@ -370,31 +410,42 @@ namespace utils { // UnicodeStringView
         }
     }
 
-    std::optional<std::size_t> UnicodeStringView::has_substr(
+    template <bool CONVERT_TO_LOWER>
+    static std::optional<std::size_t> has_substr_base(
+        const UnicodeStringView& str,
         const char* substr
-    ) const {
+    ) {
         if (!substr) {
             return std::nullopt;
         }
         UnicodeStringView uni_substr{substr};
-        if (char_len == 1) {
+        if (str.get_char_len() == 1) {
             if (uni_substr.get_char_len() == 1
-                && uni_substr.get_char(0) == get_char(0)
+                && uni_substr.get_char(0) == str.get_char(0)
             ) {
                 return 0;
             } else {
                 return std::nullopt;
             }
         }
-        for (auto it = cbegin(); it != cend(); ++it) {
+        for (auto it = str.cbegin(); it != str.cend(); ++it) {
             bool has_substr = true;
             auto it_copy = it;
             for (
                 auto substr_it = uni_substr.cbegin();
-                substr_it != uni_substr.cend() && it_copy != cend();
+                substr_it != uni_substr.cend() && it_copy != str.cend();
                 ++substr_it, ++it_copy
             ) {
-                if (*substr_it != *it_copy) {
+                bool is_symbols_equals = false;
+                if constexpr (CONVERT_TO_LOWER) {
+                    char32_t ch1 = 
+                        unicode_support::symbol_to_lower(*substr_it);
+                    char32_t ch2 = unicode_support::symbol_to_lower(*it);
+                    is_symbols_equals = (ch1 == ch2);
+                } else {
+                    is_symbols_equals = (*substr_it == *it_copy);
+                }
+                if (!is_symbols_equals) {
                     has_substr = false;
                     break;
                 }
@@ -404,6 +455,18 @@ namespace utils { // UnicodeStringView
             }
         }
         return std::nullopt;
+    }
+
+    std::optional<std::size_t> UnicodeStringView::has_substr(
+        const char* substr
+    ) const {
+        return has_substr_base<false>(*this, substr);
+    }
+
+    std::optional<std::size_t> UnicodeStringView::has_substr_lower(
+        const char* substr
+    ) const {
+        return has_substr_base<true>(*this, substr);
     }
 
     ConstUnicodeStringIter UnicodeStringView::cbegin() const {

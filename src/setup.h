@@ -30,7 +30,7 @@ class Setup {
                       // DEV      (previous value is 20) ]
 
         BindingsList key_bindings = {
-            {"manager_go",     had::KeySequence{had::Key::j}.add_ctrl()}, // DEV [enter]
+            {"manager_go",     had::KeySequence{had::Key::enter}},
             {"manager_back",   had::KeySequence{had::Key::backspace}},
             {"manager_up",     had::KeySequence{had::Key::arrow_up}},
             {"manager_down",   had::KeySequence{had::Key::arrow_down}},

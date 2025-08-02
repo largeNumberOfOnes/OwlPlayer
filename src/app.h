@@ -43,6 +43,7 @@ class App {
                         shuffler.set_sequential(
                             manager.get_dirs_files()
                         );
+                        log.log_err("manager.go()");
                     }
                 );
             }},

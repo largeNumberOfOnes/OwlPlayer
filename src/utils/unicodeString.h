@@ -20,6 +20,8 @@ namespace utils::unicode_support {
     std::size_t calc_substr_byte_len(const char* ptr,
                                             std::size_t substr_char_len);
 
+    char32_t symbol_to_lower(char32_t ch);
+
     std::optional<std::size_t> rfind_till(const char* ptr, char32_t ch,
                                                     std::size_t till_char);
     std::optional<std::size_t> lfind_from(const char* ptr, char32_t ch,
@@ -76,11 +78,13 @@ namespace utils {
             std::optional<std::size_t> has_substr(
                                                 const char* substr) const;
 
+            // Сompares strings converted to lowercase
+            std::optional<std::size_t> has_substr_lower(
+                                                const char* substr) const;
+
             std::optional<std::size_t> find(char32_t ch) const;
 
-            std::optional<std::size_t> rfind(
-                char32_t ch
-            ) const;
+            std::optional<std::size_t> rfind(char32_t ch) const;
             std::optional<std::size_t> rfind_from(
                 char32_t ch, std::size_t from
             ) const;
@@ -91,9 +95,7 @@ namespace utils {
                 char32_t ch, std::size_t from, std::size_t till
             ) const;
 
-            std::optional<std::size_t> lfind(
-                char32_t ch
-            ) const;
+            std::optional<std::size_t> lfind(char32_t ch) const;
             std::optional<std::size_t> lfind_from(
                 char32_t ch, std::size_t from
             ) const;
@@ -103,8 +105,6 @@ namespace utils {
             std::optional<std::size_t> lfind_bord(
                 char32_t ch, std::size_t from, std::size_t till
             ) const;
-
-            void set_new_ptr(const char* ptr);
     }; 
 
     class UnicodeString : public UnicodeStringView {

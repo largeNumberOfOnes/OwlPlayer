@@ -45,7 +45,7 @@ int main() {
     interface.create_color(setup.colors.playing_selected, 232,  30,  91, 100, 100, 100);
     // interface.create_text_color(setup.colors.error_str, 237, 55, 9);
     interface.create_background_color(
-        setup.colors.manager_search_select, 100, 100, 100);
+        setup.colors.manager_search_select, 140, 140, 140);
     interface.create_color(setup.colors.error_str, 250, 250, 250, 168, 85, 64);
     
     log.log_info(std::to_string(getpid()));

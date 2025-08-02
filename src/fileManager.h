@@ -5,6 +5,7 @@
 #pragma once
 
 #include "had/had.h"
+#include <cstddef>
 class Setup; // DEV [Should include setup.h but this causes errors]
 
 #include <string_view>
@@ -37,9 +38,15 @@ class FileManager {
     std::string search_str;
     int search_curs_pos = 0;
 
+    struct Selection { // DEV [bad definition of struct]
+        std::size_t from_char;
+        std::size_t from_byte;
+        std::size_t till_char;
+        std::size_t till_byte;
+    };
     struct File {
-        bool reduce;
-        std::size_t reduce_len;
+        std::optional<std::size_t> reduce_len;
+        std::optional<Selection> selection;
         std::filesystem::directory_entry file;
     };
     std::vector<File> list;
@@ -49,7 +56,7 @@ class FileManager {
     had::Res draw_scrol_line();
     had::Res draw_search_line();
 
-    bool search_comp(const char* ptr);
+    std::optional<Selection> search_comp(const char* ptr);
 
     had::Res reload();
     had::Res resize_width();
