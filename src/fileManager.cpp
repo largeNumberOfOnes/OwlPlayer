@@ -1,6 +1,5 @@
 #include "fileManager.h"
 
-#include "had/had_types.h"
 #include "utils/unicodeString.h"
 #include "had/had.h"
 #include "setup.h"
@@ -138,7 +137,7 @@ had::Res FileManager::select(had::Dem new_pointer) {
     return had::Res::error;
 }
 
-had::Res FileManager::reload() {
+had::Res FileManager::reload() { // DEV [Extrimely big function]
     list.clear();
     namespace fs = std::filesystem;
 
@@ -266,7 +265,7 @@ had::Res FileManager::draw_tree_symbol(int q) {
     return had::Res::success;
 }
 
-had::Res FileManager::draw_file_name(int q) {
+had::Res FileManager::draw_file_name(int q) { // DEV [Extrimely big function]
     const File& list_elem = list[top+q];
     bool is_selected  = (top + q == selecter);
     enum class Type {

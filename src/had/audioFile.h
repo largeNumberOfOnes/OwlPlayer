@@ -7,6 +7,8 @@
 
 #include <string_view>
 #include <functional>
+#include <optional>
+#include <complex>
 #include <string>
 #include <vector>
 
@@ -14,29 +16,50 @@
 #include "had_types.h"
 #include "had_dataFrame.h"
 
-#include "../../audio_decoders/dr_libs/dr_mp3.h"
+
 
 namespace had {
     static constexpr bool PRINT_FFMPEG_WARNINGS = false;
-    using SampleDem = std::size_t;
-    using Value = int16_t;
-    static_assert(sizeof(Value) == 2);
 
     class AudioFile {
 
         bool is_inited      = false;
         bool is_end_reached = false;
-        SampleDem cur_pos = 0;
+        SampleDem cur_pos   = 0;
         FILE* file          = nullptr;
         int rate            = 0;
         int channels        = 0;
         SampleDem samples   = 0;
         const Logger& log;
 
-        Res convert_to_pcm(const char* input_file, const char* output_file);
+        Res convert_to_pcm(
+            const char* input_file, const char* output_file
+        );
 
-        std::vector<int> buf;
-        void copy_to_buf(short* ref_buf, int size);
+        class FrameManager {
+            static std::size_t get_id();
+            std::size_t id = get_id();
+            DataFrame frame1{id};
+            DataFrame frame2{id};
+            enum class OutFrame {
+                FIRST,
+                SECOND,
+            } out_frame = OutFrame::FIRST;
+            bool is_frame_issued = false;
+            bool is_in_frame_ready = false;
+            FrameManager();
+            DataFrame& get_in_frame_ref();
+            DataFrame& get_out_frame_ref();
+            void swap_out_frame();
+            public:
+                void return_frame(DataFrame&& frame);
+                DataFrame& get_in_frame();
+                std::optional<DataFrame> get_out_frame(); // std::nullopt
+                                        // if frame was already issued
+                DataFrame update_out_frame(DataFrame&& frame);
+                void mark_in_frame_as_ready();
+        } frame_manager;
+        void copy_to_buf(short* ref_buf, SampleDem samples);
 
         public:
             AudioFile(const Logger& log);
@@ -53,8 +76,8 @@ namespace had {
                 other_error,
             };
 
-            res_code load(std::string_view path);
-            res_code erase();
+            Res load(std::string_view path);
+            void erase();
 
             SampleDem get_cur_pos();
             SampleDem get_max_pos();
@@ -66,8 +89,9 @@ namespace had {
                                                     SampleDem& retcount);
             res_code set_position(SampleDem position);
 
-            [[deprecated]] const std::vector<int>& get_buf();
-            DataFrame get_frame();
+            std::optional<DataFrame> get_first_frame(); // Rerurns frame
+                                // only once. std::nullopt in other times.
+            DataFrame get_frame(DataFrame&& frame);
 
             SampleDem byte_to_samples(std::size_t bytes);
             std::size_t samples_to_byte(SampleDem pos);

@@ -82,7 +82,8 @@ namespace had {
 
             had::seconds get_cur_time();
             had::seconds get_duration();
-            void get_samples(std::vector<std::complex<float>>& ret);
+            
+            std::vector<std::complex<float>> get_samples();
 
             res_code set_volume(Volume vol);
             Volume get_volume();

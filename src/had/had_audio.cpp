@@ -325,12 +325,8 @@ namespace had {
         }
     }
 
-    void Audio::get_samples(std::vector<std::complex<float>>& ret) {
-        std::lock_guard<std::mutex> lock{mutex};
-        ret.clear();
-        for (const auto& elem : audio_file.get_buf()) {
-            ret.push_back(std::complex<float>(elem));
-        }
+    std::vector<std::complex<float>> Audio::get_samples() {
+        afwaf
     }
 
     bool Audio::can_be_played(std::string_view path) {

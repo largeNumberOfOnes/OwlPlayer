@@ -7,4 +7,5 @@ objects/
 audio_decoders/
 .vscode/
 .clangd
+Makefile
 

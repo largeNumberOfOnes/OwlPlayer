@@ -4,12 +4,18 @@
 
 #pragma once
 
+#include <cstdint>
+
 
 
 namespace had {
     using Dem     = int;
     using seconds = int;
     using Volume  = int;
+
+    using SampleDem = std::size_t;
+    using Value = uint16_t;
+    static_assert(sizeof(Value) == 2);
 
     enum Res {
         success = 0,
