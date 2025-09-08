@@ -16,6 +16,8 @@
 
 #include "pipewire/pipewire.h"
 
+#include <memory>
+#include <new>
 #include <string_view>
 #include <functional>
 #include <complex>
@@ -30,6 +32,19 @@ namespace had {
         const Logger& log;
         mutable std::mutex mutex;
         Volume vol = 100;
+
+        class Buffer {
+            std::unique_ptr<Value*> buf;
+            std::size_t size = 0;
+            std::size_t elem_count = 0;
+            public:
+                void set_elem_count(std::size_t elem_count);
+                void resize(std::size_t new_size);
+                Value* get_ptr();
+        } period_buf;
+        // SampleDem samples_on_period = 0;
+        int frame_per_period = 0;
+        bool is_buf_sent = false;
 
         bool is_stream_connected = false;
         bool was_finalized_val = false;
@@ -46,7 +61,9 @@ namespace had {
             std::mutex*     mutex;
             State*          state;
             bool*           was_finalized_val;
+            Buffer*         period_buf;
         } data;
+
 
         static void on_process(void* userdata);
         struct pw_stream_events stream_events = {
@@ -83,7 +100,12 @@ namespace had {
             had::seconds get_cur_time();
             had::seconds get_duration();
             
-            std::vector<std::complex<float>> get_samples();
+            void set_frame_per_period(int frame_count);
+            SampleDem get_samples_on_period();
+            std::vector<
+                std::vector<std::complex<float>>
+            > get_frame();
+            [[deprecated]] void get_samples(std::vector<std::complex<float>>& ret);
 
             res_code set_volume(Volume vol);
             Volume get_volume();

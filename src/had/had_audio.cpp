@@ -4,6 +4,9 @@
 #include "had_types.h"
 #include "had_audio.h"
 
+#include <cstddef>
+#include <cstring>
+#include <memory>
 #include <spa/param/audio/format-utils.h>
 #include "pipewire/pipewire.h"
 #include "pipewire/stream.h"
@@ -25,6 +28,7 @@ namespace had {
         data.mutex = &mutex;
         data.state = &state;
         data.was_finalized_val = &was_finalized_val;
+        data.period_buf = &period_buf;
         pw_init(nullptr, nullptr);
 
         data.loop = pw_thread_loop_new("audio_player", nullptr);
@@ -85,7 +89,6 @@ namespace had {
         }
         struct pw_buffer* buffer;
         struct spa_buffer* spa_buf;
-        float* dst;
 
         buffer = pw_stream_dequeue_buffer(data.stream);
         if (buffer == NULL) {
@@ -94,14 +97,29 @@ namespace had {
         }
 
         spa_buf = buffer->buffer;
-        dst = static_cast<float*>(spa_buf->datas[0].data);
+        Value* dst = static_cast<Value*>(spa_buf->datas[0].data);
 
         if (dst == NULL) {
             return;
         }
 
-        size_t samples_read;
-        ret = data.audio_file->read_file(dst, data.audio_file->byte_to_samples(spa_buf->datas[0].maxsize), samples_read);
+        size_t samples_read = 0;
+        std::size_t buf_byte_size = spa_buf->datas[0].maxsize;
+        SampleDem buf_samples_size = // DEV
+            data.audio_file->byte_to_samples(buf_byte_size);
+        data.period_buf->resize(
+            buf_samples_size * data.audio_file->get_channels()
+        );
+        data.period_buf->get_ptr()[243] = 32;
+        ret = data.audio_file->read_file(
+            data.period_buf->get_ptr(),
+            buf_samples_size,
+            samples_read
+        );
+        data.period_buf->set_elem_count(
+            samples_read  * data.audio_file->get_channels()
+        );
+        std::memcpy(dst, data.period_buf->get_ptr(), buf_byte_size);
         if (ret == AudioFile::res_code::end_of_file) {
             *data.state = State::inited;
             *data.was_finalized_val = true;
@@ -111,7 +129,8 @@ namespace had {
             pw_thread_loop_unlock(data.loop);
             return;
         }
-        spa_buf->datas[0].chunk->size = data.audio_file->samples_to_byte(samples_read);
+        spa_buf->datas[0].chunk->size =
+                            data.audio_file->samples_to_byte(samples_read);
 
         pw_stream_queue_buffer(data.stream, buffer);
 
@@ -188,8 +207,6 @@ namespace had {
         return res_code::success;
     }
 
-    // res Audio::drop();
-    // res Audio::run();
     Audio::res_code Audio::stop() {
         if (state != State::playing) {
             return res_code::bad_state;
@@ -325,11 +342,52 @@ namespace had {
         }
     }
 
-    std::vector<std::complex<float>> Audio::get_samples() {
-        afwaf
-    }
-
     bool Audio::can_be_played(std::string_view path) {
         return path.ends_with(".mp3"); // DEV [should check file]
     }
+
+    void Audio::get_samples(std::vector<std::complex<float>>& ret) {
+
+    }
+
+    void Audio::Buffer::set_elem_count(std::size_t elem_count) {
+        this->elem_count = elem_count;
+    }
+
+    void Audio::Buffer::resize(std::size_t new_size) {
+        if (new_size != size) {
+            // buf.reset(new Value[new_size]);
+            buf = std::make_unique<Value*>(new Value[new_size]{7});
+            size = new_size;
+        }
+    }
+
+    Value* Audio::Buffer::get_ptr() {
+        return *buf;
+    }
+
+    // void Audio::set_frame_per_period(int frame_count) {
+    //     std::lock_guard<std::mutex> lock{mutex};
+    //     pw_thread_loop_lock(data.loop);
+    //     frame_per_period = frame_count;
+    //     pw_thread_loop_unlock(data.loop);
+    // }
+
+    // SampleDem Audio::get_samples_on_period() {
+    //     std::lock_guard<std::mutex> lock{mutex};
+    //     pw_thread_loop_lock(data.loop);
+    //     SampleDem ret = samples_on_period;
+    //     pw_thread_loop_unlock(data.loop);
+    //     return ret;
+    // }
+
+    // std::vector<
+    //     std::vector<std::complex<float>>
+    // > Audio::get_frame() {
+    //     std::lock_guard<std::mutex> lock{mutex};
+    //     pw_thread_loop_lock(data.loop);
+    //     SampleDem ret = samples_on_period;
+    //     pw_thread_loop_unlock(data.loop);
+    //     return 
+    // }
 }

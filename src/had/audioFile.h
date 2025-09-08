@@ -7,8 +7,6 @@
 
 #include <string_view>
 #include <functional>
-#include <optional>
-#include <complex>
 #include <string>
 #include <vector>
 
@@ -36,31 +34,6 @@ namespace had {
             const char* input_file, const char* output_file
         );
 
-        class FrameManager {
-            static std::size_t get_id();
-            std::size_t id = get_id();
-            DataFrame frame1{id};
-            DataFrame frame2{id};
-            enum class OutFrame {
-                FIRST,
-                SECOND,
-            } out_frame = OutFrame::FIRST;
-            bool is_frame_issued = false;
-            bool is_in_frame_ready = false;
-            FrameManager();
-            DataFrame& get_in_frame_ref();
-            DataFrame& get_out_frame_ref();
-            void swap_out_frame();
-            public:
-                void return_frame(DataFrame&& frame);
-                DataFrame& get_in_frame();
-                std::optional<DataFrame> get_out_frame(); // std::nullopt
-                                        // if frame was already issued
-                DataFrame update_out_frame(DataFrame&& frame);
-                void mark_in_frame_as_ready();
-        } frame_manager;
-        void copy_to_buf(short* ref_buf, SampleDem samples);
-
         public:
             AudioFile(const Logger& log);
             AudioFile(const AudioFile&)            = delete;
@@ -85,13 +58,9 @@ namespace had {
             int get_channels();
             int get_samples();
 
-            res_code read_file(void* buf, SampleDem samples,
+            res_code read_file(Value* buf, SampleDem samples,
                                                     SampleDem& retcount);
             res_code set_position(SampleDem position);
-
-            std::optional<DataFrame> get_first_frame(); // Rerurns frame
-                                // only once. std::nullopt in other times.
-            DataFrame get_frame(DataFrame&& frame);
 
             SampleDem byte_to_samples(std::size_t bytes);
             std::size_t samples_to_byte(SampleDem pos);

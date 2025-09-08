@@ -10,9 +10,7 @@
 
 
 
-int main() {
-
-
+void test1() {
     had::Res result;
     had::Audio audio{result, had::std_logger};
 
@@ -99,6 +97,25 @@ int main() {
     audio.jump(0);
 
     std::this_thread::sleep_for(std::chrono::seconds(60*5));
+}
+
+void test2() {
+    had::Res result;
+    had::Audio audio{result, had::std_logger};
+
+    had::Audio::res_code ret = audio.load(
+        "/home/dt/Documents/audioPlayer/test_data/alyans_na_zare.mp3"
+    );
+    assert(ret == had::Audio::res_code::success);
+    audio.play();
+    std::this_thread::sleep_for(std::chrono::seconds(60*5));
+    // while (true) {
+        // std::cout << audio.get_cur_time() << std::endl;
+    // }
+}
+
+int main() {
+    test2();
 
     return 0;
 }

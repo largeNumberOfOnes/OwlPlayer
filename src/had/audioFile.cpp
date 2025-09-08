@@ -10,6 +10,7 @@
 #include <optional>
 #include <string_view>
 #include <string>
+#include <type_traits>
 #include <vector>
 #include <mutex>
 
@@ -318,20 +319,7 @@ namespace had {
         log.log_info("Creating an empty AudioFile");
     }
 
-    void AudioFile::copy_to_buf(short* ref_buf, SampleDem samples) {
-
-        DataFrame::DataType data;
-        for (SampleDem q = 0; q < samples; ++q) {
-            for (int ch = 0; ch < channels; ++ch) {
-                data[ch].push_back(
-                    std::complex<float>(ref_buf[samples * channels + ch])
-                );
-            }
-        }
-        frame_manager.get_in_frame().push(std::move(data), rate, cur_pos);
-    }
-
-    AudioFile::res_code AudioFile::read_file(void* buf, SampleDem samples,
+    AudioFile::res_code AudioFile::read_file(Value* buf, SampleDem samples,
                                                     SampleDem& retcount) {
         if (!is_inited) {
             log.log_err("File is not initialized");
@@ -355,8 +343,10 @@ namespace had {
         }
         cur_pos += byte_to_samples(size);
         retcount = byte_to_samples(size);
-
-        copy_to_buf(reinterpret_cast<short*>(buf), retcount);
+        log.log_info(
+            std::to_string(retcount*1000 / rate) + " " + 
+            std::to_string(cur_pos*1000 / rate)
+        );
 
         return res_code::success;
     }
@@ -424,77 +414,6 @@ namespace had {
             return 0;
         }
         return samples / rate;
-    }
-
-    std::optional<DataFrame> AudioFile::get_first_frame() {
-        return frame_manager.get_out_frame();
-    }
-
-    DataFrame AudioFile::get_frame(DataFrame&& frame) {
-        return frame_manager.update_out_frame(std::move(frame));
-    }
-
-    std::size_t AudioFile::FrameManager::get_id() {
-        static std::size_t id_counter = 7;
-        
-    }
-
-    DataFrame& AudioFile::FrameManager::get_in_frame_ref() {
-        switch (out_frame) {
-            case OutFrame::FIRST:  return frame2;
-            case OutFrame::SECOND: return frame1;
-        }
-    }
-
-    DataFrame& AudioFile::FrameManager::get_out_frame_ref() {
-        switch (out_frame) {
-            case OutFrame::FIRST:  return frame1;
-            case OutFrame::SECOND: return frame2;
-        }
-    }
-
-    void AudioFile::FrameManager::swap_out_frame() {
-        switch (out_frame) {
-            case OutFrame::FIRST:  out_frame = OutFrame::SECOND;
-            case OutFrame::SECOND: out_frame = OutFrame::FIRST;
-        }
-    }
-
-    void AudioFile::FrameManager::return_frame(DataFrame&& frame) {
-        if (!is_frame_issued) {
-            return;
-        }
-        get_out_frame_ref() = std::move(frame);
-        is_frame_issued = false;
-    }
-
-    DataFrame& AudioFile::FrameManager::get_in_frame() {
-        return get_in_frame_ref();
-    }
-
-    std::optional<DataFrame> AudioFile::FrameManager::get_out_frame() {
-        if (is_frame_issued) {
-            return std::nullopt;
-        }
-        return std::move(get_out_frame_ref());
-    }
-
-    DataFrame AudioFile::FrameManager::update_out_frame(
-        DataFrame&& frame
-    ) {
-        // if (!is_frame_issued) {
-            // Error
-        // }
-        get_out_frame_ref() = std::move(frame);
-        if (is_in_frame_ready) {
-            swap_out_frame();
-            is_in_frame_ready = false;
-        }
-        return std::move(get_out_frame_ref());
-    }
-
-    void AudioFile::FrameManager::mark_in_frame_as_ready() {
-        is_in_frame_ready = true;
     }
 
 }
