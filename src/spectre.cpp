@@ -24,10 +24,13 @@ had::Res Spectre::prepare_data(had::Dem w, had::Dem h) {
     if (input_data.empty()) {
         return had::Res::success;
     }
-    FourierTransformer{}.transform(input_data, output_data);
+    int output_count = w;
+    FourierTransformer{}.transform_fast(input_data[0], output_data, output_count);
+    log.log_info(std::to_string(output_data.size()));
 
     sp_data.clear();
-    for (int q = 0; q < std::min<had::Dem>(w, output_data.size()); ++q) {
+    int count = std::min<had::Dem>(w, output_data.size());
+    for (int q = 0; q < count; ++q) {
         sp_data.push_back(
             static_cast<int>(
                 std::abs(output_data[output_data.size() / w * q])

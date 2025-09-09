@@ -16,6 +16,7 @@
 
 #include "pipewire/pipewire.h"
 
+#include <cstddef>
 #include <memory>
 #include <new>
 #include <string_view>
@@ -37,14 +38,21 @@ namespace had {
             std::unique_ptr<Value*> buf;
             std::size_t size = 0;
             std::size_t elem_count = 0;
+            int frames_per_period = 1;
+            int buf_step = 0;
             public:
                 void set_elem_count(std::size_t elem_count);
+                std::size_t get_elem_count();
                 void resize(std::size_t new_size);
                 Value* get_ptr();
+                std::size_t get_size();
+                void new_buf_set();
+                int get_step();
+                void reset_step();
+                void inc_step();
+                void set_frames_per_period(int frames_count);
+                int get_frames_per_period();
         } period_buf;
-        // SampleDem samples_on_period = 0;
-        int frame_per_period = 0;
-        bool is_buf_sent = false;
 
         bool is_stream_connected = false;
         bool was_finalized_val = false;

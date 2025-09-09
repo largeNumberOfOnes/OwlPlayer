@@ -14,7 +14,7 @@ namespace had {
     using Volume  = int;
 
     using SampleDem = std::size_t;
-    using Value = uint16_t;
+    using Value = int16_t;
     static_assert(sizeof(Value) == 2);
 
     enum Res {

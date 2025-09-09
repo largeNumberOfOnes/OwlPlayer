@@ -47,7 +47,7 @@ App::App(had::Interface& interface, Setup& setup, const had::Logger& log)
     , spectre(
         switch_panel_drawer,
         [this](Spectre::DataArray& data) {
-            player.get_cur_samples(data);
+            data = player.get_cur_samples();
         },
         log)
     , queue(switch_panel_drawer, log)

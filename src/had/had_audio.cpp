@@ -4,6 +4,7 @@
 #include "had_types.h"
 #include "had_audio.h"
 
+#include <chrono>
 #include <cstddef>
 #include <cstring>
 #include <memory>
@@ -12,6 +13,7 @@
 #include "pipewire/stream.h"
 #include <spa/param/props.h>
 
+#include <string>
 #include <string_view>
 #include <complex>
 #include <mutex>
@@ -39,7 +41,7 @@ namespace had {
 
         data.stream = pw_stream_new_simple(
             pw_thread_loop_get_loop(data.loop),
-            "audio_player_stream_simple", // DEV [change stream name]
+            "owl_player", // DEV [change stream name]
             pw_properties_new(
                 PW_KEY_MEDIA_TYPE,     "Audio",
                 PW_KEY_MEDIA_CATEGORY, "Playback",
@@ -105,7 +107,7 @@ namespace had {
 
         size_t samples_read = 0;
         std::size_t buf_byte_size = spa_buf->datas[0].maxsize;
-        SampleDem buf_samples_size = // DEV
+        SampleDem buf_samples_size =
             data.audio_file->byte_to_samples(buf_byte_size);
         data.period_buf->resize(
             buf_samples_size * data.audio_file->get_channels()
@@ -119,6 +121,7 @@ namespace had {
         data.period_buf->set_elem_count(
             samples_read  * data.audio_file->get_channels()
         );
+        data.period_buf->reset_step();
         std::memcpy(dst, data.period_buf->get_ptr(), buf_byte_size);
         if (ret == AudioFile::res_code::end_of_file) {
             *data.state = State::inited;
@@ -161,16 +164,10 @@ namespace had {
                             SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
         spa_audio_info_raw audio_info = SPA_AUDIO_INFO_RAW_INIT(
             .format = SPA_AUDIO_FORMAT_S16,
-                // DEV [Must depend on audio_file] // if mpg123 is used
-            // .format = SPA_AUDIO_FORMAT_S32,
-                // DEV [Must depend on audio_file] // if sndfile is used
             .rate     = static_cast<uint32_t>(audio_file.get_rate()),
             .channels = static_cast<uint32_t>(audio_file.get_channels())
         );
 
-        // std::cout << "rate " << audio_file.get_rate() << std::endl;
-        // std::cout << "chan " << audio_file.get_channels() << std::endl;
-        
         const struct spa_pod *params[1] = {
             spa_format_audio_raw_build(
                 &builder,
@@ -323,7 +320,32 @@ namespace had {
         if (state == State::inited) {
             return 0;
         }
+        std::lock_guard<std::mutex> lock{mutex};
+        pw_thread_loop_lock(data.loop);
+        struct pw_time time;
+        uint64_t now = pw_stream_get_time_n(data.stream, &time, sizeof(time));
+        // now_ns = pw_stream_get_nsec(data.stream);
+        // int64_t ret = time.ticks;
+        // int64_t now = pw_stream_get_nsec(data.stream);
+        // struct spa_system *system = pw_loop_get_system(data.loop);
+        // int64_t now = spa_system_get_nsec(system);
+        // DEV [necessary to update pipewire to unblock usage of
+        // DEV         pw_stream_get_nsec function()]
+
+        static int counter = 0;
+        ++counter;
+        log.log_info(
+            std::to_string(counter) + " " +
+            // std::to_string(1000 * time.queued / audio_file.get_rate()) + " " +
+            std::to_string(time.now) + " " +
+            std::to_string(now) + " " +
+            std::to_string(
+                audio_file.samples_to_seconds(audio_file.get_cur_pos())
+            )
+        );
+        pw_thread_loop_unlock(data.loop);
         return audio_file.samples_to_seconds(audio_file.get_cur_pos());
+        // return ret;
     }
 
     had::seconds Audio::get_duration() {
@@ -366,28 +388,83 @@ namespace had {
         return *buf;
     }
 
-    // void Audio::set_frame_per_period(int frame_count) {
-    //     std::lock_guard<std::mutex> lock{mutex};
-    //     pw_thread_loop_lock(data.loop);
-    //     frame_per_period = frame_count;
-    //     pw_thread_loop_unlock(data.loop);
-    // }
+    std::size_t Audio::Buffer::get_size() {
+        return size;
+    }
 
-    // SampleDem Audio::get_samples_on_period() {
-    //     std::lock_guard<std::mutex> lock{mutex};
-    //     pw_thread_loop_lock(data.loop);
-    //     SampleDem ret = samples_on_period;
-    //     pw_thread_loop_unlock(data.loop);
-    //     return ret;
-    // }
+    int Audio::Buffer::get_step() {
+        return buf_step;
+    }
 
-    // std::vector<
-    //     std::vector<std::complex<float>>
-    // > Audio::get_frame() {
-    //     std::lock_guard<std::mutex> lock{mutex};
-    //     pw_thread_loop_lock(data.loop);
-    //     SampleDem ret = samples_on_period;
-    //     pw_thread_loop_unlock(data.loop);
-    //     return 
-    // }
+    void Audio::Buffer::set_frames_per_period(int frames_count) {
+        frames_per_period = frames_count;
+    }
+
+    int Audio::Buffer::get_frames_per_period() {
+        return frames_per_period;
+    }
+
+    std::size_t Audio::Buffer::get_elem_count() {
+        return elem_count;
+    }
+
+    void Audio::Buffer::reset_step() {
+        buf_step = 0;
+    }
+    
+    void Audio::Buffer::inc_step() {
+        if (buf_step + 1 < frames_per_period) {
+            ++buf_step;
+        }
+    }
+
+    void Audio::set_frame_per_period(int frame_count) {
+        std::lock_guard<std::mutex> lock{mutex};
+        pw_thread_loop_lock(data.loop);
+        period_buf.set_frames_per_period(frame_count);
+        pw_thread_loop_unlock(data.loop);
+    }
+
+    SampleDem Audio::get_samples_on_period() {
+        std::lock_guard<std::mutex> lock{mutex};
+        pw_thread_loop_lock(data.loop);
+        SampleDem ret = period_buf.get_size() / sizeof(Value);
+        pw_thread_loop_unlock(data.loop);
+        return ret;
+    }
+
+    std::vector<
+        std::vector<std::complex<float>>
+    > Audio::get_frame() {
+        std::lock_guard<std::mutex> lock{mutex};
+        pw_thread_loop_lock(data.loop);
+
+        int count = std::min(
+            period_buf.get_size() / period_buf.get_frames_per_period(),
+            period_buf.get_elem_count()
+        );
+        int offset = period_buf.get_step() * count;
+        int channels = audio_file.get_channels();
+        std::vector<
+            std::vector<std::complex<float>>
+        > ret;
+        for (int ch = 0; ch < channels; ++ch) {
+            ret.push_back(std::vector<std::complex<float>>{});
+        }
+        for (int q = 0; q < count; ++q) {
+            for (int ch = 0; ch < channels; ++ch) {
+                ret[ch].push_back(
+                    std::complex<float>(
+                        period_buf.get_ptr()[offset + q * channels + ch]
+                    )
+                );
+            }
+        }
+        if (state == State::playing) {
+            period_buf.inc_step();
+        }
+
+        pw_thread_loop_unlock(data.loop);
+        return ret;
+    }
 }

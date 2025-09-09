@@ -9,7 +9,10 @@
 
 class Spectre {
     public:
-        using DataArray = std::vector<std::complex<float>>;
+        using DataArray = std::vector<
+            std::vector<std::complex<float>>
+        >;
+        using DataArray_ch = std::vector<std::complex<float>>;
         using GetDataPtr =
                 std::function<void(DataArray&)>;
     private:
@@ -19,7 +22,7 @@ class Spectre {
         GetDataPtr get_data;
 
         DataArray input_data;
-        DataArray output_data;
+        DataArray_ch output_data;
         SpData sp_data;
 
         had::Res prepare_data(had::Dem w, had::Dem h);

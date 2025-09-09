@@ -1,6 +1,5 @@
 #include "audioFile.h"
 
-#include "had_dataFrame.h"
 #include "had_logger.h"
 #include "had_types.h"
 
@@ -343,10 +342,6 @@ namespace had {
         }
         cur_pos += byte_to_samples(size);
         retcount = byte_to_samples(size);
-        log.log_info(
-            std::to_string(retcount*1000 / rate) + " " + 
-            std::to_string(cur_pos*1000 / rate)
-        );
 
         return res_code::success;
     }

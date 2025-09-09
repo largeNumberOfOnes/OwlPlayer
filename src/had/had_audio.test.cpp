@@ -108,10 +108,10 @@ void test2() {
     );
     assert(ret == had::Audio::res_code::success);
     audio.play();
-    std::this_thread::sleep_for(std::chrono::seconds(60*5));
-    // while (true) {
-        // std::cout << audio.get_cur_time() << std::endl;
-    // }
+    while (true) {
+        std::cout << audio.get_cur_time() << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
 }
 
 int main() {

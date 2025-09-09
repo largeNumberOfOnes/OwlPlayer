@@ -65,5 +65,7 @@ class Player {
 
         void set_source_str(std::string_view str);
 
-        void get_cur_samples(std::vector<std::complex<float>>& ret);
+        std::vector<
+            std::vector<std::complex<float>>
+        > get_cur_samples();
 };

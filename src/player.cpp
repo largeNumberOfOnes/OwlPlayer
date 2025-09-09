@@ -290,8 +290,10 @@ had::Res Player::jump_rel(had::seconds pos_rel) {
     }
 }
 
-void Player::get_cur_samples(std::vector<std::complex<float>>& ret) {
-    audio.get_samples(ret);
+std::vector<
+    std::vector<std::complex<float>>
+> Player::get_cur_samples() {
+    return audio.get_frame();
 }
 
 void Player::hide_comp_name() {
